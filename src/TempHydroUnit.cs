@@ -12,7 +12,7 @@ using Landis.Utilities;
 using Landis.Library.Succession;
 using Landis.Library.Climate;
 
-namespace Landis.Extension.Succession.NECN
+namespace Landis.Extension.Succession.DGS
 {
     public class TempHydroUnit
     {
@@ -187,6 +187,8 @@ namespace Landis.Extension.Succession.NECN
                     weather.Precip *= 10.0;     // cm to mm
                     if (weather.Wind < 0.0)
                         weather.Wind = 0.0;     // missing wind data
+                    else
+                        weather.Wind /= 3.6;    // km/hr to m/s
 
                     shawWeatherData[i] = weather;
                 }
@@ -225,7 +227,10 @@ namespace Landis.Extension.Succession.NECN
 
         private static string GetShawInputFilePath()
         {
-            return @"C:\Users\mslucash\Documents\John\SHAW\TestCases\POC\POC.inp";
+            //return @"C:\Users\mslucash\Dropbox\SHAW\POC 10.10.2019\POC.inp"; //John's path
+            //;return @"C:\Users\lucash\Dropbox\SHAW\POC 10.10.2019\POC.inp"; //Mel's path
+            return @"D:\Shelbys Files\AK_DGS_Runs\SHAW\POC 10.10.2019\POC.inp"; //Shelby's path
+            //return @"C:\Users\mslucash\Documents\John\SHAW\TestCases\POC\POC.inp";
 
             Console.WriteLine();
             Console.WriteLine(">>>>>>> Simultaneous Heat And Water (SHAW) Model <<<<<<<");
@@ -234,10 +239,13 @@ namespace Landis.Extension.Succession.NECN
 
             return Console.ReadLine() ?? string.Empty;
         }
-
+        
         private static string GetGiplInputPath()
         {
-            return @"C:\Users\mslucash\Documents\John\GIPL\TestCases\POC";
+            //return @"C:\Users\mslucash\Dropbox\GIPL\POC 10.10.2019";  // John's path
+            //return @"C:\Users\lucash\Dropbox\GIPL\POC 10.10.2019";  // Mel's path
+            return @"D:\Shelbys Files\AK_DGS_Runs\GIPL\POC 10.10.2019";  // Shelby's path
+            //return @"C:\Users\mslucash\Documents\John\GIPL\TestCases\POC";
 
             Console.WriteLine();
             Console.WriteLine(">>>>>>> GIPL DAMM <<<<<<<");

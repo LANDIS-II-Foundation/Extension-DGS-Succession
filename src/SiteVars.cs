@@ -8,7 +8,7 @@ using Landis.Library.LeafBiomassCohorts;
 using System.Collections.Generic;
 using System;
 
-namespace Landis.Extension.Succession.NECN
+namespace Landis.Extension.Succession.DGS
 {
     /// <summary>
     /// The pools of dead biomass for the landscape's sites.

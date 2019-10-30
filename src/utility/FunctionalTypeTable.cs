@@ -2,7 +2,7 @@
 using Landis.Utilities;
 
 
-namespace Landis.Extension.Succession.NECN
+namespace Landis.Extension.Succession.DGS
 {
     /// <summary>
     /// Definition of a Litter Type.

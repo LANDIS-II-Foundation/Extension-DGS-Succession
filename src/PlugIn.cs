@@ -1,4 +1,4 @@
-//  Authors: Robert Scheller, Melissa Lucash
+//  Authors: John McNabb, Melissa Lucash, Robert Scheller
 
 using Landis.Core;
 using Landis.SpatialModeling;
@@ -18,12 +18,12 @@ using System.Text.RegularExpressions;
 using Landis.Extension.ShawDamm;
 using Landis.Extension.GiplDamm;
 
-namespace Landis.Extension.Succession.NECN
+namespace Landis.Extension.Succession.DGS
 {
     public class PlugIn
         : Landis.Library.Succession.ExtensionBase
     {
-        public static readonly string ExtensionName = "NECN Succession DAMM";
+        public static readonly string ExtensionName = "DGS Succession";
         private static ICore modelCore;
         public static IInputParameters Parameters;
         public static double[] ShadeLAI;

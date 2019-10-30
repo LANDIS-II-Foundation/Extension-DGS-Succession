@@ -11,7 +11,7 @@ using System;
 //using Landis.Cohorts;
 
 
-namespace Landis.Extension.Succession.NECN
+namespace Landis.Extension.Succession.DGS
 {
     /// <summary>
     /// The initial live and dead biomass at a site.

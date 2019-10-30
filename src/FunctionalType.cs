@@ -6,7 +6,7 @@ using Landis.Core;
 using System.Collections.Generic;
 
 
-namespace Landis.Extension.Succession.NECN
+namespace Landis.Extension.Succession.DGS
 {
     public interface IFunctionalType
     {
@@ -18,8 +18,10 @@ namespace Landis.Extension.Succession.NECN
         double BTOLAI{get;set;}
         double KLAI{get;set;}
         double MAXLAI{get;set;}
-        double MoistureCurve2 {get;set;}
-        double MoistureCurve3 { get; set; }
+        double MoistureCurve1 { get; set; }
+        double MoistureCurve2 { get; set; }
+        double MoistureCurve3 {get;set;}
+        double MoistureCurve4 { get; set; }
         double MonthlyWoodMortality{get;set;}
         double WoodDecayRate{get;set;}
         double MortCurveShape{get;set;}
@@ -40,8 +42,10 @@ namespace Landis.Extension.Succession.NECN
         private double btolai;
         private double klai;
         private double maxlai;
+        private double moisturecurve1;
         private double moisturecurve2;
         private double moisturecurve3;
+        private double moisturecurve4;
         private double monthlyWoodMortality;
         private double woodDecayRate;
         private double mortCurveShape;
@@ -193,7 +197,21 @@ namespace Landis.Extension.Succession.NECN
         }
         //---------------------------------------------------------------------
         // 'PPRPTS(2)': The effect of water content on the intercept, allows the user to 
-        //              increase the value of the intercept and thereby increase the slope of the line. MoistureCurve has replaced PPRPTS naming convention in NECN
+        //              increase the value of the intercept and thereby increase the slope of the line. MoistureCurve has replaced PPRPTS naming convention in DGS
+        public double MoistureCurve1
+        {
+            get
+            {
+                return moisturecurve1;
+            }
+            set
+            {
+                moisturecurve1 = value;
+            }
+        }
+        //---------------------------------------------------------------------
+        // 'PPRPTS(2)': The effect of water content on the intercept, allows the user to 
+        //              increase the value of the intercept and thereby increase the slope of the line. MoistureCurve has replaced PPRPTS naming convention in DGS
         public double MoistureCurve2
         {
             get {
@@ -212,6 +230,19 @@ namespace Landis.Extension.Succession.NECN
             }
             set {
                 moisturecurve3 = value;
+            }
+        }
+        //---------------------------------------------------------------------
+        // 'PPRPTS(3)': The lowest ratio of available water to PET at which there is no restriction on production.
+        public double MoistureCurve4
+        {
+            get
+            {
+                return moisturecurve4;
+            }
+            set
+            {
+                moisturecurve4 = value;
             }
         }
         //---------------------------------------------------------------------

@@ -8,7 +8,7 @@ using Landis.Core;
 using Landis.SpatialModeling;
 using Landis.Library.Climate;
 
-namespace Landis.Extension.Succession.NECN
+namespace Landis.Extension.Succession.DGS
 {
 
     public enum WaterType { Linear, Ratio }
@@ -36,7 +36,7 @@ namespace Landis.Extension.Succession.NECN
             //     Rewritten by Melissa Lucash- 11/2014
 
             //PlugIn.ModelCore.UI.WriteLine("month={0}.", Main.Month);
-        
+
             //...Initialize Local Variables
             double addToSoil = 0.0;
             double bareSoilEvap = 0.0;
@@ -72,20 +72,20 @@ namespace Landis.Extension.Succession.NECN
             endGrowing = ClimateRegionData.AnnualWeather[ecoregion].EndGrowing;
 
             double wiltingPoint = SiteVars.SoilWiltingPoint[site];
-            double soilDepth = SiteVars.SoilDepth[site]; 
+            double soilDepth = SiteVars.SoilDepth[site];
             double fieldCapacity = SiteVars.SoilFieldCapacity[site];
-            double stormFlowFraction = SiteVars.SoilStormFlowFraction[site]; 
+            double stormFlowFraction = SiteVars.SoilStormFlowFraction[site];
             double baseFlowFraction = SiteVars.SoilBaseFlowFraction[site];
-            double drain = SiteVars.SoilDrain[site]; 
-           
-                      
+            double drain = SiteVars.SoilDrain[site];
+
+
             //...Calculating snow pack first. Occurs when mean monthly air temperature is equal to or below freezing,
             //     precipitation is in the form of snow.
-            
+
             if (tmin <= 0.0) // Use tmin to dictate whether it snows or rains. 
             {
-                snow = H2Oinputs; 
-                H2Oinputs = 0.0;  
+                snow = H2Oinputs;
+                H2Oinputs = 0.0;
                 liquidSnowpack += snow;  //only tracking liquidsnowpack (water equivalent) and not the actual amount of snow on the ground (i.e. not snowpack).
                 //PlugIn.ModelCore.UI.WriteLine("Let it snow!! snow={0}, liquidsnowpack={1}.", snow, liquidSnowpack);
             }
@@ -95,7 +95,7 @@ namespace Landis.Extension.Succession.NECN
                 //PlugIn.ModelCore.UI.WriteLine("Let it rain and add it to soil! rain={0}, soilWaterContent={1}.", H2Oinputs, soilWaterContent);
             }
 
-           
+
             //...Then melt snow if there is snow on the ground and air temperature (tmax) is above minimum.            
             if (liquidSnowpack > 0.0 && tmax > 0.0)
             {
@@ -104,19 +104,19 @@ namespace Landis.Extension.Succession.NECN
                 //Documentation for the regression equation is in spreadsheet called WaterCalcs.xls by M. Lucash
                 double snowMeltFraction = Math.Max((tmax * 0.05) + 0.024, 0.0);//This equation assumes a linear increase in the fraction of snow that melts as a function of air temp.  
 
-               if (snowMeltFraction > 1.0)
+                if (snowMeltFraction > 1.0)
                     snowMeltFraction = 1.0;
 
-               addToSoil = liquidSnowpack * snowMeltFraction;  //Amount of liquidsnowpack that melts = liquidsnowpack multiplied by the fraction that melts.
-              
+                addToSoil = liquidSnowpack * snowMeltFraction;  //Amount of liquidsnowpack that melts = liquidsnowpack multiplied by the fraction that melts.
+
                 //Subtracted melted snow from snowpack and add it to the soil
-               liquidSnowpack = liquidSnowpack - addToSoil;  
-               soilWaterContent += addToSoil;
+                liquidSnowpack = liquidSnowpack - addToSoil;
+                soilWaterContent += addToSoil;
             }
-            
+
             //Calculate the max amout of water available to trees, an over-estimate of the water available to trees.  It only reflects precip and melting of precip.
             availableWaterMax = soilWaterContent;
-            
+
             //...Evaporate water from the snow pack (rewritten by Pulliam 9/94)
             //...Coefficient 0.87 relates to heat of fusion for ice vs. liquid water
             if (liquidSnowpack > 0.0)
@@ -132,8 +132,8 @@ namespace Landis.Extension.Succession.NECN
 
                 //...Decrement remaining pet by energy used to evaporate snow:
                 remainingPET = pet - evaporatedSnow;
-                
-                if (remainingPET < 0.0) 
+
+                if (remainingPET < 0.0)
                     remainingPET = 0.0;
 
                 //Subtract evaporated snowfrom the soil water content
@@ -142,15 +142,15 @@ namespace Landis.Extension.Succession.NECN
 
             //Allow excess water to run off during storm events (stormflow)
             double waterFull = soilDepth * fieldCapacity;  //units of cm
-            
-            double waterMovement = 0.0;            
+
+            double waterMovement = 0.0;
 
             if (soilWaterContent > waterFull)
             {
 
                 waterMovement = Math.Max((soilWaterContent - waterFull), 0.0); // How much water should move during a storm event, which is based on how much water the soil can hold.
                 soilWaterContent = waterFull;
-                
+
                 //...Compute storm flow.
                 stormFlow = waterMovement * stormFlowFraction;
 
@@ -158,7 +158,7 @@ namespace Landis.Extension.Succession.NECN
                 soilWaterContent -= stormFlow;
                 //PlugIn.ModelCore.UI.WriteLine("Water Runs Off. stormflow={0}.", stormFlow);
             }
-            
+
             //...Calculate bare soil water loss and interception  when air temperature is above freezing and no snow cover.
             //...Mofified 9/94 to allow interception when t < 0 but no snow cover, Pulliam
             if (liquidSnowpack <= 0.0)
@@ -174,15 +174,15 @@ namespace Landis.Extension.Succession.NECN
 
                 //...Bare soil evaporation, fraction of precip (bareSoilEvap):
                 bareSoilEvap = 0.5 * System.Math.Exp((-0.002 * litterBiomass) - (0.004 * standingBiomass)) * OtherData.WaterLossFactor2;
-                
+
                 //...Calculate total surface evaporation losses, maximum allowable is 0.4 * pet. -rm 6/94
                 remainingPET = pet;
                 double soilEvaporation = System.Math.Min(((bareSoilEvap + canopyIntercept) * H2Oinputs), (0.4 * remainingPET));
-                
+
                 //Subtract soil evaporation from soil water content
-               soilWaterContent -= soilEvaporation;
+                soilWaterContent -= soilEvaporation;
             }
-                     
+
             // Calculate actual evapotranspiration.  This equation is derived from the stand equation for calculating AET from PET
             //  Bergström, 1992
 
@@ -206,15 +206,15 @@ namespace Landis.Extension.Succession.NECN
 
             //Leaching occurs. Drain baseflow fraction from holding tank.
             baseFlow = soilWaterContent * baseFlowFraction;
-            
+
             //Subtract baseflow from soil water
             soilWaterContent -= baseFlow;
-                                                         
+
             //Calculate the amount of available water after all the evapotranspiration and leaching has taken place (minimum available water)           
             availableWaterMin = Math.Max(soilWaterContent - waterEmpty, 0.0);
 
             //Calculate the final amount of available water to the trees, which is the average of the max and min          
-            availableWater = (availableWaterMax + availableWaterMin)/ 2.0;
+            availableWater = (availableWaterMax + availableWaterMin) / 2.0;
 
             // Compute the ratio of precipitation to PET
             double ratioPrecipPET = 0.0;
@@ -228,14 +228,14 @@ namespace Landis.Extension.Succession.NECN
             SiteVars.WaterMovement[site] = waterMovement;
             SiteVars.AvailableWater[site] = availableWater;  //available to plants for growth     
             SiteVars.SoilWaterContent[site] = soilWaterContent;
-            SiteVars.SoilTemperature[site] = CalculateSoilTemp(tmin, tmax, liveBiomass, litterBiomass, month);            
+            SiteVars.SoilTemperature[site] = CalculateSoilTemp(tmin, tmax, liveBiomass, litterBiomass, month);
             SiteVars.DecayFactor[site] = CalculateDecayFactor((int)OtherData.WType, SiteVars.SoilTemperature[site], relativeWaterContent, ratioPrecipPET, month);
             SiteVars.AnaerobicEffect[site] = CalculateAnaerobicEffect(drain, ratioPrecipPET, pet, tave);
             if (month == 0)
                 SiteVars.DryDays[site] = 0;
             else
                 SiteVars.DryDays[site] += CalculateDryDays(month, beginGrowing, endGrowing, waterEmpty, availableWater, priorWaterAvail);
-                        
+
             return;
         }
 
@@ -244,64 +244,64 @@ namespace Landis.Extension.Succession.NECN
             //PlugIn.ModelCore.UI.WriteLine("Month={0}, begin={1}, end={2}.", month, beginGrowing, endGrowing);
             int[] julianMidMonth = { 15, 45, 74, 105, 135, 166, 196, 227, 258, 288, 319, 349 };
             int dryDays = 0;
-            int julianDay = julianMidMonth[month]; 
-            int oldJulianDay = julianMidMonth[month-1]; 
+            int julianDay = julianMidMonth[month];
+            int oldJulianDay = julianMidMonth[month - 1];
             double dryDayInterp = 0.0;
             //PlugIn.ModelCore.UI.WriteLine("Month={0}, begin={1}, end={2}, wiltPt={3:0.0}, waterAvail={4:0.0}, priorWater={5:0.0}.", month, beginGrowing, endGrowing, wiltingPoint, waterAvail, priorWaterAvail);
-            
+
             //Increment number of dry days, truncate at end of growing season
-                if ((julianDay > beginGrowing) && (oldJulianDay < endGrowing)) 
+            if ((julianDay > beginGrowing) && (oldJulianDay < endGrowing))
+            {
+                if ((priorWaterAvail >= wiltingPoint) && (waterAvail >= wiltingPoint))
                 {
-                    if ((priorWaterAvail >= wiltingPoint)  && (waterAvail >= wiltingPoint))
-                        {
-                        dryDayInterp += 0.0;  // NONE below wilting point
-                    }
-                    else if ((priorWaterAvail > wiltingPoint) && (waterAvail < wiltingPoint)) 
-                    {
-                        dryDayInterp = daysInMonth * (wiltingPoint - waterAvail) / 
-                                        (priorWaterAvail - waterAvail);
-                        if ((oldJulianDay < beginGrowing) && (julianDay > beginGrowing))
-                            if ((julianDay - beginGrowing) < dryDayInterp)
-                                dryDayInterp = julianDay - beginGrowing;
-    
-                        if ((oldJulianDay < endGrowing) && (julianDay > endGrowing))
-                            dryDayInterp = endGrowing - julianDay + dryDayInterp;
-    
-                        if (dryDayInterp < 0.0)
-                            dryDayInterp = 0.0;
-    
-                    } 
-                    else if ((priorWaterAvail < wiltingPoint) && (waterAvail > wiltingPoint)) 
-                    {
-                        dryDayInterp = daysInMonth * (wiltingPoint - priorWaterAvail) / 
-                                        (waterAvail - priorWaterAvail);
-          
-                        if ((oldJulianDay < beginGrowing) && (julianDay > beginGrowing))
-                            dryDayInterp = oldJulianDay + dryDayInterp - beginGrowing;
-    
-                        if (dryDayInterp < 0.0)
-                            dryDayInterp = 0.0;
-    
-                        if ((oldJulianDay < endGrowing) && (julianDay > endGrowing))
-                            if ((endGrowing - oldJulianDay) < dryDayInterp)
-                                dryDayInterp = endGrowing - oldJulianDay;
-                    } 
-                    else // ALL below wilting point
-                    {
-                        dryDayInterp = daysInMonth;
-          
-                        if ((oldJulianDay < beginGrowing) && (julianDay > beginGrowing))
-                            dryDayInterp = julianDay - beginGrowing;
-    
-                        if ((oldJulianDay < endGrowing) && (julianDay > endGrowing))
-                            dryDayInterp = endGrowing - oldJulianDay;
-                    }
-      
-                    dryDays += (int) dryDayInterp;
+                    dryDayInterp += 0.0;  // NONE below wilting point
                 }
-                return dryDays;
+                else if ((priorWaterAvail > wiltingPoint) && (waterAvail < wiltingPoint))
+                {
+                    dryDayInterp = daysInMonth * (wiltingPoint - waterAvail) /
+                                    (priorWaterAvail - waterAvail);
+                    if ((oldJulianDay < beginGrowing) && (julianDay > beginGrowing))
+                        if ((julianDay - beginGrowing) < dryDayInterp)
+                            dryDayInterp = julianDay - beginGrowing;
+
+                    if ((oldJulianDay < endGrowing) && (julianDay > endGrowing))
+                        dryDayInterp = endGrowing - julianDay + dryDayInterp;
+
+                    if (dryDayInterp < 0.0)
+                        dryDayInterp = 0.0;
+
+                }
+                else if ((priorWaterAvail < wiltingPoint) && (waterAvail > wiltingPoint))
+                {
+                    dryDayInterp = daysInMonth * (wiltingPoint - priorWaterAvail) /
+                                    (waterAvail - priorWaterAvail);
+
+                    if ((oldJulianDay < beginGrowing) && (julianDay > beginGrowing))
+                        dryDayInterp = oldJulianDay + dryDayInterp - beginGrowing;
+
+                    if (dryDayInterp < 0.0)
+                        dryDayInterp = 0.0;
+
+                    if ((oldJulianDay < endGrowing) && (julianDay > endGrowing))
+                        if ((endGrowing - oldJulianDay) < dryDayInterp)
+                            dryDayInterp = endGrowing - oldJulianDay;
+                }
+                else // ALL below wilting point
+                {
+                    dryDayInterp = daysInMonth;
+
+                    if ((oldJulianDay < beginGrowing) && (julianDay > beginGrowing))
+                        dryDayInterp = julianDay - beginGrowing;
+
+                    if ((oldJulianDay < endGrowing) && (julianDay > endGrowing))
+                        dryDayInterp = endGrowing - oldJulianDay;
+                }
+
+                dryDays += (int)dryDayInterp;
+            }
+            return dryDays;
         }
-        
+
         //---------------------------------------------------------------------------
 
         private static double CalculateDecayFactor(int idef, double soilTemp, double rwc, double ratioPrecipPET, int month)
@@ -441,16 +441,16 @@ namespace Landis.Extension.Succession.NECN
             //         take into account the effect of snow (AKM)
             //double soilTemp = (maxSoilTemp + minSoilTemp) / 2.0;  // original code.  This generates very high soil temps >= to air temp.
 
-            
+
             double soilTemp = (tmax + tmin) / 4.0;  //ML added for testing purposes. Remove later
-            PlugIn.ModelCore.UI.WriteLine("Month={0}, Soil Temperature = {1}, Tmax = {2}, Tmin = {3}.", month+1, soilTemp, tmax, tmin);
+            PlugIn.ModelCore.UI.WriteLine("Month={0}, Soil Temperature = {1}, Tmax = {2}, Tmin = {3}.", month + 1, soilTemp, tmax, tmin);
 
             return soilTemp;
         }
         //--------------------------------------------------------------------------
         public static void Leach(Site site, double baseFlow, double stormFlow)
         {
-           
+
             //  double minlch, double frlech[3], double stream[8], double basef, double stormf)
             //Originally from leach.f of CENTURY model
             //...This routine computes the leaching of inorganic nitrogen (potential for use with phosphorus, and sulfur)
@@ -473,20 +473,20 @@ namespace Landis.Extension.Succession.NECN
             double amtNLeached = 0.0;
 
             //PlugIn.ModelCore.UI.WriteLine("WaterMove={0:0}, ", waterMove);         
-           
-         //...waterMove > 0. indicates a saturated water flow out of layer lyr
+
+            //...waterMove > 0. indicates a saturated water flow out of layer lyr
             if (waterMove > 0.0 && SiteVars.MineralN[site] > 0.0)
             {
                 double textureEffect = OtherData.MineralLeachIntercept + OtherData.MineralLeachSlope * SiteVars.SoilPercentSand[site];//ClimateRegionData.PercentSand[ecoregion];
                 //double leachIntensity = (1.0 - (OtherData.OMLeachWater - waterMove) / OtherData.OMLeachWater);
                 //amtNLeached = textureEffect * SiteVars.MineralN[site] * OtherData.NfracLeachWater * OtherData.NO3frac;
-                amtNLeached = textureEffect * SiteVars.MineralN[site] *  OtherData.NO3frac;
-                
+                amtNLeached = textureEffect * SiteVars.MineralN[site] * OtherData.NO3frac;
+
                 //PlugIn.ModelCore.UI.WriteLine("amtNLeach={0:0.0}, textureEffect={1:0.0}, waterMove={2:0.0}, MineralN={3:0.00}", amtNLeached, textureEffect, waterMove, SiteVars.MineralN[site]);      
-            }        
-            
+            }
+
             double totalNleached = (baseFlow * amtNLeached) + (stormFlow * amtNLeached);
-                        
+
             SiteVars.MineralN[site] -= totalNleached;
             //PlugIn.ModelCore.UI.WriteLine("AfterSoilWaterLeaching. totalNLeach={0:0.0}, MineralN={1:0.00}", totalNleached, SiteVars.MineralN[site]);         
 

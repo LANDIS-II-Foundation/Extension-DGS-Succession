@@ -2,7 +2,7 @@
 
 using Landis.SpatialModeling;
 
-namespace Landis.Extension.Succession.NECN
+namespace Landis.Extension.Succession.DGS
 {
     public class ShortPixel : Pixel
     {

@@ -7,7 +7,7 @@ using Landis.Library.Metadata;
 using Landis.Core;
 using Landis.Utilities;
 
-namespace Landis.Extension.Succession.NECN
+namespace Landis.Extension.Succession.DGS
 {
     public class MetadataHandler
     {
@@ -30,7 +30,7 @@ namespace Landis.Extension.Succession.NECN
             };
 
             Extension = new ExtensionMetadata(mCore){
-                Name = "NECN-Succession",
+                Name = "DGS-Succession",
                 TimeInterval = timestep, 
                 ScenarioReplicationMetadata = scenRep
             };
@@ -39,9 +39,9 @@ namespace Landis.Extension.Succession.NECN
             //          table outputs:   
             //---------------------------------------
 
-            Outputs.primaryLog = new MetadataTable<PrimaryLog>("NECN-succession-log.csv");
-            Outputs.primaryLogShort = new MetadataTable<PrimaryLogShort>("NECN-succession-log-short.csv");
-            Outputs.monthlyLog = new MetadataTable<MonthlyLog>("NECN-succession-monthly-log.csv");
+            Outputs.primaryLog = new MetadataTable<PrimaryLog>("DGS-succession-log.csv");
+            Outputs.primaryLogShort = new MetadataTable<PrimaryLogShort>("DGS-succession-log-short.csv");
+            Outputs.monthlyLog = new MetadataTable<MonthlyLog>("DGS-succession-monthly-log.csv");
 
             OutputMetadata tblOut_monthly = new OutputMetadata()
             {
@@ -79,12 +79,12 @@ namespace Landis.Extension.Succession.NECN
             if (ANPPMapNames != null)
             {
                 PlugIn.ModelCore.UI.WriteLine("  ANPP Map Names = \"{0}\" ...", ANPPMapNames);
-                //string[] paths = { @"NECN", "AG_NPP-{timestep}.img" };
+                //string[] paths = { @"DGS", "AG_NPP-{timestep}.img" };
                 OutputMetadata mapOut_ANPP = new OutputMetadata()
                 {
                     Type = OutputType.Map,
                     Name = "Aboveground Net Primary Production",
-                    FilePath = @"NECN\AG_NPP-{timestep}.img",  
+                    FilePath = @"DGS\AG_NPP-{timestep}.img",  
                     //FilePath = Path.Combine(paths),
                     Map_DataType = MapDataType.Continuous,
                     Map_Unit = FieldUnits.g_C_m2,
@@ -99,7 +99,7 @@ namespace Landis.Extension.Succession.NECN
                 {
                     Type = OutputType.Map,
                     Name = "Net Ecosystem Exchange",
-                    FilePath = @"NECN\NEE-{timestep}.img",  
+                    FilePath = @"DGS\NEE-{timestep}.img",  
                     Map_DataType = MapDataType.Continuous,
                     Map_Unit = FieldUnits.g_C_m2,
                     Visualize = true,
@@ -112,7 +112,7 @@ namespace Landis.Extension.Succession.NECN
                 {
                     Type = OutputType.Map,
                     Name = "Soil Organic Carbon",
-                    FilePath = @"NECN\SOC-{timestep}.img",  
+                    FilePath = @"DGS\SOC-{timestep}.img",  
                     Map_DataType = MapDataType.Continuous,
                     Map_Unit = FieldUnits.g_C_m2,
                     Visualize = true,
@@ -125,7 +125,7 @@ namespace Landis.Extension.Succession.NECN
                 {
                     Type = OutputType.Map,
                     Name = "Soil Organic Nitrogen",
-                    FilePath = @"NECN\SON-{timestep}.img",  
+                    FilePath = @"DGS\SON-{timestep}.img",  
                     Map_DataType = MapDataType.Continuous,
                     Map_Unit = FieldUnits.g_N_m2,
                     Visualize = true,
@@ -138,7 +138,7 @@ namespace Landis.Extension.Succession.NECN
                 {
                     Type = OutputType.Map,
                     Name = "Total Carbon",
-                    FilePath = @"NECN\TotalC-{timestep}.img",  
+                    FilePath = @"DGS\TotalC-{timestep}.img",  
                     Map_DataType = MapDataType.Continuous,
                     Map_Unit = FieldUnits.g_C_m2,
                     Visualize = true,

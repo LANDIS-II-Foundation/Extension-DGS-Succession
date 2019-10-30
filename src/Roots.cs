@@ -7,7 +7,7 @@ using Landis.Library.Succession;
 using Landis.Library.LeafBiomassCohorts;
 using System;
 
-namespace Landis.Extension.Succession.NECN
+namespace Landis.Extension.Succession.DGS
 {
     /// <summary>
     /// Fine and coarse roots.

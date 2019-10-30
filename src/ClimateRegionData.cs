@@ -10,7 +10,7 @@ using System.Linq;
 using System;
 
 
-namespace Landis.Extension.Succession.NECN
+namespace Landis.Extension.Succession.DGS
 {
     public class ClimateRegionData
     {

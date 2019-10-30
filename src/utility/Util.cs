@@ -6,7 +6,7 @@ using Landis.Library.LeafBiomassCohorts;
 using Landis.Utilities;
 using System.IO;
 
-namespace Landis.Extension.Succession.NECN
+namespace Landis.Extension.Succession.DGS
 {
     /// <summary>
     /// Utility methods.

@@ -5,7 +5,7 @@ using Landis.Utilities;
 using Landis.Library.Parameters;
 using System.Collections.Generic;
 
-namespace Landis.Extension.Succession.NECN
+namespace Landis.Extension.Succession.DGS
 {
     /// <summary>
     /// The parameters for biomass succession.

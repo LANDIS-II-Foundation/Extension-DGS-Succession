@@ -5,8 +5,9 @@ using Landis.SpatialModeling;
 using Landis.Library.LeafBiomassCohorts;
 using System.Collections.Generic;
 using Landis.Library.Climate;
+using System.Linq;
 
-namespace Landis.Extension.Succession.NECN
+namespace Landis.Extension.Succession.DGS
 {
     /// <summary>
     /// Utility methods.
@@ -71,14 +72,14 @@ namespace Landis.Extension.Succession.NECN
                     SiteVars.TotalWoodBiomass[site] = Main.ComputeWoodBiomass((ActiveSite) site);
                     //SiteVars.LAI[site] = Century.ComputeLAI((ActiveSite)site);
                                    
-                    double ppt = ClimateRegionData.AnnualWeather[ecoregion].MonthlyPrecip[Main.Month];
+                    double ppt = ClimateRegionData.AnnualWeather[ecoregion].MonthlyPrecip[Month];
 
                     double monthlyNdeposition;
                     if  (PlugIn.Parameters.AtmosNintercept !=-1 && PlugIn.Parameters.AtmosNslope !=-1)
                         monthlyNdeposition = PlugIn.Parameters.AtmosNintercept + (PlugIn.Parameters.AtmosNslope * ppt);
                     else 
                     {
-                        monthlyNdeposition = ClimateRegionData.AnnualWeather[ecoregion].MonthlyNDeposition[Main.Month];
+                        monthlyNdeposition = ClimateRegionData.AnnualWeather[ecoregion].MonthlyNDeposition[Month];
                     }
 
                     if (monthlyNdeposition < 0)
@@ -92,9 +93,11 @@ namespace Landis.Extension.Succession.NECN
                     double baseFlow, stormFlow, AET;
                     if (PlugIn.ShawGiplEnabled)
                     {
-                        baseFlow = 0.0;
-                        stormFlow = 0.0;
-                        AET = 0.0;
+                        var thu = PlugIn.TempHydroUnits[PlugIn.ModelCore.Ecoregion[site]];
+
+                        baseFlow = thu.MonthlyShawDammResults[Month].DailyDeepPercolation.Sum() / 10.0;     // convert from mm to cm
+                        stormFlow = thu.MonthlyShawDammResults[Month].DailyRunoff.Sum() / 10.0;             // convert from mm to cm
+                        AET = thu.MonthlyShawDammResults[Month].DailyEvapotranspiration.Sum() / 10.0;       // convert from mm to cm
                     }
                     else
                     {

@@ -11,12 +11,12 @@ using System.Collections.Generic;
 using System;
 using System.IO;
 
-namespace Landis.Extension.Succession.NECN
+namespace Landis.Extension.Succession.DGS
 {
-
-
     public class SpeciesData 
     {
+        public static double AdventitiousLayerDepth = 0.20; // [m]
+
         public static Landis.Library.Parameters.Species.AuxParm<int> FuncType;
         public static Landis.Library.Parameters.Species.AuxParm<bool> NFixer;
         public static Landis.Library.Parameters.Species.AuxParm<bool> AdventRoots;

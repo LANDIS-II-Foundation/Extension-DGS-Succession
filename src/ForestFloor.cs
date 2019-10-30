@@ -7,7 +7,7 @@ using System;
 using System.Collections.Generic;
 
 
-namespace Landis.Extension.Succession.NECN
+namespace Landis.Extension.Succession.DGS
 {
     /// <summary>
     /// Soil organic matter (SOM) pool.

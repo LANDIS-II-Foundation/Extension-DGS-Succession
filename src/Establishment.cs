@@ -9,7 +9,7 @@ using System;
 using System.IO;
 using Landis.Library.Climate;
 
-namespace Landis.Extension.Succession.NECN
+namespace Landis.Extension.Succession.DGS
 {
     public class Establishment
     {
@@ -23,8 +23,8 @@ namespace Landis.Extension.Succession.NECN
 
         public static void InitializeLogFile()
         {
-            string logFileName   = "NECN-prob-establish-log.csv"; 
-            PlugIn.ModelCore.UI.WriteLine("   Opening a NECN log file \"{0}\" ...", logFileName);
+            string logFileName   = "DGS-prob-establish-log.csv"; 
+            PlugIn.ModelCore.UI.WriteLine("   Opening a DGS log file \"{0}\" ...", logFileName);
             try {
                 log = Landis.Data.CreateTextFile(logFileName);
             }

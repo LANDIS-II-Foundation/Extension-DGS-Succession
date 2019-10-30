@@ -5,7 +5,7 @@ using Landis.Utilities;
 using Landis.Library.Succession;
 using System.Collections.Generic;
 
-namespace Landis.Extension.Succession.NECN
+namespace Landis.Extension.Succession.DGS
 {
     /// <summary>
     /// A parser that reads biomass succession parameters from text input.
@@ -508,8 +508,10 @@ namespace Landis.Extension.Succession.NECN
             InputVar<double> mortCurveShapeParm = new InputVar<double>("Mortality Curve Shape Parameter");
             InputVar<int> leafNeedleDrop = new InputVar<int>("Leaf or Needle Drop Month");
 
-            InputVar<double> ppr2 = new InputVar<double>("MoistureCurve2");
-            InputVar<double> ppr3 = new InputVar<double>("MoistureCurve3");
+            InputVar<double> moisturecurve1 = new InputVar<double>("MoistureCurve1");
+            InputVar<double> moisturecurve2 = new InputVar<double>("MoistureCurve2");
+            InputVar<double> moisturecurve3 = new InputVar<double>("MoistureCurve3");
+            InputVar<double> moisturecurve4 = new InputVar<double>("MoistureCurve4");
             InputVar<double> coarseRootFraction = new InputVar<double>("CRootFrac");
             InputVar<double> fineRootFraction = new InputVar<double>("FRootFrac");
 
@@ -554,11 +556,17 @@ namespace Landis.Extension.Succession.NECN
                 ReadValue(maxlai, currentLine);
                 funcTParms.MAXLAI = maxlai.Value;
 
-                ReadValue(ppr2, currentLine);
-                funcTParms.MoistureCurve2 = ppr2.Value;
+                ReadValue(moisturecurve1, currentLine);
+                funcTParms.MoistureCurve1 = moisturecurve1.Value;
 
-                ReadValue(ppr3, currentLine);
-                funcTParms.MoistureCurve3 = ppr3.Value;
+                ReadValue(moisturecurve2, currentLine);
+                funcTParms.MoistureCurve2 = moisturecurve2.Value;
+
+                ReadValue(moisturecurve3, currentLine);
+                funcTParms.MoistureCurve3 = moisturecurve3.Value;
+
+                ReadValue(moisturecurve4, currentLine);
+                funcTParms.MoistureCurve4 = moisturecurve4.Value;
 
                 ReadValue(wdr, currentLine);
                 funcTParms.WoodDecayRate = wdr.Value;

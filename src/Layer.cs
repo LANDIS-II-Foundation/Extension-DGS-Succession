@@ -7,7 +7,7 @@ using Landis.Core;
 using Landis.SpatialModeling;
 
 
-namespace Landis.Extension.Succession.NECN
+namespace Landis.Extension.Succession.DGS
 {
 
     public enum LayerName { Leaf, FineRoot, Wood, CoarseRoot, Metabolic, Structural, Other }; //, SOM1, DO, Other};

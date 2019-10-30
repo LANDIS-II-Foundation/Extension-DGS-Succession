@@ -9,7 +9,7 @@ using System;
 using System.Linq;
 
 
-namespace Landis.Extension.Succession.NECN
+namespace Landis.Extension.Succession.DGS
 {
     /// <summary>
     /// Calculations for an individual cohort's biomass.
@@ -174,7 +174,7 @@ namespace Landis.Extension.Succession.NECN
             double sitelai          = SiteVars.LAI[site];
             double maxNPP           = SpeciesData.Max_ANPP[cohort.Species];//.ANPP_MAX_Spp[cohort.Species][ecoregion];
 
-            double limitT   = calculateTemp_Limit(site, cohort.Species);
+            double limitT   = calculateTemp_Limit(site, cohort.Species, out var soilTemperature);
 
             double limitH20 = calculateWater_Limit(site, ecoregion, cohort.Species);
 
@@ -221,7 +221,7 @@ namespace Landis.Extension.Succession.NECN
             {
                 PlugIn.ModelCore.UI.WriteLine("  EITHER WOOD or LEAF NPP = NaN!  Will set to zero.");
                 //PlugIn.ModelCore.UI.WriteLine("  Yr={0},Mo={1}, SpeciesName={2}, CohortAge={3}.   GROWTH LIMITS: LAI={4:0.00}, H20={5:0.00}, N={6:0.00}, T={7:0.00}, Capacity={8:0.0}.", PlugIn.ModelCore.CurrentTime, Main.Month + 1, cohort.Species.Name, cohort.Age, limitLAI, limitH20, limitN, limitT, limitCapacity);
-                PlugIn.ModelCore.UI.WriteLine("  Yr={0},Mo={1}.     Other Information: MaxB={2}, Bsite={3}, Bcohort={4:0.0}, SoilT={5:0.0}.", PlugIn.ModelCore.CurrentTime, Main.Month + 1, maxBiomass, (int)siteBiomass, (cohort.WoodBiomass + cohort.LeafBiomass), SiteVars.SoilTemperature[site]);
+                PlugIn.ModelCore.UI.WriteLine("  Yr={0},Mo={1}.     Other Information: MaxB={2}, Bsite={3}, Bcohort={4:0.0}.", PlugIn.ModelCore.CurrentTime, Main.Month + 1, maxBiomass, (int)siteBiomass, (cohort.WoodBiomass + cohort.LeafBiomass));
                 PlugIn.ModelCore.UI.WriteLine("  Yr={0},Mo={1}.     WoodNPP={2:0.00}, LeafNPP={3:0.00}.", PlugIn.ModelCore.CurrentTime, Main.Month + 1, woodNPP, leafNPP);
                 if (Double.IsNaN(leafNPP))
                     leafNPP = 0.0;
@@ -234,7 +234,8 @@ namespace Landis.Extension.Succession.NECN
             {
                 //Outputs.CalibrateLog.Write("{0:0.00},{1:0.00},{2:0.00},{3:0.00}, {4:0.00},", limitLAI, limitH20, limitT, limitCapacity, limitN);
                 Outputs.CalibrateLog.Write("{0:0.00},{1:0.00},{2:0.00},{3:0.00},", limitLAI, limitH20, limitT, limitN);
-                Outputs.CalibrateLog.Write("{0},{1},{2},{3:0.0},{4:0.0},", maxNPP, maxBiomass, (int)siteBiomass, (cohort.WoodBiomass + cohort.LeafBiomass), SiteVars.SoilTemperature[site]);
+                //Outputs.CalibrateLog.Write("{0},{1},{2},{3:0.0},{4:0.0},", maxNPP, maxBiomass, (int)siteBiomass, (cohort.WoodBiomass + cohort.LeafBiomass), SiteVars.SoilTemperature[site]);
+                Outputs.CalibrateLog.Write("{0},{1},{2},{3:0.0},{4:0.0},", maxNPP, maxBiomass, (int)siteBiomass, (cohort.WoodBiomass + cohort.LeafBiomass), soilTemperature);
                 Outputs.CalibrateLog.Write("{0:0.00},{1:0.00},", woodNPP, leafNPP);
             }
                         
@@ -635,40 +636,50 @@ namespace Landis.Extension.Succession.NECN
             double pet = ClimateRegionData.AnnualWeather[ecoregion].MonthlyPET[Main.Month];
             //PlugIn.ModelCore.UI.WriteLine("pet={0}, waterContent={1}, precip={2}.", pet, waterContent, H2Oinputs);
 
-            var adventRoots = SpeciesData.AdventRoots[species];
-            double rootingdepth = SpeciesData.RootingDepth[species];
+            var hasAdventRoots = SpeciesData.AdventRoots[species];
+            var rootingdepth = SpeciesData.RootingDepth[species] / 100.0;   // convert rooting depth to meters
+            var thu = PlugIn.TempHydroUnits[PlugIn.ModelCore.Ecoregion[site]];
 
-            if (pet >= 0.01)
-            {   //       Trees are allowed to access the whole soil profile -rm 2/97
-                //         pptprd = (avh2o(1) + tmoist) / pet
-               // pptprd = (SiteVars.AvailableWater[site] + H2Oinputs) / pet;  
-                Ratio_AvailWaterToPET = (SiteVars.AvailableWater[site] / pet);  //Modified by ML so that we weren't double-counting precip as in above equation
-                //PlugIn.ModelCore.UI.WriteLine("RatioAvailWaterToPET={0}, AvailableWater={1}.", Ratio_AvailWaterToPET, SiteVars.AvailableWater[site]);            
-            }
-            else Ratio_AvailWaterToPET = 0.01;
+            // integrate Shaw's soil moisture profile (at Shaw depths) to get the AvailableWater.
+            //  start the average at either the top of the profile (if the species has adventitious roots), 
+            //  or at the bottom of the adventitious layer (if the species does not have adventitious roots).
+            //  end the average at the rooting depth for the species.
 
-            //...The equation for the y-intercept (intcpt) is A+B*WC.  A and B
-            //     determine the effect of soil texture on plant production based
-            //     on moisture.
+            var startingDepth = hasAdventRoots ? 0.0 : SpeciesData.AdventitiousLayerDepth;
 
-            //...Old way:
-            //      intcpt = 0.0 + 1.0 * wc
-            //      The second point in the equation is (.8,1.0)
-            //      slope = (1.0-0.0)/(.8-intcpt)
-            //      pprdwc = 1.0+slope*(x-.8)
+            var availableWater = AverageOrIntegrateOverProfile(false, thu.MonthlyShawDammResults[Main.Month].AverageSoilMoistureProfile, thu.ShawDepths, thu.ShawDepthIncrements, startingDepth, rootingdepth);
 
-            //PPRPTS naming convention is imported from orginal Century model. Now replaced with 'MoistureCurve' to be more intuitive
-            //...New way (with updated naming convention):
+            //if (pet >= 0.01)
+            //{  
+            //    Ratio_AvailWaterToPET = availableWater / pet;  //Modified by ML so that we weren't double-counting precip as in above equation
 
-            double moisturecurve1 = OtherData.MoistureCurve1;
+            //    //PlugIn.ModelCore.UI.WriteLine("RatioAvailWaterToPET={0}, AvailableWater={1}.", Ratio_AvailWaterToPET, SiteVars.AvailableWater[site]);            
+            //}
+            //else Ratio_AvailWaterToPET = 0.01;
+
+           
+            ////PPRPTS naming convention is imported from orginal Century model. Now replaced with 'MoistureCurve' to be more intuitive
+            ////...New way (with updated naming convention):
+
+            //double moisturecurve1 = OtherData.MoistureCurve1;
+            //double moisturecurve2 = FunctionalType.Table[SpeciesData.FuncType[species]].MoistureCurve2;
+            //double moisturecurve3 = FunctionalType.Table[SpeciesData.FuncType[species]].MoistureCurve3;
+
+            //double intcpt = moisturecurve1 + (moisturecurve2 * waterContent);
+            //double slope = 1.0 / (moisturecurve3 - intcpt);
+
+            //double WaterLimit = 1.0 + slope * (Ratio_AvailWaterToPET - moisturecurve3);
+
+            double moisturecurve1 = FunctionalType.Table[SpeciesData.FuncType[species]].MoistureCurve1;
             double moisturecurve2 = FunctionalType.Table[SpeciesData.FuncType[species]].MoistureCurve2;
             double moisturecurve3 = FunctionalType.Table[SpeciesData.FuncType[species]].MoistureCurve3;
+            double moisturecurve4 = FunctionalType.Table[SpeciesData.FuncType[species]].MoistureCurve4;
 
-            double intcpt = moisturecurve1 + (moisturecurve2 * waterContent);
-            double slope = 1.0 / (moisturecurve3 - intcpt);
+            double SM_frac = (moisturecurve2 - availableWater) / (moisturecurve2 - moisturecurve1);
+            double WaterLimit = 0.0;
+            if (SM_frac > 0.0)
+                WaterLimit = Math.Exp(moisturecurve3 / moisturecurve4 * (1.0 - Math.Pow(SM_frac, moisturecurve3))) * Math.Pow(SM_frac, moisturecurve3);
 
-            double WaterLimit = 1.0 + slope * (Ratio_AvailWaterToPET - moisturecurve3);
-              
             if (WaterLimit > 1.0)  WaterLimit = 1.0;
             if (WaterLimit < 0.01) WaterLimit = 0.01;
 
@@ -682,7 +693,7 @@ namespace Landis.Extension.Succession.NECN
 
 
         //-----------
-        private double calculateTemp_Limit(ActiveSite site, ISpecies species)
+        private double calculateTemp_Limit(ActiveSite site, ISpecies species, out double soilTemperature)
         {
             //Originally from gpdf.f of CENTURY model
             //It calculates the limitation of soil temperature on aboveground forest potential production.
@@ -701,42 +712,71 @@ namespace Landis.Extension.Succession.NECN
             //       Fort collins, Colorado  80523
             // https://mountainscholar.org/bitstream/handle/10217/16102/IBP153.pdf?sequence=1&isAllowed=y
 
+            var hasAdventRoots = SpeciesData.AdventRoots[species];
             var rootingdepth = SpeciesData.RootingDepth[species] / 100.0;   // convert rooting depth to meters
+            var thu = PlugIn.TempHydroUnits[PlugIn.ModelCore.Ecoregion[site]];
 
+            // average Gipl's soil temperature profile (at Shaw depths) to get the A1 temperature.
+            //  start the average at either the top of the profile (if the species has adventitious roots), 
+            //  or at the bottom of the adventitious layer (if the species does not have adventitious roots).
+            //  end the average at the rooting depth for the species.
+
+            var startingDepth = hasAdventRoots ? 0.0 : SpeciesData.AdventitiousLayerDepth;
+
+            soilTemperature = AverageOrIntegrateOverProfile(true, thu.MonthlyGiplDammResults[Main.Month].AverageSoilTemperatureProfileAtShawDepths, thu.ShawDepths, thu.ShawDepthIncrements, startingDepth, rootingdepth);
 
             //double A1 = SiteVars.SoilTemperature[site];
-            var A1 = PlugIn.TempHydroUnits[PlugIn.ModelCore.Ecoregion[site]].MonthlyGiplDammResults[Main.Month].DailySoilTemperatureProfilesAtShawDepths.Average(x => x.Average());
-            double A2 = FunctionalType.Table[SpeciesData.FuncType[species]].TempCurve1;
-            double A3 = FunctionalType.Table[SpeciesData.FuncType[species]].TempCurve2;
-            double A4 = FunctionalType.Table[SpeciesData.FuncType[species]].TempCurve3;
-            double A5 = FunctionalType.Table[SpeciesData.FuncType[species]].TempCurve4;
+            double A1 = FunctionalType.Table[SpeciesData.FuncType[species]].TempCurve1;
+            double A2 = FunctionalType.Table[SpeciesData.FuncType[species]].TempCurve2;
+            double A3 = FunctionalType.Table[SpeciesData.FuncType[species]].TempCurve3;
+            double A4 = FunctionalType.Table[SpeciesData.FuncType[species]].TempCurve4;
 
-            double frac = (A3-A1) / (A3-A2);
+            double frac = (A2-soilTemperature) / (A2-A1);
             double U1 = 0.0;
             if (frac > 0.0)
-                U1 = Math.Exp(A4 / A5 * (1.0 - Math.Pow(frac, A5))) * Math.Pow(frac, A4);
+                U1 = Math.Exp(A3 / A4 * (1.0 - Math.Pow(frac, A4))) * Math.Pow(frac, A3);
 
             //PlugIn.ModelCore.UI.WriteLine("  TEMPERATURE Limits:  Soil Temp={0:0.00}, Temp Limit={1:0.00000}. [PPDF1={2:0.0},PPDF2={3:0.0},PPDF3={4:0.0},PPDF4={5:0.0}]", A1, U1,A2,A3,A4,A5);
 
             return U1;
         }
 
-        public static double AverageOverProfile(List<double> profile, List<double> depths, List<double> depthIncrements, double startingDepth, double endingDepth)
+        private static double AverageOrIntegrateOverProfile(bool makeAverage, double[] profile, List<double> depths, List<double> depthIncrements, double startingDepth, double endingDepth)
         {
             // assumes the depths start at 0.0.
 
             var weight = 0.0;
             var sum = 0.0;
-           
+
+            var i0 = 0;
             if (startingDepth > 0.0)
             {
-                var i0 = depths.FindIndex(x => x > startingDepth);
+                // find the first depth point that exceeds startingDepth
+                i0 = depths.FindIndex(x => x > startingDepth);
                 if (i0 < 0)
                     throw new ApplicationException($"Error: CohortBiomass.AverageOverProfile(): starting depth {startingDepth} not within the profile range.");
 
+                // add the profile value at i0 - 1, weighted by the depth between the starting depth and the depth at i0.
+                sum += profile[i0 - 1] * (depths[i0] - startingDepth);
+                weight += depths[i0] - startingDepth;
             }
 
-            return 0.0;
+            // find the last depth point before ending depth
+            var i1 = depths.FindIndex(x => x > endingDepth);
+            i1 = i1 < 0 ? depths.Count - 1 : i1 - 1;    // if endingDepth is below the last depth, use the last depth point and assume the profile extends to the ending depth
+
+            // add the profile at i1, weighted by the depth between the depth at i1 and the ending depth.
+            sum += profile[i1] * (endingDepth - depths[i1]);
+            weight += endingDepth - depths[i1];
+
+            // now add all the points from i0 to i1 - 1, weighted by their depth increments
+            for (var i = i0; i < i1; ++i)
+            {
+                sum += profile[i] * depthIncrements[i];
+                weight += depthIncrements[i];
+            }
+
+            return makeAverage ? sum / weight : sum;
         }
     }
 }

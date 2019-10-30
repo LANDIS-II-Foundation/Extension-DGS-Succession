@@ -4,7 +4,7 @@ using Landis.Utilities;
 using System;
 using Landis.Core;
 
-namespace Landis.Extension.Succession.NECN
+namespace Landis.Extension.Succession.DGS
 {
     public class OtherData
     {

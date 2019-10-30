@@ -6,7 +6,7 @@ using Landis.Utilities;
 using System;
 using Landis.Library.Climate;
 
-namespace Landis.Extension.Succession.NECN
+namespace Landis.Extension.Succession.DGS
 {
     public enum SoilName { Primary, Secondary, Tertiary, Other };
     /// <summary>
@@ -254,16 +254,16 @@ namespace Landis.Extension.Succession.NECN
                 double sol_soc = dliq * Math.Pow(soilm, 3) * frac * SOC;  
                 double sol_son = dliq * Math.Pow(soilm, 3) * frac * SON;                                    //calculate unprotected SON
                 double vmax_dep = a_dep * Math.Exp(-ea_dep / (r * (SoilT + 273)));                          //calculate maximum depolymerization rate
-                PlugIn.ModelCore.UI.WriteLine("vmax_dep={0:0.00000}", vmax_dep);
+                //PlugIn.ModelCore.UI.WriteLine("vmax_dep={0:0.00000}", vmax_dep);
                 double vmax_upt = a_upt * Math.Exp(-ea_upt / (r * (SoilT + 273)));                          //calculate maximum depolymerization rate
-                PlugIn.ModelCore.UI.WriteLine("vmax_upt={0:0.00000}", vmax_upt);
+                //PlugIn.ModelCore.UI.WriteLine("vmax_upt={0:0.00000}", vmax_upt);
                 double upt_c = microbial_C * vmax_upt * DOC / (km_upt + DOC) * o2 / (km_o2 + o2);           //calculate DOC uptake
-                PlugIn.ModelCore.UI.WriteLine("Cuptake={0:0.000000}, microbialC={1:0.000000}, DOC={2:0.000000}", upt_c, microbial_C, DOC);
+                //PlugIn.ModelCore.UI.WriteLine("Cuptake={0:0.000000}, microbialC={1:0.000000}, DOC={2:0.000000}", upt_c, microbial_C, DOC);
                 double c_mineralization = upt_c * (1 - c_use_efficiency);                                   //calculate initial C mineralization               
                 double upt_n = microbial_N * vmax_upt * DON / (km_upt + DON) * o2 / (km_o2 + o2);           //calculate DON uptake
                 double death_c = r_death * Math.Pow(microbial_C, 2);                                        //calculate density-dependent microbial C turnover
                 double death_n = r_death * Math.Pow(microbial_N, 2);                                        //calculate density-dependent microbial N turnover
-                PlugIn.ModelCore.UI.WriteLine("c_mineralization={0:0.000000}, upt_n={1:0.000000}, death_c={2:0.000000}, death_n={3:0.000000}", c_mineralization, upt_n, death_c, death_n);
+                //PlugIn.ModelCore.UI.WriteLine("c_mineralization={0:0.000000}, upt_n={1:0.000000}, death_c={2:0.000000}, death_n={3:0.000000}", c_mineralization, upt_n, death_c, death_n);
 
                 double enz_c = pconst * c_use_efficiency * upt_c;                                           //calculate potential enzyme C production
                 double enz_n = qconst * upt_n;                                                              //calculate potential enzyme N production
@@ -271,7 +271,7 @@ namespace Landis.Extension.Succession.NECN
                 double growth_c = (1 - pconst) * (upt_c * c_use_efficiency) + enz_c - cn_enzymes * eprod;   //calculate potential microbial biomass C growth
                 double growth_n = (1 - qconst) * upt_n + enz_n - eprod;                                     //calculate potential microbial biomass N growth
                 double growth = (growth_c / cn_microbial >= growth_n) ? growth_n : (growth_c / cn_microbial); //calculate actual microbial biomass growth based on Liebig's Law of the minimum (Schimel & Weintraub 2003 SBB)
-                PlugIn.ModelCore.UI.WriteLine("enz_c={0:0.000000}, eprod={1:0.000000}, growth_c={2:0.000000}, growth={3:0.000000}, cn_microbial={4:0.000000}", enz_c, eprod, growth_c, growth, cn_microbial);
+                //PlugIn.ModelCore.UI.WriteLine("enz_c={0:0.000000}, eprod={1:0.000000}, growth_c={2:0.000000}, growth={3:0.000000}, cn_microbial={4:0.000000}", enz_c, eprod, growth_c, growth, cn_microbial);
 
                 double overflow = growth_c - cn_microbial * growth;                         //calculate overflow metabolism of C
                 double nmin = growth_n - growth;                                            //calculate N mineralization
@@ -286,14 +286,14 @@ namespace Landis.Extension.Succession.NECN
                 double decom_n = vmax_dep * (1 - p_enz_SOC) * enzymatic_concentration * sol_son / (km_dep + sol_son + enzymatic_concentration); //calculate depolymerization of SON using ECA kinetics 
 
                 double dsoc = LitterCinput + death_c * mic_to_som - decom_c;                    //calculate change in SOC pool
-                PlugIn.ModelCore.UI.WriteLine("Initialize. dsoc={0:0.0000}, death_c={1:0.00000}, mic_to_som={2:0.00000}, decom_c={3:0.00000}", dsoc, death_c, mic_to_som, decom_c);
+                //PlugIn.ModelCore.UI.WriteLine("Initialize. dsoc={0:0.0000}, death_c={1:0.00000}, mic_to_som={2:0.00000}, decom_c={3:0.00000}", dsoc, death_c, mic_to_som, decom_c);
                 double dson = (LitterCinput/ cn_litter) + death_n * mic_to_som - decom_n;                    //calculate change in SON pool
-                PlugIn.ModelCore.UI.WriteLine("dson={0:0.000000}, LitterCinput={1:0.000000}, cn_litter={2:0.000000}", dson, LitterCinput, cn_litter);
+                //PlugIn.ModelCore.UI.WriteLine("dson={0:0.000000}, LitterCinput={1:0.000000}, cn_litter={2:0.000000}", dson, LitterCinput, cn_litter);
 
                 double ddoc = decom_c + death_c * (1 - mic_to_som) + cn_enzymes * eloss - upt_c; //calculate change in DOC pool
-                PlugIn.ModelCore.UI.WriteLine("ddoc={0:0.00000}", ddoc);
+                //PlugIn.ModelCore.UI.WriteLine("ddoc={0:0.00000}", ddoc);
                 double ddon = decom_n + death_n * (1 - mic_to_som) + eloss - upt_n; //calculate change in DON pool
-                PlugIn.ModelCore.UI.WriteLine("ddon={0:0.00000}", ddon);
+                //PlugIn.ModelCore.UI.WriteLine("ddon={0:0.00000}", ddon);
 
                 SiteVars.SoilPrimary[site].Carbon += dsoc * (hours_to_month/ mg_to_g);
                 SiteVars.SoilPrimary[site].Nitrogen += dson * (hours_to_month / mg_to_g);
@@ -307,7 +307,7 @@ namespace Landis.Extension.Succession.NECN
 
                 //double c_loss = (c_mineralization + overflow) * (hours_to_month / mg_to_g);                //calculate C efflux
                 double c_loss = (c_mineralization + overflow) * hours_to_month * 100/1000 *10000;                //calculate C efflux from mg /cm3/h to g/m2/h 
-                PlugIn.ModelCore.UI.WriteLine("AfterLotsOfCalcs. C_loss={0:0.0000}, c_mineralization={1:0.0000}, overflow={2:0.0000}", c_loss, c_mineralization, overflow);
+                //PlugIn.ModelCore.UI.WriteLine("AfterLotsOfCalcs. C_loss={0:0.0000}, c_mineralization={1:0.0000}, overflow={2:0.0000}", c_loss, c_mineralization, overflow);
                 SiteVars.SoilPrimary[site].Respiration(c_loss, site);
 
                 double cLeached = 0.0;  // Carbon leached to a stream
