@@ -93,11 +93,12 @@ namespace Landis.Extension.Succession.DGS
                     double baseFlow, stormFlow, AET;
                     if (PlugIn.ShawGiplEnabled)
                     {
-                        var thu = PlugIn.TempHydroUnits[PlugIn.ModelCore.Ecoregion[site]];
+                        var thu = PlugIn.TempHydroUnit;
+                        //var thu = PlugIn.TempHydroUnits[PlugIn.ModelCore.Ecoregion[site]];
 
-                        baseFlow = thu.MonthlyShawDammResults[Month].DailyDeepPercolation.Sum() / 10.0;     // convert from mm to cm
-                        stormFlow = thu.MonthlyShawDammResults[Month].DailyRunoff.Sum() / 10.0;             // convert from mm to cm
-                        AET = thu.MonthlyShawDammResults[Month].DailyEvapotranspiration.Sum() / 10.0;       // convert from mm to cm
+                        baseFlow = thu.MonthlyShawDammResults[Month].MonthDeepPercolationInCm;
+                        stormFlow = thu.MonthlyShawDammResults[Month].MonthRunoffInCm;
+                        AET = thu.MonthlyShawDammResults[Month].MonthEvapotranspirationInCm;
                     }
                     else
                     {

@@ -174,9 +174,33 @@ namespace Landis.Extension.Succession.DGS
             double sitelai          = SiteVars.LAI[site];
             double maxNPP           = SpeciesData.Max_ANPP[cohort.Species];//.ANPP_MAX_Spp[cohort.Species][ecoregion];
 
-            double limitT   = calculateTemp_Limit(site, cohort.Species, out var soilTemperature);
+            double limitT, soilTemperature, limitH20, availableWater;
 
-            double limitH20 = calculateWater_Limit(site, ecoregion, cohort.Species);
+            if (PlugIn.ShawGiplEnabled)
+            {
+                var thu = PlugIn.TempHydroUnit;
+
+                var rec = thu.MonthlySpeciesRecords[Main.Month][cohort.Species];
+                soilTemperature = rec.SoilTemperature;
+                limitT = rec.TemperatureLimit;
+                availableWater = rec.AvailableWater;
+                limitH20 = rec.WaterLimit;
+            }
+            else
+            {
+                soilTemperature = SiteVars.SoilTemperature[site];
+                limitT = TemperatureLimitEquation(soilTemperature, cohort.Species);
+
+                availableWater = SiteVars.AvailableWater[site];
+                limitH20 = WaterLimitEquation(availableWater, cohort.Species);
+            }
+
+            //double limitT   = calculateTemp_Limit(site, cohort.Species, out var soilTemperature);
+
+            //double limitH20 = calculateWater_Limit(site, ecoregion, cohort.Species, out var availableWater);
+
+            if (PlugIn.ModelCore.CurrentTime > 0 && OtherData.CalibrateMode)
+                Outputs.CalibrateLog.Write("{0:0.00},", availableWater);
 
             double limitLAI = calculateLAI_Limit(cohort, site);
 
@@ -622,32 +646,37 @@ namespace Landis.Extension.Succession.DGS
         //                 thereby increase the slope of the line.
         //     pprpts(3):  The lowest ratio of available water to pet at which
         //                 there is no restriction on production.
-        private static double calculateWater_Limit(ActiveSite site, IEcoregion ecoregion, ISpecies species)
+        private static double calculateWater_Limit(ActiveSite site, IEcoregion ecoregion, ISpecies species, out double availableWater)
         {
 
             // Ratio_AvailWaterToPET used to be pptprd and WaterLimit used to be pprdwc
-            double Ratio_AvailWaterToPET = 0.0;
-            double waterContent = SiteVars.SoilFieldCapacity[site] - SiteVars.SoilWiltingPoint[site];
-                //ClimateRegionData.FieldCapacity[ecoregion] - ClimateRegionData.WiltingPoint[ecoregion];  // Difference between two fractions (FC - WP), not the actual water content, per se.
-            double tmin = ClimateRegionData.AnnualWeather[ecoregion].MonthlyMinTemp[Main.Month];
-            
-            double H2Oinputs = ClimateRegionData.AnnualWeather[ecoregion].MonthlyPrecip[Main.Month]; //rain + irract;
-            
-            double pet = ClimateRegionData.AnnualWeather[ecoregion].MonthlyPET[Main.Month];
-            //PlugIn.ModelCore.UI.WriteLine("pet={0}, waterContent={1}, precip={2}.", pet, waterContent, H2Oinputs);
+            //double Ratio_AvailWaterToPET = 0.0;
+            //double waterContent = SiteVars.SoilFieldCapacity[site] - SiteVars.SoilWiltingPoint[site];
+            //double tmin = ClimateRegionData.AnnualWeather[ecoregion].MonthlyMinTemp[Main.Month];            
+            //double H2Oinputs = ClimateRegionData.AnnualWeather[ecoregion].MonthlyPrecip[Main.Month]; //rain + irract;            
+            //double pet = ClimateRegionData.AnnualWeather[ecoregion].MonthlyPET[Main.Month];
 
-            var hasAdventRoots = SpeciesData.AdventRoots[species];
-            var rootingdepth = SpeciesData.RootingDepth[species] / 100.0;   // convert rooting depth to meters
-            var thu = PlugIn.TempHydroUnits[PlugIn.ModelCore.Ecoregion[site]];
+            if (PlugIn.ShawGiplEnabled)
+            {
+                var hasAdventRoots = SpeciesData.AdventRoots[species];
+                var rootingdepth = SpeciesData.RootingDepth[species] / 100.0;   // convert rooting depth to meters
+                                                                                //var thu = PlugIn.TempHydroUnits[PlugIn.ModelCore.Ecoregion[site]];
+                var thu = PlugIn.TempHydroUnit;
 
-            // integrate Shaw's soil moisture profile (at Shaw depths) to get the AvailableWater.
-            //  start the average at either the top of the profile (if the species has adventitious roots), 
-            //  or at the bottom of the adventitious layer (if the species does not have adventitious roots).
-            //  end the average at the rooting depth for the species.
+                // integrate Shaw's soil moisture profile (at Shaw depths) to get the AvailableWater.
+                //  start the average at either the top of the profile (if the species has adventitious roots), 
+                //  or at the bottom of the adventitious layer (if the species does not have adventitious roots).
+                //  end the average at the rooting depth for the species.
 
-            var startingDepth = hasAdventRoots ? 0.0 : SpeciesData.AdventitiousLayerDepth;
+                var startingDepth = hasAdventRoots ? 0.0 : SpeciesData.AdventitiousLayerDepth;
 
-            var availableWater = AverageOrIntegrateOverProfile(false, thu.MonthlyShawDammResults[Main.Month].AverageSoilMoistureProfile, thu.ShawDepths, thu.ShawDepthIncrements, startingDepth, rootingdepth);
+                availableWater = AverageOrIntegrateOverProfile(false, thu.MonthlyShawDammResults[Main.Month].MonthSoilMoistureProfile, thu.ShawDepths, thu.ShawDepthIncrements, startingDepth, rootingdepth);
+            }
+            else
+            {
+                availableWater = SiteVars.AvailableWater[site];
+            }
+
 
             //if (pet >= 0.01)
             //{  
@@ -657,7 +686,7 @@ namespace Landis.Extension.Succession.DGS
             //}
             //else Ratio_AvailWaterToPET = 0.01;
 
-           
+
             ////PPRPTS naming convention is imported from orginal Century model. Now replaced with 'MoistureCurve' to be more intuitive
             ////...New way (with updated naming convention):
 
@@ -670,27 +699,57 @@ namespace Landis.Extension.Succession.DGS
 
             //double WaterLimit = 1.0 + slope * (Ratio_AvailWaterToPET - moisturecurve3);
 
-            double moisturecurve1 = FunctionalType.Table[SpeciesData.FuncType[species]].MoistureCurve1;
-            double moisturecurve2 = FunctionalType.Table[SpeciesData.FuncType[species]].MoistureCurve2;
-            double moisturecurve3 = FunctionalType.Table[SpeciesData.FuncType[species]].MoistureCurve3;
-            double moisturecurve4 = FunctionalType.Table[SpeciesData.FuncType[species]].MoistureCurve4;
+            //double moisturecurve1 = FunctionalType.Table[SpeciesData.FuncType[species]].MoistureCurve1;
+            //double moisturecurve2 = FunctionalType.Table[SpeciesData.FuncType[species]].MoistureCurve2;
+            //double moisturecurve3 = FunctionalType.Table[SpeciesData.FuncType[species]].MoistureCurve3;
+            //double moisturecurve4 = FunctionalType.Table[SpeciesData.FuncType[species]].MoistureCurve4;
 
-            double SM_frac = (moisturecurve2 - availableWater) / (moisturecurve2 - moisturecurve1);
-            double WaterLimit = 0.0;
-            if (SM_frac > 0.0)
-                WaterLimit = Math.Exp(moisturecurve3 / moisturecurve4 * (1.0 - Math.Pow(SM_frac, moisturecurve3))) * Math.Pow(SM_frac, moisturecurve3);
+            //double SM_frac = (moisturecurve2 - availableWater) / (moisturecurve2 - moisturecurve1);
+            //double WaterLimit = 0.0;
+            //if (SM_frac > 0.0)
+            //    WaterLimit = Math.Exp(moisturecurve3 / moisturecurve4 * (1.0 - Math.Pow(SM_frac, moisturecurve3))) * Math.Pow(SM_frac, moisturecurve3);
 
-            if (WaterLimit > 1.0)  WaterLimit = 1.0;
-            if (WaterLimit < 0.01) WaterLimit = 0.01;
+            //if (WaterLimit > 1.0)  WaterLimit = 1.0;
+            //if (WaterLimit < 0.01) WaterLimit = 0.01;
 
-            //PlugIn.ModelCore.UI.WriteLine("Intercept={0}, Slope={1}, WaterLimit={2}.", intcpt, slope, WaterLimit);     
 
-            if (PlugIn.ModelCore.CurrentTime > 0 && OtherData.CalibrateMode)
-                Outputs.CalibrateLog.Write("{0:0.00},", SiteVars.AvailableWater[site]);
+            //double vertex = FunctionalType.Table[SpeciesData.FuncType[species]].MoistureCurve1;
+            //double xIntercept = FunctionalType.Table[SpeciesData.FuncType[species]].MoistureCurve2;
+            //double yIntercept = FunctionalType.Table[SpeciesData.FuncType[species]].MoistureCurve3;
+            ////double moisturecurve4 = FunctionalType.Table[SpeciesData.FuncType[species]].MoistureCurve4;
 
-            return WaterLimit;
+            ////double SM_frac = (moisturecurve2 - availableWater) / (moisturecurve2 - moisturecurve1);
+            //double WaterLimit = 0.0;
+            //WaterLimit = vertex * Math.Pow((availableWater - xIntercept), 2) + yIntercept;
+
+            //if (WaterLimit > 1.0) WaterLimit = 1.0;
+            //if (WaterLimit < 0.01) WaterLimit = 0.01;
+
+            ////PlugIn.ModelCore.UI.WriteLine("WaterLimit={0:0.00}, WaterLimit1={1:0.00}, WaterLimit2={2:0.00}, WaterLimit3={3:0.00}, WaterLimit4={4:0.00}, frac={5:0.00}, availableWater={6:0.00}.", WaterLimit, moisturecurve1, moisturecurve2, moisturecurve3, moisturecurve4, SM_frac, availableWater);     
+
+            ////PlugIn.ModelCore.UI.WriteLine("WaterLimit={0:0.00}, vertex={1:0.00}, xIntercept={2:0.00}, yIntercept={3:0.00},availableWater={4:0.00}.", WaterLimit, vertex, xIntercept, yIntercept, availableWater);     
+
+
+            ////if (PlugIn.ModelCore.CurrentTime > 0 && OtherData.CalibrateMode)
+            ////    Outputs.CalibrateLog.Write("{0:0.00},", availableWater);
+
+            //return WaterLimit;
+
+            return WaterLimitEquation(availableWater, species);
         }
 
+        public static double WaterLimitEquation(double availableWater, ISpecies species)
+        {
+            var vertex = FunctionalType.Table[SpeciesData.FuncType[species]].MoistureCurve1;
+            var xIntercept = FunctionalType.Table[SpeciesData.FuncType[species]].MoistureCurve2;
+            var yIntercept = FunctionalType.Table[SpeciesData.FuncType[species]].MoistureCurve3;
+
+            var waterLimit = vertex * Math.Pow(availableWater - xIntercept, 2) + yIntercept;
+            if (waterLimit > 1.0) waterLimit = 1.0;
+            if (waterLimit < 0.01) waterLimit = 0.01;
+
+            return waterLimit;
+        }
 
         //-----------
         private double calculateTemp_Limit(ActiveSite site, ISpecies species, out double soilTemperature)
@@ -712,31 +771,74 @@ namespace Landis.Extension.Succession.DGS
             //       Fort collins, Colorado  80523
             // https://mountainscholar.org/bitstream/handle/10217/16102/IBP153.pdf?sequence=1&isAllowed=y
 
-            var hasAdventRoots = SpeciesData.AdventRoots[species];
-            var rootingdepth = SpeciesData.RootingDepth[species] / 100.0;   // convert rooting depth to meters
-            var thu = PlugIn.TempHydroUnits[PlugIn.ModelCore.Ecoregion[site]];
+            if (PlugIn.ShawGiplEnabled)
+            {
+                var hasAdventRoots = SpeciesData.AdventRoots[species];
+                var rootingdepth = SpeciesData.RootingDepth[species] / 100.0;   // convert rooting depth to meters
+                var thu = PlugIn.TempHydroUnit;
+                //var thu = PlugIn.TempHydroUnits[PlugIn.ModelCore.Ecoregion[site]];
 
-            // average Gipl's soil temperature profile (at Shaw depths) to get the A1 temperature.
-            //  start the average at either the top of the profile (if the species has adventitious roots), 
-            //  or at the bottom of the adventitious layer (if the species does not have adventitious roots).
-            //  end the average at the rooting depth for the species.
+                // average Gipl's soil temperature profile (at Shaw depths) to get the A1 temperature.
+                //  start the average at either the top of the profile (if the species has adventitious roots), 
+                //  or at the bottom of the adventitious layer (if the species does not have adventitious roots).
+                //  end the average at the rooting depth for the species.
 
-            var startingDepth = hasAdventRoots ? 0.0 : SpeciesData.AdventitiousLayerDepth;
+                var startingDepth = hasAdventRoots ? 0.0 : SpeciesData.AdventitiousLayerDepth;
 
-            soilTemperature = AverageOrIntegrateOverProfile(true, thu.MonthlyGiplDammResults[Main.Month].AverageSoilTemperatureProfileAtShawDepths, thu.ShawDepths, thu.ShawDepthIncrements, startingDepth, rootingdepth);
+                soilTemperature = AverageOrIntegrateOverProfile(true, thu.MonthlyGiplDammResults[Main.Month].AverageSoilTemperatureProfileAtShawDepths, thu.ShawDepths, thu.ShawDepthIncrements, startingDepth, rootingdepth);
+            }
+            else
+            {
+                soilTemperature = SiteVars.SoilTemperature[site];
+            }
 
-            //double A1 = SiteVars.SoilTemperature[site];
-            double A1 = FunctionalType.Table[SpeciesData.FuncType[species]].TempCurve1;
-            double A2 = FunctionalType.Table[SpeciesData.FuncType[species]].TempCurve2;
-            double A3 = FunctionalType.Table[SpeciesData.FuncType[species]].TempCurve3;
-            double A4 = FunctionalType.Table[SpeciesData.FuncType[species]].TempCurve4;
+            //double A1 = FunctionalType.Table[SpeciesData.FuncType[species]].TempCurve1;
+            //double A2 = FunctionalType.Table[SpeciesData.FuncType[species]].TempCurve2;
+            //double A3 = FunctionalType.Table[SpeciesData.FuncType[species]].TempCurve3;
+            //double A4 = FunctionalType.Table[SpeciesData.FuncType[species]].TempCurve4;
 
-            double frac = (A2-soilTemperature) / (A2-A1);
-            double U1 = 0.0;
+            //double frac = (A2-soilTemperature) / (A2-A1);
+            //double U1 = 0.0;
+            //if (frac > 0.0)
+            //    U1 = Math.Exp(A3 / A4 * (1.0 - Math.Pow(frac, A4))) * Math.Pow(frac, A3);
+
+            ////PlugIn.ModelCore.UI.WriteLine("  TEMPERATURE Limits:  Soil Temp={0:0.00}, Temp Limit={1:0.00000}. [PPDF1={2:0.0},PPDF2={3:0.0},PPDF3={4:0.0},PPDF4={5:0.0}]", soilTemperature, U1, A1, A2,A3,A4);
+
+            //return U1;
+
+            return TemperatureLimitEquation(soilTemperature, species);
+        }
+
+        public static double TemperatureLimitEquation(double soilTemperature, ISpecies species)
+        {
+            //Originally from gpdf.f of CENTURY model
+            //It calculates the limitation of soil temperature on aboveground forest potential production.
+            //It is a function and only called by potcrp.f and potfor.f.
+
+            //A1-A4 are paramters from tree.100
+
+            //...This routine is functionally equivalent to the routine of the
+            //     same name, described in the publication:
+
+            //       Some Graphs and their Functional Forms
+            //       Technical Report No. 153
+            //       William Parton and George Innis (1972)
+            //       Natural Resource Ecology Lab.
+            //       Colorado State University
+            //       Fort collins, Colorado  80523
+            // https://mountainscholar.org/bitstream/handle/10217/16102/IBP153.pdf?sequence=1&isAllowed=y
+
+            var A1 = FunctionalType.Table[SpeciesData.FuncType[species]].TempCurve1;
+            var A2 = FunctionalType.Table[SpeciesData.FuncType[species]].TempCurve2;
+            var A3 = FunctionalType.Table[SpeciesData.FuncType[species]].TempCurve3;
+            var A4 = FunctionalType.Table[SpeciesData.FuncType[species]].TempCurve4;
+
+            var frac = (A2 - soilTemperature) / (A2 - A1);
+            var U1 = 0.0;
             if (frac > 0.0)
                 U1 = Math.Exp(A3 / A4 * (1.0 - Math.Pow(frac, A4))) * Math.Pow(frac, A3);
 
-            //PlugIn.ModelCore.UI.WriteLine("  TEMPERATURE Limits:  Soil Temp={0:0.00}, Temp Limit={1:0.00000}. [PPDF1={2:0.0},PPDF2={3:0.0},PPDF3={4:0.0},PPDF4={5:0.0}]", A1, U1,A2,A3,A4,A5);
+            //PlugIn.ModelCore.UI.WriteLine("  TEMPERATURE Limits:  Soil Temp={0:0.00}, Temp Limit={1:0.00000}. [PPDF1={2:0.0},PPDF2={3:0.0},PPDF3={4:0.0},PPDF4={5:0.0}]", soilTemperature, U1, A1, A2,A3,A4);
 
             return U1;
         }

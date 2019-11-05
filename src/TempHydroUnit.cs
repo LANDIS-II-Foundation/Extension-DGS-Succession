@@ -41,19 +41,21 @@ namespace Landis.Extension.Succession.DGS
             if (!ShawInstance.Initialize(name))
                 return;
 
-            List<string> t;
+            // get Shaw depths
+            ShawDepths = ShawInstance.GetDepths();
 
             // read and
             // set the initial soil moisture from the first line of the soil moisture file
             var soilMoistureData = File.ReadAllLines(ShawInstance.SoilMoistureFile).Where(x => !string.IsNullOrEmpty(x)).ToArray();
-            t = ParseLine(soilMoistureData.First());
+            var t = ParseLine(soilMoistureData.First());
             t = t.GetRange(3, t.Count - 3);    // remove day-hr-time
+
+            if (t.Count != ShawDepths.Count)
+                throw new ApplicationException($"The number of initial Shaw moisture points {t.Count} for THU {Name} does not equal the number of Shaw depth points {ShawDepths.Count}");
+
             var soilMoistureInit = t.Select(x => double.Parse(x)).ToArray();
 
             ShawInstance.SetInitialSoilMoisture(soilMoistureInit);
-
-            // get Shaw depths
-            ShawDepths = ShawInstance.GetDepths();
 
 
             // **
@@ -84,6 +86,12 @@ namespace Landis.Extension.Succession.DGS
             for (var i = 0; i < GiplDepths.Count - 1; ++i)
                 GiplDepthIncrements.Add(GiplDepths[i + 1] - GiplDepths[i]);
 
+            // initialize monthly species records
+            MonthlySpeciesRecords = new Dictionary<ISpecies, ThuSpeciesRecord>[12];
+            for (var i = 0; i < 12; i++)
+            {
+                MonthlySpeciesRecords[i] = new Dictionary<ISpecies, ThuSpeciesRecord>();
+            }
         }
 
         #endregion
@@ -98,13 +106,15 @@ namespace Landis.Extension.Succession.DGS
 
         public ShawDammResults[] MonthlyShawDammResults { get; }
         public GiplDammResults[] MonthlyGiplDammResults { get; }
-        
+
         public List<double> ShawDepths { get; }
         public List<double> ShawDepthIncrements { get; }
 
         public List<double> GiplDepths { get; }
         public List<double> GiplDepthIncrements { get; }
 
+        public Dictionary<ISpecies, ThuSpeciesRecord>[] MonthlySpeciesRecords { get; }
+        
         #endregion
 
         #region methods
@@ -172,7 +182,7 @@ namespace Landis.Extension.Succession.DGS
                 //  pass the daily air temperature, estimates of daily snow depth, snow thermal conductivity, and snow volumetric heat capacity, and Shaw's soil moisture profile at the end
                 //  of the previous month.
                 //  if this is the first month, there will be no Shaw results, so this will be passed as null, in which case Gipl will use the default profile from its properties file. 
-                MonthlyGiplDammResults[month] = GiplInstance.CalculateSoilTemperature(tavg.ToArray(), dailySnowDepthEstimate, MonthlyShawDammResults[lastMonth]?.DailySoilMoistureProfiles.Last(), snowThermalConductivity, snowVolumetricHeatCapacity);
+                var giplResults = MonthlyGiplDammResults[month] = GiplInstance.CalculateSoilTemperature(tavg.ToArray(), dailySnowDepthEstimate, MonthlyShawDammResults[lastMonth]?.DailySoilMoistureProfiles.Last(), snowThermalConductivity, snowVolumetricHeatCapacity);
 
 
                 // **
@@ -193,31 +203,38 @@ namespace Landis.Extension.Succession.DGS
                     shawWeatherData[i] = weather;
                 }
 
-                //var p = GetShawInputFilePath();
-                //var p1 = Path.GetDirectoryName(p);
-                //var writer = new StreamWriter(Path.Combine(p1, $"shaw_weather.txt"));
-                //var ii = 339;
-                //foreach (var w in shawWeatherData)
-                //{
-                //    writer.WriteLine($"{ii++} 86 {w.Tmax} {w.Tmin} {w.Tdew} {w.Wind} {w.Precip} {w.Solar}");
-                //}
-                //writer.Close();
-
-
-                //writer = new StreamWriter(Path.Combine(p1, $"shaw_temp.txt"));
-                //ii = 339;
-                //foreach (var s in MonthlyGiplDammResults[month].DailySoilTemperatureProfilesAtShawDepths)
-                //{
-                //    writer.WriteLine($"{ii++} 0 86 {string.Join(" ", s)}");
-                //}
-                //writer.Close();
-
                 // call Shaw
                 //  pass the Shaw weather data and the soil temperature profiles from this month's Gipl run.
                 //  also pass an average temperature in case Gipl is not used.  todo: this is not currently enabled in the code.
                 // Shaw will return the daily soil moisture profiles, daily snow thickness, daily snow heat capacity, and daily snow volumetric heat capacity.
                 //  currently the snow heat capacity and volumetric heat capacity are not used.
-                MonthlyShawDammResults[month] = ShawInstance.CalculateSoilResults(year, startingDay, shawWeatherData, MonthlyGiplDammResults[month].DailySoilTemperatureProfilesAtShawDepths, -1.0);
+                var shawResults = MonthlyShawDammResults[month] = ShawInstance.CalculateSoilResults(year, startingDay, shawWeatherData, MonthlyGiplDammResults[month].DailySoilTemperatureProfilesAtShawDepths, -1.0);
+
+                // calculate species records for this month based on gipl and shaw results
+                foreach (var species in PlugIn.ModelCore.Species)
+                {
+                    var hasAdventRoots = SpeciesData.AdventRoots[species];
+                    var rootingdepth = SpeciesData.RootingDepth[species] / 100.0;   // convert rooting depth to meters
+                    var startingDepth = hasAdventRoots ? 0.0 : SpeciesData.AdventitiousLayerDepth;
+
+                    // average Gipl's soil temperature profile (at Shaw depths) to get the soil temperature.
+                    //  start the average at either the top of the profile (if the species has adventitious roots), 
+                    //  or at the bottom of the adventitious layer (if the species does not have adventitious roots).
+                    //  end the average at the rooting depth for the species.
+
+                    var soilTemperature = AverageOrIntegrateOverProfile(true, giplResults.AverageSoilTemperatureProfileAtShawDepths, startingDepth, rootingdepth);
+                    var temperatureLimit = CohortBiomass.TemperatureLimitEquation(soilTemperature, species);
+
+                    // integrate Shaw's soil moisture profile (at Shaw depths) to get the availableWater.
+                    //  start the average at either the top of the profile (if the species has adventitious roots), 
+                    //  or at the bottom of the adventitious layer (if the species does not have adventitious roots).
+                    //  end the average at the rooting depth for the species.
+
+                    var availableWater = AverageOrIntegrateOverProfile(false, shawResults.MonthSoilMoistureProfile, startingDepth, rootingdepth);
+                    var waterLimit = CohortBiomass.WaterLimitEquation(availableWater, species);
+
+                    MonthlySpeciesRecords[month][species] = new ThuSpeciesRecord { SoilTemperature = soilTemperature, TemperatureLimit = temperatureLimit, AvailableWater = availableWater, WaterLimit = waterLimit };
+                }
             }
         }
 
@@ -228,8 +245,8 @@ namespace Landis.Extension.Succession.DGS
         private static string GetShawInputFilePath()
         {
             //return @"C:\Users\mslucash\Dropbox\SHAW\POC 10.10.2019\POC.inp"; //John's path
-            //;return @"C:\Users\lucash\Dropbox\SHAW\POC 10.10.2019\POC.inp"; //Mel's path
-            return @"D:\Shelbys Files\AK_DGS_Runs\SHAW\POC 10.10.2019\POC.inp"; //Shelby's path
+            return @"C:\Users\lucash\Dropbox\SHAW\UP1A_Birch\UP1A.inp"; //Mel's path
+            //return @"D:\Shelbys Files\AK_DGS_Runs\SHAW\POC 10.10.2019\POC.inp"; //Shelby's path
             //return @"C:\Users\mslucash\Documents\John\SHAW\TestCases\POC\POC.inp";
 
             Console.WriteLine();
@@ -243,8 +260,8 @@ namespace Landis.Extension.Succession.DGS
         private static string GetGiplInputPath()
         {
             //return @"C:\Users\mslucash\Dropbox\GIPL\POC 10.10.2019";  // John's path
-            //return @"C:\Users\lucash\Dropbox\GIPL\POC 10.10.2019";  // Mel's path
-            return @"D:\Shelbys Files\AK_DGS_Runs\GIPL\POC 10.10.2019";  // Shelby's path
+            return @"C:\Users\lucash\Dropbox\GIPL\POC 10.10.2019";  // Mel's path
+            //return @"D:\Shelbys Files\AK_DGS_Runs\GIPL\POC 10.10.2019";  // Shelby's path
             //return @"C:\Users\mslucash\Documents\John\GIPL\TestCases\POC";
 
             Console.WriteLine();
@@ -353,6 +370,44 @@ namespace Landis.Extension.Succession.DGS
             return dailySnowDepth;
         }
 
+        private double AverageOrIntegrateOverProfile(bool makeAverage, double[] profile, double startingDepth, double endingDepth)
+        {
+            // assumes the depths start at 0.0.
+
+            var weight = 0.0;
+            var sum = 0.0;
+
+            var i0 = 0;
+            if (startingDepth > 0.0)
+            {
+                // find the first depth point that exceeds startingDepth
+                i0 = ShawDepths.FindIndex(x => x > startingDepth);
+                if (i0 < 0)
+                    throw new ApplicationException($"Error: CohortBiomass.AverageOverProfile(): starting depth {startingDepth} not within the profile range.");
+
+                // add the profile value at i0 - 1, weighted by the depth between the starting depth and the depth at i0.
+                sum += profile[i0 - 1] * (ShawDepths[i0] - startingDepth);
+                weight += ShawDepths[i0] - startingDepth;
+            }
+
+            // find the last depth point before ending depth
+            var i1 = ShawDepths.FindIndex(x => x > endingDepth);
+            i1 = i1 < 0 ? ShawDepths.Count - 1 : i1 - 1;    // if endingDepth is below the last depth, use the last depth point and assume the profile extends to the ending depth
+
+            // add the profile at i1, weighted by the depth between the depth at i1 and the ending depth.
+            sum += profile[i1] * (endingDepth - ShawDepths[i1]);
+            weight += endingDepth - ShawDepths[i1];
+
+            // now add all the points from i0 to i1 - 1, weighted by their depth increments
+            for (var i = i0; i < i1; ++i)
+            {
+                sum += profile[i] * ShawDepthIncrements[i];
+                weight += ShawDepthIncrements[i];
+            }
+
+            return makeAverage ? sum / weight : sum;
+        }
+
         private static Regex _whiteSpaceRegex = new Regex(@"\s+");
         private static Regex _repeatInputRegex = new Regex(@"^(?'count'\d+)\*(?'value'.*)$");
 
@@ -377,5 +432,13 @@ namespace Landis.Extension.Succession.DGS
             return t1;
         }
         #endregion
+    }
+
+    public class ThuSpeciesRecord
+    {
+        public double AvailableWater { get; set; }
+        public double WaterLimit { get; set; }
+        public double SoilTemperature { get; set; }
+        public double TemperatureLimit { get; set; }
     }
 }

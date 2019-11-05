@@ -45,7 +45,10 @@ namespace Landis.Extension.Succession.DGS
 
         public static int FutureClimateBaseYear;
 
-        public static Dictionary<IEcoregion, TempHydroUnit> TempHydroUnits { get; set; }
+        //public static Dictionary<IEcoregion, TempHydroUnit> TempHydroUnits { get; set; }
+
+        public static TempHydroUnit TempHydroUnit { get; set; }
+
         public static bool ShawGiplEnabled { get; set; }
 
 
@@ -214,13 +217,18 @@ namespace Landis.Extension.Succession.DGS
                     ClimateRegionData.AnnualDailyWeather[climateRegion] = Climate.Future_DailyData[year][climateRegion.Index];
             }
 
-            // run each temp hydro unit for the year
-            foreach (var thu in TempHydroUnits.Values)
-            {
-                thu.RunForYear(year, ClimateRegionData.AnnualDailyWeather[thu.ClimateRegion]);
+            // temporary
+            var weather = ClimateRegionData.AnnualDailyWeather[ModelCore.Ecoregions.First(x => x.Active)];
+            TempHydroUnit.RunForYear(year, weather);
+
+
+            //// run each temp hydro unit for the year
+            //foreach (var thu in TempHydroUnits.Values)
+            //{
+            //    thu.RunForYear(year, ClimateRegionData.AnnualDailyWeather[thu.ClimateRegion]);
                 
-                var xt = 0;
-            }
+            //    var xt = 0;
+            //}
         }
 
         //---------------------------------------------------------------------
@@ -539,12 +547,14 @@ namespace Landis.Extension.Succession.DGS
             //var hu = new TempHydroUnit("THU1", "Fairbanks");
             //_tempHydroUnits.Add(hu);
 
-            TempHydroUnits = new Dictionary<IEcoregion, TempHydroUnit>();
+            TempHydroUnit = new TempHydroUnit("THU1", "First");
 
-            foreach (var climateRegion in ModelCore.Ecoregions.Where(x => x.Active))
-            {
-                TempHydroUnits[climateRegion] = new TempHydroUnit($"THU{climateRegion.Name}", climateRegion.Name);
-            }
+            //TempHydroUnits = new Dictionary<IEcoregion, TempHydroUnit>();
+
+            //foreach (var climateRegion in ModelCore.Ecoregions.Where(x => x.Active))
+            //{
+            //    TempHydroUnits[climateRegion] = new TempHydroUnit($"THU{climateRegion.Name}", climateRegion.Name);
+            //}
 
             return true;
         }
