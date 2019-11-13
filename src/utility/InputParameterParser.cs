@@ -74,12 +74,27 @@ namespace Landis.Extension.Succession.DGS
             ReadVar(timestep);
             parameters.Timestep = timestep.Value;
 
-            InputVar<SeedingAlgorithms> seedAlg = new InputVar<SeedingAlgorithms>("SeedingAlgorithm");
-            ReadVar(seedAlg);
-            parameters.SeedAlgorithm = seedAlg.Value;
+            InputVar<bool> calimode = new InputVar<bool>("CalibrateMode");
+            if (ReadOptionalVar(calimode))
+                parameters.CalibrateMode = calimode.Value;
+            else
+                parameters.CalibrateMode = false;
 
-            //---------------------------------------------------------------------------------
+            InputVar<string> climateConfigFile = new InputVar<string>("ClimateConfigFile");
+            ReadVar(climateConfigFile);
+            parameters.ClimateConfigFile = climateConfigFile.Value;
 
+            InputVar<double> ans = new InputVar<double>("AtmosphericNSlope");
+            ReadVar(ans);
+            parameters.SetAtmosNslope(ans.Value);
+
+            InputVar<double> ani = new InputVar<double>("AtmosphericNIntercept");
+            ReadVar(ani);
+            parameters.SetAtmosNintercept(ani.Value);
+
+
+            //----------------Landscape Maps-----------------------------------------------------------------
+            
             InputVar<string> initCommunities = new InputVar<string>("InitialCommunities");
             ReadVar(initCommunities);
             parameters.InitialCommunities = initCommunities.Value;
@@ -88,9 +103,11 @@ namespace Landis.Extension.Succession.DGS
             ReadVar(communitiesMap);
             parameters.InitialCommunitiesMap = communitiesMap.Value;
 
-            InputVar<string> climateConfigFile = new InputVar<string>("ClimateConfigFile");
-            ReadVar(climateConfigFile);
-            parameters.ClimateConfigFile = climateConfigFile.Value;
+            InputVar<double> lat = new InputVar<double>("Latitude");
+            ReadVar(lat);
+            parameters.SetLatitude(lat.Value);
+
+            //-----------------Soil Maps----------------------------------------------------------------
 
             InputVar<string> soilDepthMapName = new InputVar<string>("SoilDepthMapName");
             ReadVar(soilDepthMapName);
@@ -176,50 +193,35 @@ namespace Landis.Extension.Succession.DGS
             ReadVar(deadSoilMapName);
             parameters.InitialDeadSoilMapName = deadSoilMapName.Value;
 
-            InputVar<bool> calimode = new InputVar<bool>("CalibrateMode");
-            if (ReadOptionalVar(calimode))
-                parameters.CalibrateMode = calimode.Value;
-            else
-                parameters.CalibrateMode = false;
-
-            InputVar<bool> smokemode = new InputVar<bool>("SmokeModelOutputs");
-            if (ReadOptionalVar(smokemode))
-                parameters.SmokeModelOutputs = smokemode.Value;
-            else
-                parameters.SmokeModelOutputs = false;
-
-            InputVar<string> wt = new InputVar<string>("WaterDecayFunction");
-            ReadVar(wt);
-            parameters.WType = WParse(wt.Value);
-
-            InputVar<double> pea = new InputVar<double>("ProbabilityEstablishAdjust");
-            ReadVar(pea);
-            parameters.ProbEstablishAdjustment = pea.Value;
-
-            InputVar<double> iMN = new InputVar<double>("InitialMineralN");
-            ReadVar(iMN);
-            parameters.SetInitMineralN(iMN.Value);
-
-            InputVar<double> iDOC = new InputVar<double>("InitialDOC");
-            ReadVar(iDOC);
-            parameters.SetInitDOC(iDOC.Value);
+            //-----------------Soil Parameters----------------------------------------------------------------
 
             InputVar<double> iFF = new InputVar<double>("InitialFineFuels");
             ReadVar(iFF);
             parameters.SetInitFineFuels(iFF.Value);
 
+            InputVar<double> iMN = new InputVar<double>("InitialMineralN");
+            ReadVar(iMN);
+            parameters.SetInitMineralN(iMN.Value);
 
-            InputVar<double> ans = new InputVar<double>("AtmosphericNSlope");
-            ReadVar(ans);
-            parameters.SetAtmosNslope(ans.Value);
+            InputVar<double> iMicC = new InputVar<double>("InitialMicrobialC");
+            ReadVar(iMicC);
+            parameters.SetInitMicrobialC(iMicC.Value);
 
-            InputVar<double> ani = new InputVar<double>("AtmosphericNIntercept");
-            ReadVar(ani);
-            parameters.SetAtmosNintercept(ani.Value);
+            InputVar<double> iMicN = new InputVar<double>("InitialMicrobialN");   
+            ReadVar(iMicN);
+            parameters.SetInitMicrobialN(iMicN.Value);
 
-            InputVar<double> lat = new InputVar<double>("Latitude");
-            ReadVar(lat);
-            parameters.SetLatitude(lat.Value);
+            InputVar<double> iEnzConc = new InputVar<double>("InitialEnzymeConcentration");
+            ReadVar(iEnzConc);
+            parameters.SetInitEnzymeConc(iEnzConc.Value);
+
+            InputVar<double> iDOCf = new InputVar<double>("InitialDOCFraction");
+            ReadVar(iDOCf);
+            parameters.SetInitDOCFraction(iDOCf.Value);
+
+            InputVar<double> iDONf = new InputVar<double>("InitialDONFraction");
+            ReadVar(iDONf);
+            parameters.SetInitDONFraction(iDONf.Value);
 
             InputVar<double> denits = new InputVar<double>("DenitrificationRate");
             ReadVar(denits);
@@ -228,6 +230,21 @@ namespace Landis.Extension.Succession.DGS
             InputVar<double> fracDOC = new InputVar<double>("FractionLitterToDOC");
             ReadVar(fracDOC);
             parameters.SetFractionDOC(fracDOC.Value);
+
+            InputVar<string> wt = new InputVar<string>("WaterDecayFunction");
+            ReadVar(wt);
+            parameters.WType = WParse(wt.Value);
+
+            //-----------------Dispersal Parameters----------------------------------------------------------------
+
+                       InputVar<SeedingAlgorithms> seedAlg = new InputVar<SeedingAlgorithms>("SeedingAlgorithm");
+            ReadVar(seedAlg);
+            parameters.SeedAlgorithm = seedAlg.Value;
+
+            InputVar<double> pea = new InputVar<double>("ProbabilityEstablishAdjust");
+            ReadVar(pea);
+            parameters.ProbEstablishAdjustment = pea.Value;
+
 
             //InputVar<double> drsoms = new InputVar<double>("DecayRateSurf");
             //ReadVar(drsoms);
@@ -245,62 +262,6 @@ namespace Landis.Extension.Succession.DGS
             //ReadVar(drsom3);
             //parameters.SetDecayRateSOM3(drsom3.Value);
 
-            InputVar<string> anppMaps = new InputVar<string>("ANPPMapNames");
-            if (ReadOptionalVar(anppMaps))
-            {
-                PlugIn.ANPPMapNames = anppMaps.Value;
-
-                InputVar<int> anppMapFreq = new InputVar<int>("ANPPMapFrequency");
-                ReadVar(anppMapFreq);
-                PlugIn.ANPPMapFrequency = anppMapFreq.Value;
-
-            }
-
-            InputVar<string> aneeMaps = new InputVar<string>("ANEEMapNames");
-            if (ReadOptionalVar(aneeMaps))
-            {
-                PlugIn.ANEEMapNames = aneeMaps.Value;
-
-                InputVar<int> aneeMapFreq = new InputVar<int>("ANEEMapFrequency");
-                ReadVar(aneeMapFreq);
-                PlugIn.ANEEMapFrequency = aneeMapFreq.Value;
-
-            }
-
-            InputVar<string> soilCarbonMaps = new InputVar<string>("SoilCarbonMapNames");
-            if (ReadOptionalVar(soilCarbonMaps))
-            {
-                PlugIn.SoilCarbonMapNames = soilCarbonMaps.Value;
-
-                InputVar<int> soilCarbonMapFreq = new InputVar<int>("SoilCarbonMapFrequency");
-                ReadVar(soilCarbonMapFreq);
-                PlugIn.SoilCarbonMapFrequency = soilCarbonMapFreq.Value;
-
-            }
-
-            InputVar<string> soilNitrogenMaps = new InputVar<string>("SoilNitrogenMapNames");
-            if (ReadOptionalVar(soilNitrogenMaps))
-            {
-                PlugIn.SoilNitrogenMapNames = soilNitrogenMaps.Value;
-
-                InputVar<int> soilNitrogenMapFreq = new InputVar<int>("SoilNitrogenMapFrequency");
-                ReadVar(soilNitrogenMapFreq);
-                PlugIn.SoilNitrogenMapFrequency = soilNitrogenMapFreq.Value;
-
-            }
-
-            InputVar<string> totalCMaps = new InputVar<string>("TotalCMapNames");
-            if (ReadOptionalVar(totalCMaps))
-            {
-                PlugIn.TotalCMapNames = totalCMaps.Value;
-
-                InputVar<int> totalCMapFreq = new InputVar<int>("TotalCMapFrequency");
-                ReadVar(totalCMapFreq);
-                PlugIn.TotalCMapFrequency = totalCMapFreq.Value;
-
-            }
-
-
             //--------------------------
             //  LAI and light table
 
@@ -308,7 +269,8 @@ namespace Landis.Extension.Succession.DGS
             InputVar<byte> shadeClassVar = new InputVar<byte>("Shade Class");
             InputVar<double> maxLAI = new InputVar<double>("Maximum LAI");
 
-            for (byte shadeClass = 1; shadeClass <= 5; shadeClass++) {
+            for (byte shadeClass = 1; shadeClass <= 5; shadeClass++)
+            {
                 if (AtEndOfInput)
                     throw NewParseException("Expected a line with available light class {0}", shadeClass);
 
@@ -317,7 +279,7 @@ namespace Landis.Extension.Succession.DGS
                 if (shadeClassVar.Value.Actual != shadeClass)
                     throw new InputValueException(shadeClassVar.Value.String,
                                                   "Expected the available light class {0}", shadeClass);
-                
+
                 ReadValue(maxLAI, currentLine);
                 parameters.SetMaximumShadeLAI(shadeClass, maxLAI.Value);
 
@@ -675,6 +637,7 @@ namespace Landis.Extension.Succession.DGS
 
             return parameters; 
         }
+
 
         //---------------------------------------------------------------------
 

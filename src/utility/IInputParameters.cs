@@ -110,7 +110,11 @@ namespace Landis.Extension.Succession.DGS
         double Latitude {get;}
         double DenitrificationRate { get; }
         double InitialMineralN { get; }
-        double InitialDOC { get; }
+        double InitialMicrobialC { get; }
+        double InitialMicrobialN { get; }
+        double InitialEnzymeConc { get; }
+        double InitialDOCFraction { get; }
+        double InitialDONFraction { get; }        
         double InitialFineFuels { get; }
         double FractionLitterDecayToDOC { get; }
         //double DecayRateSurf { get; }

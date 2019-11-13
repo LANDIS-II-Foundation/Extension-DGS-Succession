@@ -268,8 +268,11 @@ namespace Landis.Extension.Succession.DGS
 
             InitialBiomass initialBiomass = InitialBiomass.Compute(site, initialCommunity);
             SiteVars.MineralN[site] = Parameters.InitialMineralN;
-            SiteVars.SoilPrimary[site].DOC = Parameters.InitialDOC;
-            SiteVars.SoilPrimary[site].DON = SiteVars.SoilPrimary[site].DOC / SoilLayer.CN_DOCN;
+            SiteVars.SoilPrimary[site].MicrobialCarbon = Parameters.InitialMicrobialC;
+            SiteVars.SoilPrimary[site].MicrobialNitrogen = Parameters.InitialMicrobialN;
+            SiteVars.SoilPrimary[site].EnzymaticConcentration = Parameters.InitialEnzymeConc;
+            SiteVars.SoilPrimary[site].DOC = Parameters.InitialDOCFraction * SiteVars.SoilPrimary[site].Carbon;
+            SiteVars.SoilPrimary[site].DON = Parameters.InitialDONFraction * SiteVars.SoilPrimary[site].Nitrogen;
         }
 
 

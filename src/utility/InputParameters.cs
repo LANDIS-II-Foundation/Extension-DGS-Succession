@@ -51,10 +51,16 @@ namespace Landis.Extension.Succession.DGS
         private double atmosNintercept;
         private double latitude;
         private double denitrif;
-        private double[] maximumShadeLAI;
-        private double initMineralN;
-        private double initDOC;
+        private double[] maximumShadeLAI;        
         private double initFineFuels;
+        private double initMineralN;
+        private double initMicrobialC;
+        private double initMicrobialN;
+        private double initEnzymeConc;
+        private double initDOCFraction;
+        private double initDONFraction;
+        //private double initDOC;
+        
         private double fractionLitterDecayToDOC;
         //private double decayRateSurf;
         //private double decayRateSOM1;
@@ -481,16 +487,15 @@ namespace Landis.Extension.Succession.DGS
         //    }
         //}
         //-----------------------------------------------
-        public double DenitrificationRate
-        {
-            get
-            {
-                return denitrif;
-            }
-        }
-        public double InitialMineralN { get { return initMineralN; } }
-        public double InitialDOC { get { return initDOC; } }
+        
         public double InitialFineFuels { get { return initFineFuels; } }
+        public double InitialMineralN { get { return initMineralN; } }
+        public double InitialMicrobialC { get { return initMicrobialC; } }
+        public double InitialMicrobialN { get { return initMicrobialN; } }
+        public double InitialEnzymeConc { get { return initEnzymeConc; } }
+        public double InitialDOCFraction { get { return initDOCFraction; } }
+        public double InitialDONFraction { get { return initDONFraction; } }
+        public double DenitrificationRate { get  {return denitrif; }      }
         public double FractionLitterDecayToDOC { get { return fractionLitterDecayToDOC; } }
 
         //---------------------------------------------------------------------
@@ -1050,10 +1055,34 @@ namespace Landis.Extension.Succession.DGS
         {
             initMineralN = CheckBiomassParm(newValue, 0.0, 50.0);
         }
+
         //---------------------------------------------------------------------
-        public void SetInitDOC(InputValue<double> newValue)
+        public void SetInitMicrobialC(InputValue<double> newValue)
         {
-            initDOC = CheckBiomassParm(newValue, 0.0, 5.0);
+            initMicrobialC = CheckBiomassParm(newValue, 0.0, 5.0);
+        }
+
+        //---------------------------------------------------------------------
+        public void SetInitMicrobialN(InputValue<double> newValue)
+        {
+            initMicrobialN = CheckBiomassParm(newValue, 0.0, 5.0);
+        }
+
+        //---------------------------------------------------------------------
+        public void SetInitEnzymeConc(InputValue<double> newValue)
+        {
+            initEnzymeConc = CheckBiomassParm(newValue, 0.0, 5.0);
+        }
+        //---------------------------------------------------------------------
+        public void SetInitDOCFraction(InputValue<double> newValue)
+        {
+            initDOCFraction = CheckBiomassParm(newValue, 0.0, 1.0);
+        }
+        //---------------------------------------------------------------------
+        //---------------------------------------------------------------------
+        public void SetInitDONFraction(InputValue<double> newValue)
+        {
+            initDONFraction = CheckBiomassParm(newValue, 0.0, 1.0);
         }
         //---------------------------------------------------------------------
         public void SetInitFineFuels(InputValue<double> newValue)

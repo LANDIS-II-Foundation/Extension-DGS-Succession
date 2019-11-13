@@ -143,7 +143,7 @@ namespace Landis.Extension.Succession.DGS
             float[] deltas = new float[2] { deltaWood, deltaLeaf };
 
             //if((totalMortality[1] + defoliatedLeafBiomass) > cohort.LeafBiomass)
-            //   PlugIn.ModelCore.UI.WriteLine("Warning: Leaf Mortality exceeds cohort leaf biomass. M={0:0.0}, B={1:0.0}, DefoLeafBiomass={2:0.0}, defoliationIndex={3:0.0}", totalMortality[1], cohort.LeafBiomass, defoliatedLeafBiomass, defoliation);
+              //PlugIn.ModelCore.UI.WriteLine("Mortality Calcs. WoodMortality={0:0.000}, leafMortality={1:0.000}, DefoliatedLeafBiomass={2:0.000}", totalMortality[0], totalMortality[1], defoliatedLeafBiomass);
             
             UpdateDeadBiomass(cohort, site, totalMortality);
 
