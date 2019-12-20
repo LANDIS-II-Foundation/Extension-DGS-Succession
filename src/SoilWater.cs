@@ -229,8 +229,8 @@ namespace Landis.Extension.Succession.DGS
             SiteVars.AvailableWater[site] = availableWater;  //available to plants for growth     
             SiteVars.SoilWaterContent[site] = soilWaterContent;
             SiteVars.SoilTemperature[site] = CalculateSoilTemp(tmin, tmax, liveBiomass, litterBiomass, month);
-            SiteVars.DecayFactor[site] = CalculateDecayFactor((int)OtherData.WType, SiteVars.SoilTemperature[site], relativeWaterContent, ratioPrecipPET, month);
-            SiteVars.AnaerobicEffect[site] = CalculateAnaerobicEffect(drain, ratioPrecipPET, pet, tave);
+            SiteVars.DecayFactor[site] = CalculateDecayFactor((int)OtherData.WType, SiteVars.SoilTemperature[site], relativeWaterContent, ratioPrecipPET);
+            SiteVars.AnaerobicEffect[site] = CalculateAnaerobicEffect(drain, ratioPrecipPET, pet, tave);            
             if (month == 0)
                 SiteVars.DryDays[site] = 0;
             else
@@ -304,7 +304,7 @@ namespace Landis.Extension.Succession.DGS
 
         //---------------------------------------------------------------------------
 
-        private static double CalculateDecayFactor(int idef, double soilTemp, double rwc, double ratioPrecipPET, int month)
+        public static double CalculateDecayFactor(int idef, double soilTemp, double rwc, double ratioPrecipPET)
         {
             // Decomposition factor relfecting the effects of soil temperature and moisture on decomposition
             // Originally revised from prelim.f of CENTURY
@@ -376,7 +376,7 @@ namespace Landis.Extension.Succession.DGS
             return r;
         }
         //---------------------------------------------------------------------------
-        private static double CalculateAnaerobicEffect(double drain, double ratioPrecipPET, double pet, double tave)
+        public static double CalculateAnaerobicEffect(double drain, double ratioPrecipPET, double pet, double tave)
         {
 
             //Originally from anerob.f of Century

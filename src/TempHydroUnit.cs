@@ -22,6 +22,8 @@ namespace Landis.Extension.Succession.DGS
         private static int[] _firstDayOfMonth = { 0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334 };  // zero-based.  note: without leap year
         private static int[] _lengthOfMonth = { 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31 };  // note: without leap year
 
+        private const double DecompositionDepth = 0.1;  // depth to which soil temperature and soil moisture decomposition are calculated
+
         #endregion
 
         #region constructor
@@ -92,6 +94,9 @@ namespace Landis.Extension.Succession.DGS
             {
                 MonthlySpeciesRecords[i] = new Dictionary<ISpecies, ThuSpeciesRecord>();
             }
+
+            MonthlySoilTemperatureDecomp = new double[12];
+            MonthlySoilMoistureDecomp = new double[12];
         }
 
         #endregion
@@ -114,7 +119,11 @@ namespace Landis.Extension.Succession.DGS
         public List<double> GiplDepthIncrements { get; }
 
         public Dictionary<ISpecies, ThuSpeciesRecord>[] MonthlySpeciesRecords { get; }
-        
+
+        public double[] MonthlySoilTemperatureDecomp { get; }
+
+        public double[] MonthlySoilMoistureDecomp { get; }
+
         #endregion
 
         #region methods
@@ -222,7 +231,7 @@ namespace Landis.Extension.Succession.DGS
                     //  or at the bottom of the adventitious layer (if the species does not have adventitious roots).
                     //  end the average at the rooting depth for the species.
 
-                    var soilTemperature = AverageOrIntegrateOverProfile(true, giplResults.AverageSoilTemperatureProfileAtShawDepths, startingDepth, rootingdepth);
+                    var soilTemperature = AverageOverProfile(giplResults.AverageSoilTemperatureProfileAtShawDepths, startingDepth, rootingdepth);
                     var temperatureLimit = CohortBiomass.TemperatureLimitEquation(soilTemperature, species);
 
                     // integrate Shaw's soil moisture profile (at Shaw depths) to get the availableWater.
@@ -230,11 +239,15 @@ namespace Landis.Extension.Succession.DGS
                     //  or at the bottom of the adventitious layer (if the species does not have adventitious roots).
                     //  end the average at the rooting depth for the species.
 
-                    var availableWater = AverageOrIntegrateOverProfile(false, shawResults.MonthSoilMoistureProfile, startingDepth, rootingdepth);
+                    var availableWater = IntegrateOverProfile(shawResults.MonthSoilMoistureProfile, startingDepth, rootingdepth);
                     var waterLimit = CohortBiomass.WaterLimitEquation(availableWater, species);
 
                     MonthlySpeciesRecords[month][species] = new ThuSpeciesRecord { SoilTemperature = soilTemperature, TemperatureLimit = temperatureLimit, AvailableWater = availableWater, WaterLimit = waterLimit };
                 }
+
+                // calculate soil moisture and temperature for decomposition
+                MonthlySoilTemperatureDecomp[month] = AverageOverProfile(giplResults.AverageSoilTemperatureProfileAtShawDepths, 0.0, DecompositionDepth);
+                MonthlySoilMoistureDecomp[month] = IntegrateOverProfile(shawResults.MonthSoilMoistureProfile, 0.0, DecompositionDepth);
             }
         }
 
@@ -244,9 +257,10 @@ namespace Landis.Extension.Succession.DGS
 
         private static string GetShawInputFilePath()
         {
-            //return @"C:\Users\mslucash\Dropbox\SHAW\POC 10.10.2019\POC.inp"; //John's path
-            return @"C:\Users\lucash\Dropbox\SHAW\UP1A_Birch\UP1A.inp"; //Mel's path
-            //return @"D:\Shelbys Files\AK_DGS_Runs\SHAW\POC 10.10.2019\POC.inp"; //Shelby's path
+            //return @"C:\Users\mslucash\Dropbox\SHAW\POC 10.10.2019\POC.inp"; //John's POC path
+            //return @"C:\Users\mslucash\Dropbox\SHAW\UP1A_Birch\UP1A.inp"; //John's birch path
+            return @"C:\Users\lucash\Dropbox\SHAW\UP1A_Birch\UP1A.inp"; //Mel's birch path
+            //return @"D:\Shelbys Files\AK_DGS_Runs\SHAW\UP1A_Birch\UP1A.inp"; //Shelby's birch path
             //return @"C:\Users\mslucash\Documents\John\SHAW\TestCases\POC\POC.inp";
 
             Console.WriteLine();
@@ -369,6 +383,9 @@ namespace Landis.Extension.Succession.DGS
 
             return dailySnowDepth;
         }
+
+        private double AverageOverProfile(double[] profile, double startingDepth, double endingDepth) => AverageOrIntegrateOverProfile(true, profile, startingDepth, endingDepth);
+        private double IntegrateOverProfile(double[] profile, double startingDepth, double endingDepth) => AverageOrIntegrateOverProfile(false, profile, startingDepth, endingDepth);
 
         private double AverageOrIntegrateOverProfile(bool makeAverage, double[] profile, double startingDepth, double endingDepth)
         {

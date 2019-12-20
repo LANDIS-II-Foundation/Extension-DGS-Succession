@@ -198,12 +198,12 @@ namespace Landis.Extension.Succession.DGS
             LitterType litterParmsSoil = new LitterType();
 
             // Structural decomposition rate, the fraction of the pool that turns over each year.
-            litterParmsSurface.DecayRateStrucC = 3.9;
-            litterParmsSoil.DecayRateStrucC = 4.9; 
+            litterParmsSurface.DecayRateStrucC = 3.9/100.0;
+            litterParmsSoil.DecayRateStrucC = 4.9/100.0; 
 
             // Metabolic decomposition rate, the fraction of the pool that turns over each year.
-            litterParmsSurface.DecayRateMetabolicC = 1.48; 
-            litterParmsSoil.DecayRateMetabolicC = 1.85; 
+            litterParmsSurface.DecayRateMetabolicC = 1.48/100.0; 
+            litterParmsSoil.DecayRateMetabolicC = 1.85/100.0; 
 
             // Decomposition rate of organic matter with active turnover, the fraction of the pool
             // that turns over each year (SOM1)

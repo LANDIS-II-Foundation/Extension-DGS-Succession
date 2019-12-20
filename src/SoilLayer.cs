@@ -185,29 +185,31 @@ namespace Landis.Extension.Succession.DGS
         }
 
 
-        // used defaults of default values from Abramoff et al. or values from Vogel when applicable. NOTE:  p[n] indicates the field from the prior csv input file.
+        // used fitted values from Abramoff et al. or values from Vogel when applicable. NOTE:  p[n] indicates the field from the prior csv input file.
         private static double ea_dep = 74.61914;        //p[1]  #activation energy of SOM depolymerization
         private static double ea_upt = 62.38691;        //p[2]  #activation energy of DOC uptake
         private static double a_dep = 1.15e+11;         //p[3]   #pre-exponential constant for SOM depolymerization
         private static double a_upt = 1.1e+11;         //p[4]  #pre-exponential constant for uptake
         //private static double frac = 0.000378981;          //p[5]  #fraction of unprotected SOM, Magill et al. 2000
-        private static double frac = 0.000145843;          //p[5]  # Vogel fraction of unprotected SOM
+        private static double frac = 0.8;          //p[5]  # Vogel fraction of unprotected SOM
                                                            // p[6] 0.000466501;  NOT USED
                                                            // p[7] 0.000486085;  NOT USED
                                                            //private static double cn_litter = 50.56466;     //p[8] #C:N of litter (was: cnl) Used in line 324
-        private static double cn_litter = 50.56466;     //p[8] #C:N of litter (was: cnl) Used in line 324
-        public static double CN_DOCN = 29.60162;         //p[9] #C:N of soil (was: cns)  // Rob: only used for initializing DON
+        private static double cn_litter = 44.1;     //p[8] #C:N of litter (was: cnl) Used in line 324
+        //public static double CN_DOCN = 29.60162;         //p[9] #C:N of soil (was: cns)  // Rob: only used for initializing DON
         //private static double cn_microbial = 9.803885526;  //p[10] #C:N of microbial biomass (was: cnm)
-        private static double cn_microbial = 13.4019;  //p[10] #C:N of microbial biomass, Vogel
+        private static double cn_microbial = 12.0;  //p[10] #C:N of microbial biomass, Vogel
         private static double cn_enzymes = 3.202712;    //p[11] #C:N of enzymes (was: cne)
         private static double km_dep = 0.002445366;        //p[12] #half-saturation constant for SOM depolymerization
         private static double km_upt = 0.3172;        //p[13] #half-saturation constant for DOC uptake
         private static double r_ecloss = 0.00105575;       //p[14] #enzyme turnover rate
         private static double r_death = 0.00014847;       //p[15] #microbial turnover rate
-        private static double c_use_efficiency = 0.3505942;           //p[16] #carbon use efficiency (was: cue)
+        private static double c_use_efficiency = 0.351;           //p[16] #carbon use efficiency (was: cue)
         private static double p_enz_SOC = 0.5077498;      //p[17] #proportion of enzyme pool acting on SOC (was: a)
-        private static double pconst = 0.5431845;        //p[18] #proportion of assimilated C allocated to enzyme production
-        private static double qconst = 0.4993819;        //p[19] #proportion of assimilated N allocated to enzyme production
+        private static double pconst = 0.5431845
+            ;        //p[18] #proportion of assimilated C allocated to enzyme production
+        private static double qconst = 0.4993819
+            ;        //p[19] #proportion of assimilated N allocated to enzyme production
         private static double mic_to_som = 0.5073271;    //p[20] #fraction of dead microbial biomass allocated to SOM
         private static double km_o2 = 0.1323897;         //p[21] #Michaelis constant for O2
         private static double dgas = 1.783251;          //p[22] #diffusion coefficient for O2 in air
@@ -218,17 +220,17 @@ namespace Landis.Extension.Succession.DGS
         //private static double soilMoistureA = -1.92593874;  //p[27]
         private static double soilMoistureA = 0.0001;  //p[27]
         private static double soilMoistureB = 1.0;  //p[28]                     
-        private static double saturation = 0.5403743;     //p[29] #saturation level (was: sat)
+        private static double saturation = 0.492526227563312;     //p[29] #saturation level (was: sat)
         public static double r = 0.008314;                 // gas constant
 
         public static void Decompose(int Year, int Month, ActiveSite site)
         {
             double month_to_hr = 24.0 * (double)AnnualClimate.DaysInMonth(Month, Year);
-            double g_to_mg = 1000;
+            double g_to_mg = 1000;           
             double m2_to_cm2 = 10000;
-            double depth = 10; //This is a placeholder since I'm not sure how we'll deal with depth. Rose just did the top 10cm. ML
-            double soilTemperature;
-            double availableWater;
+            //double depth1m_to_depth10cm = 10.0; //Rose simulated just the top 10cm and recommends that we don't correct for depth. ML
+            var soilTemperature = 0.0;
+            var availableWater = 0.0;
 
             double SOC = SiteVars.SoilPrimary[site].Carbon;
             if (SOC > 0.0000001)
@@ -248,26 +250,25 @@ namespace Landis.Extension.Succession.DGS
                 }
             }
 
-            soilTemperature = SiteVars.SoilTemperature[site];
-            availableWater = SiteVars.AvailableWater[site];
+            availableWater = 0.15;  //fixing this temporarily for testing because the SM is too low in SHAW at the moment.
 
             // convert Landis units to Rose's units
-            
-            SOC = (SiteVars.SoilPrimary[site].Carbon * g_to_mg)/m2_to_cm2;  //double SOC = 65.25;
-            double SON = (SiteVars.SoilPrimary[site].Nitrogen * g_to_mg)/m2_to_cm2;  //double SON = 2.1917;
-            double bulk_density = SiteVars.SoilBulkDensity[site];   //double bulk_density = 0.0377;
-            double particle_density = SiteVars.SoilParticleDensity[site]; //double particle_density = 0.8877;
-            double DOC = (SiteVars.SoilPrimary[site].DOC * g_to_mg)/m2_to_cm2;  //double DOC = 0.0020000000;
-            double DON = (SiteVars.SoilPrimary[site].DON * g_to_mg)/m2_to_cm2;  //double DON = 0.0011;
-            double microbial_C = SiteVars.SoilPrimary[site].MicrobialCarbon;  //double microbial_C = 1.9703;               
-            double microbial_N = SiteVars.SoilPrimary[site].MicrobialNitrogen;  //double microbial_N = 0.197;
-            double enzymatic_concentration = SiteVars.SoilPrimary[site].EnzymaticConcentration;  //double enzymatic_concentration = 0.0339;   
-            
-            //double LitterCinput = 1.057019e-07;  //Rose's value at an hourly rate.    
-                                                                                              
-            double LitterCinput = (SiteVars.SoilPrimary[site].MonthlyCarbonInputs * g_to_mg) / (m2_to_cm2 * month_to_hr);
+            SOC = (SiteVars.SoilPrimary[site].Carbon * g_to_mg)/(m2_to_cm2);  //double SOC = 65.25 (Rose);
+            double SON = (SiteVars.SoilPrimary[site].Nitrogen * g_to_mg)/ (m2_to_cm2 );  //double SON = 2.1917 (Rose);
+            double bulk_density = SiteVars.SoilBulkDensity[site];   //double bulk_density = 0.0377 (Jason);
+            double particle_density = SiteVars.SoilParticleDensity[site]; //double particle_density = 0.8877 (Jason);
+            double DOC = (SiteVars.SoilPrimary[site].DOC * g_to_mg)/ (m2_to_cm2 );  //double DOC = 0.0020000000;
+            double DON = (SiteVars.SoilPrimary[site].DON * g_to_mg)/ (m2_to_cm2 );  //double DON = 0.0011;
+            double microbial_C = SiteVars.SoilPrimary[site].MicrobialCarbon;  //double microbial_C = 1.9703 (Rose);               
+            double microbial_N = SiteVars.SoilPrimary[site].MicrobialNitrogen;  //double microbial_N = 0.197 (Rose);
+            double enzymatic_concentration = SiteVars.SoilPrimary[site].EnzymaticConcentration;  //double enzymatic_concentration = 0.0339 (Rose);   
 
-            PlugIn.ModelCore.UI.WriteLine("Inputs in Rose's units. LitterCinput={0:0.000000000000}, DON={1:0.00}, microbial_C={2:0.00}, microbial_N={3:0.00}, enzymatic_concentration={4:0.00}, DOC={5:0.000},", LitterCinput, DON, microbial_C, microbial_N, enzymatic_concentration, DOC);
+            //double LitterCinput = 1.057019e-07;  //Rose's value at an hourly rate.   
+            // Splitting C inputs into 50% litter and 50% DOC at the onset.
+            double LitterCinput = (SiteVars.SoilPrimary[site].MonthlyCarbonInputs * (0.5) * g_to_mg) / (m2_to_cm2 * month_to_hr);  // No depth conversion? Using 70/30 division.
+            double DOCinput= (SiteVars.SoilPrimary[site].MonthlyCarbonInputs * (0.5) * g_to_mg) / (m2_to_cm2 * month_to_hr);
+            
+            //PlugIn.ModelCore.UI.WriteLine("Inputs in Rose's units. LitterCinput={0:0.000000000000}, DON={1:0.0000000}, microbial_C={2:0.00}, microbial_N={3:0.000000}, enzymatic_concentration={4:0.000000}, DOC={5:0.0000000},", LitterCinput, DON, microbial_C, microbial_N, enzymatic_concentration, DOC);
 
             double porosity = 1 - bulk_density / particle_density;                                      //calculate porosity                
                                                                                                         //double soilm = -soilMoistureA + soilMoistureB * SoilMoisture;                                //calculate soil moisture scalar, omit gave negative values         
@@ -306,41 +307,60 @@ namespace Landis.Extension.Succession.DGS
 
             double dsoc = LitterCinput + death_c * mic_to_som - decom_c;                    //calculate change in SOC pool
             double dson = (LitterCinput / cn_litter) + death_n * mic_to_som - decom_n;                    //calculate change in SON pool              
-            double ddoc = decom_c + death_c * (1.0 - mic_to_som) + cn_enzymes * eloss - upt_c; //calculate change in DOC pool                
-            double ddon = decom_n + death_n * (1.0 - mic_to_som) + eloss - upt_n; //calculate change in DON pool
+            double ddoc = DOCinput + decom_c + death_c * (1.0 - mic_to_som) + cn_enzymes * eloss - upt_c; //calculate change in DOC pool                
+            double ddon = DOCinput / (DOC/ DON) + decom_n + death_n * (1.0 - mic_to_som) + eloss - upt_n; //calculate change in DON pool
 
             // convert Rose's results to Landis units
+            dsoc *= month_to_hr * m2_to_cm2 / (g_to_mg );
+            dson *= month_to_hr * m2_to_cm2 / (g_to_mg );
+            ddoc *= month_to_hr * m2_to_cm2 / (g_to_mg );
+            ddon *= month_to_hr * m2_to_cm2 / (g_to_mg );
 
-            if (dmic_n < 0.0)  //
-            {
-                SiteVars.MineralN[site] += Math.Abs(dmic_n) * (month_to_hr * m2_to_cm2)/ g_to_mg;
-            }
-
-            else
-            {
-                SiteVars.MineralN[site] -= (dmic_n) * (month_to_hr * m2_to_cm2) / g_to_mg;
-            }
-
-
-            SiteVars.SoilPrimary[site].Carbon += (dsoc * month_to_hr * m2_to_cm2)/g_to_mg;
-            SiteVars.SoilPrimary[site].Nitrogen += (dson * month_to_hr * m2_to_cm2)/ g_to_mg;
-            SiteVars.SoilPrimary[site].DOC += (ddoc * month_to_hr * m2_to_cm2)/ g_to_mg;
-            SiteVars.SoilPrimary[site].DON += (ddon * month_to_hr * m2_to_cm2)/ g_to_mg;
+            // adjust pools
+            SiteVars.SoilPrimary[site].Carbon += dsoc;
+            SiteVars.SoilPrimary[site].Nitrogen += dson;
+            SiteVars.SoilPrimary[site].DOC += ddoc;
+            SiteVars.SoilPrimary[site].DON += ddon;
             SiteVars.SoilPrimary[site].MicrobialCarbon += dmic_c;
             SiteVars.SoilPrimary[site].MicrobialNitrogen += dmic_n;
             SiteVars.SoilPrimary[site].EnzymaticConcentration += dec;
 
+            // make sure the pools aren't allowed to go below zero
+            if (SiteVars.SoilPrimary[site].Carbon < 0.0)
+                SiteVars.SoilPrimary[site].Carbon = 0.0;
+
+            if (SiteVars.SoilPrimary[site].Nitrogen < 0.0)
+                SiteVars.SoilPrimary[site].Nitrogen = 0.0;
+
+            if (SiteVars.SoilPrimary[site].DOC < 0.0)
+                SiteVars.SoilPrimary[site].DOC = 0.0;
+
+            if (SiteVars.SoilPrimary[site].DON < 0.0)
+                SiteVars.SoilPrimary[site].DON = 0.0;
+
+            if (SiteVars.SoilPrimary[site].MicrobialCarbon < 0.0)
+                SiteVars.SoilPrimary[site].MicrobialCarbon = 0.0;
+
+            if (SiteVars.SoilPrimary[site].MicrobialNitrogen < 0.0)
+                SiteVars.SoilPrimary[site].MicrobialNitrogen = 0.0;
+
+            if (SiteVars.SoilPrimary[site].EnzymaticConcentration < 0.0)
+                SiteVars.SoilPrimary[site].EnzymaticConcentration = 0.0;
 
 
-            PlugIn.ModelCore.UI.WriteLine("Outputs. SOC={0:0.0}, DON={1:0.00}, DOC={2:0.00}", SiteVars.SoilPrimary[site].Carbon, SiteVars.SoilPrimary[site].Nitrogen, SiteVars.SoilPrimary[site].DOC);
-
-
+            //PlugIn.ModelCore.UI.WriteLine("Outputs. SOC={0:0.0}, DON={1:0.00}, DOC={2:0.00}, DON={3:0.00}", SiteVars.SoilPrimary[site].Carbon, SiteVars.SoilPrimary[site].Nitrogen, SiteVars.SoilPrimary[site].DOC, SiteVars.SoilPrimary[site].DON);
+            
             //double dcout = cmin + overflow;                                             //calculate C efflux
+            double co2loss = (c_mineralization + overflow) * month_to_hr * m2_to_cm2 / (g_to_mg );                //calculate C efflux
+            double mineralNFlow = (nmin * month_to_hr * m2_to_cm2 )/ (g_to_mg);                //N mineralization
 
-            double c_loss = (c_mineralization + overflow) * month_to_hr;                //calculate C efflux
-                                                                                           //double c_loss = (c_mineralization + overflow) * depth * (cm2_to_m2 * hours_to_month / mg_to_g);                //calculate C efflux from mg /cm3/h to g/m2/h 
+            //Add lost CO2 to C sink/source and to monthly heterotrophic respiration
+            SiteVars.MonthlyResp[site][Main.Month] += co2loss;
+            SiteVars.SourceSink[site].Carbon = Math.Round((SiteVars.SourceSink[site].Carbon + co2loss));
+            SiteVars.MineralN[site] += mineralNFlow;
+            SiteVars.GrossMineralization[site] += mineralNFlow;
 
-            SiteVars.SoilPrimary[site].Respiration(c_loss, site);
+            //SiteVars.SoilPrimary[site].Respiration(c_loss, site);
             SiteVars.SoilPrimary[site].MonthlyCarbonInputs = 0.0;  // Reset to zero each timestep.
 
             double cLeached = 0.0;  // Carbon leached to a stream
@@ -353,7 +373,7 @@ namespace Landis.Extension.Succession.DGS
                 // this may need to be revisited for DGS. Water movement in SHAW?  ML
                 double indexWaterMovement = SiteVars.WaterMovement[site] / (SiteVars.SoilDepth[site] * SiteVars.SoilFieldCapacity[site]);
 
-                cLeached = c_loss * leachTextureEffect * indexWaterMovement;
+                cLeached = co2loss * leachTextureEffect * indexWaterMovement;
 
                 //Partition and schedule C flows 
                 if (cLeached > SiteVars.SoilPrimary[site].Carbon)

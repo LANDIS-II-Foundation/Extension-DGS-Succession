@@ -19,7 +19,9 @@ namespace Landis.Extension.Succession.DGS
 
             double wood2c = SiteVars.SurfaceDeadWood[site].Carbon;
 
-            double anerb = SiteVars.AnaerobicEffect[site];
+            //SiteVars.AnaerobicEffect[site]=1.0;   //ML: rTesting purposes.
+            double anerb = SiteVars.AnaerobicEffect[site];          
+            
 
             //....LARGE WOOD....
             if (wood2c > 0.0000001)
@@ -57,7 +59,7 @@ namespace Landis.Extension.Succession.DGS
 
 
 
-                //PlugIn.ModelCore.UI.WriteLine("  Coarse Root={0:0.0}, CFlow={1:0.00}, DecayFactor={2:0.00}, DecayValue={3:0.0}, ligninEffect={4:0.00}, anerb={5:0.00}.", wood3c, totalCFlow, SiteVars.DecayFactor[site], SiteVars.SoilDeadWood[site].DecayValue, ligninEffect, anerb);
+                //PlugIn.ModelCore.UI.WriteLine("  Coarse Root={0:0.0}, CFlow={1:0.00}, DecayFactor={2:0.00}, DecayValue={3:0.0000000}, ligninEffect={4:0.00}, anerb={5:0.00}.", wood3c, totalCFlow, SiteVars.DecayFactor[site], SiteVars.SoilDeadWood[site].DecayValue, ligninEffect, anerb);
 
                 SiteVars.SoilDeadWood[site].DecomposeLignin(totalCFlow, site);
             }

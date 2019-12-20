@@ -372,7 +372,8 @@ namespace Landis.Extension.Succession.DGS
 
             //round these to avoid unexpected behavior
             this.Carbon = Math.Round((this.Carbon - netCFlow), 2);
-            destination.Carbon = Math.Round((destination.Carbon + netCFlow), 2);
+            //destination.Carbon = Math.Round((destination.Carbon + netCFlow), 2);
+            destination.MonthlyCarbonInputs += Math.Round(netCFlow, 2);
         }
 
         public void TransferNitrogen(SoilLayer destination, double CFlow, double totalC, double ratioCNtoDestination, ActiveSite site)
@@ -480,6 +481,7 @@ namespace Landis.Extension.Succession.DGS
         public void Respiration(double co2loss, ActiveSite site)
         {
         // Compute flows associated with microbial respiration.
+        // This method is not needed with DAMM
 
         // Input:
         //  co2loss = CO2 loss associated with decomposition

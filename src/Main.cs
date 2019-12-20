@@ -90,6 +90,8 @@ namespace Landis.Extension.Succession.DGS
                     SiteVars.MineralN[site] += monthlyNdeposition;
                     //PlugIn.ModelCore.UI.WriteLine("Ndeposition={0},MineralN={1:0.00}.", monthlyNdeposition, SiteVars.MineralN[site]);
 
+                    //SiteVars.DecayFactor[site] = 1;
+
                     double baseFlow, stormFlow, AET;
                     if (PlugIn.ShawGiplEnabled)
                     {
@@ -99,6 +101,16 @@ namespace Landis.Extension.Succession.DGS
                         baseFlow = thu.MonthlyShawDammResults[Month].MonthDeepPercolationInCm;
                         stormFlow = thu.MonthlyShawDammResults[Month].MonthRunoffInCm;
                         AET = thu.MonthlyShawDammResults[Month].MonthEvapotranspirationInCm;
+
+                        // calculate decay factor and anaerobic effect
+                        var pet = ClimateRegionData.AnnualWeather[ecoregion].MonthlyPET[Month];
+                        var precipitation = ClimateRegionData.AnnualWeather[ecoregion].MonthlyPrecip[Month]; //rain + irract in cm;
+                        var ratioPrecipPET = pet > 0.0 ? precipitation / pet : 0.0;
+                        var tave = ClimateRegionData.AnnualWeather[ecoregion].MonthlyTemp[Month];   // this is air temperature when passed to CalculateAnaerobicEffect() by SoilWater, but this might need to be soil temperature instead
+                        var drain = SiteVars.SoilDrain[site];
+
+                        SiteVars.DecayFactor[site] = SoilWater.CalculateDecayFactor((int)OtherData.WType, thu.MonthlySoilTemperatureDecomp[Month], thu.MonthlySoilMoistureDecomp[Month], ratioPrecipPET);
+                        SiteVars.AnaerobicEffect[site] = SoilWater.CalculateAnaerobicEffect(drain, ratioPrecipPET, pet, tave);
                     }
                     else
                     {
