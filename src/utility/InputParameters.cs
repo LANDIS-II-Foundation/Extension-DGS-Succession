@@ -20,6 +20,7 @@ namespace Landis.Extension.Succession.DGS
         private SeedingAlgorithms seedAlg;
 
         private string climateConfigFile;
+        private string shawGiplConfigFile;
         private string initCommunities;
         private string communitiesMap;
         private string soilDepthMapName;
@@ -185,6 +186,8 @@ namespace Landis.Extension.Succession.DGS
                 climateConfigFile = value;
             }
         }
+        
+        public string ShawGiplConfigFile { get => shawGiplConfigFile; set => shawGiplConfigFile = value; }
         
         //---------------------------------------------------------------------
         /// <summary>

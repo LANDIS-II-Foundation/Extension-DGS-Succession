@@ -17,6 +17,7 @@ using System.IO;
 using System.Text.RegularExpressions;
 using Landis.Extension.ShawDamm;
 using Landis.Extension.GiplDamm;
+using System.Threading.Tasks;
 
 namespace Landis.Extension.Succession.DGS
 {
@@ -44,10 +45,13 @@ namespace Landis.Extension.Succession.DGS
         public static double ProbEstablishAdjust;
 
         public static int FutureClimateBaseYear;
+        private ICommunity initialCommunity;
 
         //public static Dictionary<IEcoregion, TempHydroUnit> TempHydroUnits { get; set; }
 
-        public static TempHydroUnit TempHydroUnit { get; set; }
+        //public static TempHydroUnit TempHydroUnit { get; set; }
+        public static List<TempHydroUnit> TempHydroUnits { get; set; }
+        //public static Dictionary<ActiveSite, TempHydroUnit> TemHydroUnitForSite { get; set; }
 
         public static bool ShawGiplEnabled { get; set; }
 
@@ -71,7 +75,7 @@ namespace Landis.Extension.Succession.DGS
             modelCore = mCore;
             SiteVars.Initialize();
             InputParametersParser parser = new InputParametersParser();
-            Parameters = Landis.Data.Load<IInputParameters>(dataFile, parser);
+            Parameters = Data.Load<IInputParameters>(dataFile, parser);
 
         }
 
@@ -94,7 +98,7 @@ namespace Landis.Extension.Succession.DGS
             Console.WriteLine("Attach process to Visual Studio for debugging and hit return");
             Console.ReadLine();     // JM:  added for debugging.  use this to stop the run to allow me to attach visual studio to the dotnet process
 
-            PlugIn.ModelCore.UI.WriteLine("Initializing {0} ...", ExtensionName);
+            ModelCore.UI.WriteLine("Initializing {0} ...", ExtensionName);
             Timestep              = Parameters.Timestep;
             SuccessionTimeStep    = Timestep;
             sufficientLight       = Parameters.LightClassProbabilities;
@@ -138,11 +142,11 @@ namespace Landis.Extension.Succession.DGS
             Reproduction.Establish = Establish;
             Reproduction.AddNewCohort = AddNewCohort;
             Reproduction.MaturePresent = MaturePresent;
-            base.Initialize(modelCore, Parameters.SeedAlgorithm);
+            Initialize(modelCore, Parameters.SeedAlgorithm);
 
             // Delegate mortality routines:
-            Landis.Library.LeafBiomassCohorts.Cohort.PartialDeathEvent += CohortPartialMortality;
-            Landis.Library.LeafBiomassCohorts.Cohort.DeathEvent += CohortTotalMortality;
+            Cohort.PartialDeathEvent += CohortPartialMortality;
+            Cohort.DeathEvent += CohortTotalMortality;
 
 
             InitializeSites(Parameters.InitialCommunities, Parameters.InitialCommunitiesMap, modelCore);
@@ -155,7 +159,7 @@ namespace Landis.Extension.Succession.DGS
                 Outputs.CreateCalibrateLogFile();
             Establishment.InitializeLogFile();
 
-            foreach (ActiveSite site in PlugIn.ModelCore.Landscape)
+            foreach (ActiveSite site in ModelCore.Landscape)
                 Main.ComputeTotalCohortCN(site, SiteVars.Cohorts[site]);
 
             Outputs.WritePrimaryLogFile(0);
@@ -169,13 +173,16 @@ namespace Landis.Extension.Succession.DGS
         public override void Run()
         {
 
-            if (PlugIn.ModelCore.CurrentTime > 0)
+            if (ModelCore.CurrentTime > 0)
                     SiteVars.InitializeDisturbances();
 
-            ClimateRegionData.AnnualNDeposition = new Landis.Library.Parameters.Ecoregions.AuxParm<double>(PlugIn.ModelCore.Ecoregions);
+            ClimateRegionData.AnnualNDeposition = new Landis.Library.Parameters.Ecoregions.AuxParm<double>(ModelCore.Ecoregions);
 
             if (ShawGiplEnabled)
+            {
+                AssignTempHydroUnits();
                 RunTempHydroUnits();
+            }
 
             //base.RunReproductionFirst();
 
@@ -198,12 +205,84 @@ namespace Landis.Extension.Succession.DGS
                     int month = months[i];
                     Outputs.WriteMonthlyLogFile(month);
                 }
-                Outputs.WritePrimaryLogFile(PlugIn.ModelCore.CurrentTime);
-                Outputs.WriteShortPrimaryLogFile(PlugIn.ModelCore.CurrentTime);
+                Outputs.WritePrimaryLogFile(ModelCore.CurrentTime);
+                Outputs.WriteShortPrimaryLogFile(ModelCore.CurrentTime);
                 Outputs.WriteMaps();
                 Establishment.LogEstablishment();
             }
 
+        }
+
+        private void AssignTempHydroUnits()
+        {
+            // disable all thus, so I only turn on those that are needed for the year
+            foreach (var thu in TempHydroUnits)
+            {
+                thu.SiteCount = 0;
+                thu.InUseForYear = false;
+            }
+
+            var nonForestCount = 0;
+
+            var timeSinceLastBurn = new Dictionary<int, int>();
+
+            SiteVars.ForestTypeName = ModelCore.GetSiteVar<string>("Output.ForestType");
+            SiteVars.TimeOfLastBurn = ModelCore.GetSiteVar<int>("Fire.TimeOfLastEvent");
+
+            foreach (var site in ModelCore.Landscape.ActiveSites)
+            {
+                var climateRegion = ModelCore.Ecoregion[site];
+
+                var reclassVegetation = SiteVars.ForestTypeName[site];
+                if (reclassVegetation == "NonForest")
+                {
+                    ++nonForestCount;
+                    continue;
+                }
+
+                var age = 0;
+                if (SiteVars.TimeOfLastBurn != null)
+                {
+                    age = ModelCore.CurrentTime - SiteVars.TimeOfLastBurn[site] - 1;
+                    if (age < 0) age = 0;
+                }
+
+                if (!timeSinceLastBurn.TryGetValue(age, out var ageCount))
+                    timeSinceLastBurn[age] = 0;
+
+                ++timeSinceLastBurn[age];
+
+                var thuClimateRegionMatches = TempHydroUnits.Where(x => x.ClimateRegionName.Equals(climateRegion.Name, StringComparison.OrdinalIgnoreCase)).ToList();
+                if (!thuClimateRegionMatches.Any())
+                    throw new ApplicationException($"No THUs match the ClimateRegion Name '{climateRegion.Name}' for site {site}");
+
+                var thuReclassVegetationMatches = thuClimateRegionMatches.Where(x => x.ReclassVegetation.Equals(reclassVegetation, StringComparison.OrdinalIgnoreCase)).ToList();
+                if (!thuReclassVegetationMatches.Any())
+                    throw new ApplicationException($"No THUs for the ClimateRegion Name '{climateRegion.Name}' match the Reclass Vegetation '{reclassVegetation}' for site {site}");
+
+                var thuAgeMatches = thuReclassVegetationMatches.Where(x => age >= x.MinAge && age <= x.MaxAge).ToList();
+                if (!thuAgeMatches.Any())
+                    throw new ApplicationException($"No THUs for the ClimateRegion Name '{climateRegion.Name}' and Reclass Vegetation '{reclassVegetation}' match the Age '{age}' for site {site}");
+
+                if (thuAgeMatches.Count != 1)
+                    throw new ApplicationException($"More than one THU matches the ClimateRegion Name '{climateRegion.Name}', Reclass Vegetation '{reclassVegetation}', and Age '{age}' for site {site}");
+
+                var thu = thuAgeMatches[0];
+
+                //var thu = TempHydroUnits.FirstOrDefault(x => x.ClimateRegionName.Equals(climateRegion.Name, StringComparison.OrdinalIgnoreCase) 
+                //        && x.ReclassVegetation.Equals(reclassVegetation, StringComparison.OrdinalIgnoreCase)
+                //        &&  age >= x.MinAge && age <= x.MaxAge);
+
+                //if (thu == null)
+                //    throw new ApplicationException($"Unable to find a THU to assign to site {site}");
+
+                ++thu.SiteCount;
+
+                thu.ClimateRegion = climateRegion;
+                thu.InUseForYear = true;
+
+                SiteVars.TempHydroUnit[site] = thu;
+            }
         }
 
         private void RunTempHydroUnits()
@@ -211,22 +290,31 @@ namespace Landis.Extension.Succession.DGS
             // get annual daily weather for all active climate regions
             var year = FutureClimateBaseYear + ModelCore.CurrentTime - 1;
 
-            foreach (var climateRegion in PlugIn.ModelCore.Ecoregions.Where(x => x.Active))
+            foreach (var climateRegion in ModelCore.Ecoregions.Where(x => x.Active))
             {
+                
                 if (Climate.Future_DailyData.ContainsKey(year))
                     ClimateRegionData.AnnualDailyWeather[climateRegion] = Climate.Future_DailyData[year][climateRegion.Index];
             }
 
-            // temporary
-            var weather = ClimateRegionData.AnnualDailyWeather[ModelCore.Ecoregions.First(x => x.Active)];
-            TempHydroUnit.RunForYear(year, weather);
+            ModelCore.UI.WriteLine("RunTemHydroUnits: Start");
 
+            // temporary
+            //var weather = ClimateRegionData.AnnualDailyWeather[ModelCore.Ecoregions.First(x => x.Active)];
+            //TempHydroUnit.RunForYear(year, weather);
+
+            //Parallel.ForEach(TempHydroUnits.Where(x => x.InUseForYear), thu => { thu.RunForYear(year); });
+            foreach (var thu in TempHydroUnits.Where(x => x.InUseForYear))
+                thu.RunForYear(year);
+
+
+            ModelCore.UI.WriteLine("RunTemHydroUnits: End");
 
             //// run each temp hydro unit for the year
             //foreach (var thu in TempHydroUnits.Values)
             //{
             //    thu.RunForYear(year, ClimateRegionData.AnnualDailyWeather[thu.ClimateRegion]);
-                
+
             //    var xt = 0;
             //}
         }
@@ -235,7 +323,7 @@ namespace Landis.Extension.Succession.DGS
 
         public override byte ComputeShade(ActiveSite site)
         {
-            IEcoregion ecoregion = PlugIn.ModelCore.Ecoregion[site];
+            IEcoregion ecoregion = ModelCore.Ecoregion[site];
 
             byte finalShade = 0;
 
@@ -244,12 +332,12 @@ namespace Landis.Extension.Succession.DGS
 
             for (byte shade = 5; shade >= 1; shade--)
             {
-                if(PlugIn.ShadeLAI[shade] <=0 ) 
+                if(ShadeLAI[shade] <=0 ) 
                 {
                     string mesg = string.Format("Maximum LAI has not been defined for shade class {0}", shade);
                     throw new System.ApplicationException(mesg);
                 }
-                if (SiteVars.LAI[site] >= PlugIn.ShadeLAI[shade])
+                if (SiteVars.LAI[site] >= ShadeLAI[shade])
                 {
                     finalShade = shade;
                     break;
@@ -262,8 +350,9 @@ namespace Landis.Extension.Succession.DGS
         }
         //---------------------------------------------------------------------
 
-        protected override void InitializeSite(ActiveSite site,
-                                               ICommunity initialCommunity)
+        //protected override void InitializeSite(ActiveSite site,
+                                               //ICommunity initialCommunity)
+            protected override void InitializeSite (ActiveSite site)
         {
 
             InitialBiomass initialBiomass = InitialBiomass.Compute(site, initialCommunity);
@@ -276,6 +365,36 @@ namespace Landis.Extension.Succession.DGS
         }
 
 
+        public override void InitializeSites(string initialCommunitiesText, string initialCommunitiesMap, ICore modelCore)
+        {
+            ModelCore.UI.WriteLine("   Loading initial communities from file \"{0}\" ...", initialCommunitiesText);
+            Landis.Library.InitialCommunities.DatasetParser parser = new Landis.Library.InitialCommunities.DatasetParser(Timestep, ModelCore.Species);
+            Landis.Library.InitialCommunities.IDataset communities = Data.Load<Landis.Library.InitialCommunities.IDataset>(initialCommunitiesText, parser);
+
+            ModelCore.UI.WriteLine("   Reading initial communities map \"{0}\" ...", initialCommunitiesMap);
+            IInputRaster<uintPixel> map;
+            map = ModelCore.OpenRaster<uintPixel>(initialCommunitiesMap);
+            using (map)
+            {
+                uintPixel pixel = map.BufferPixel;
+                foreach (Site site in ModelCore.Landscape.AllSites)
+                {
+                    map.ReadBufferPixel();
+                    uint mapCode = pixel.MapCode.Value;
+                    if (!site.IsActive)
+                        continue;
+
+                    ActiveSite activeSite = (ActiveSite)site;
+                    initialCommunity = communities.Find(mapCode);
+                    if (initialCommunity == null)
+                    {
+                        throw new ApplicationException(string.Format("Unknown map code for initial community: {0}", mapCode));
+                    }
+
+                    InitializeSite(activeSite);
+                }
+            }
+        }
         //---------------------------------------------------------------------
         // This method does not trigger reproduction
         public void CohortPartialMortality(object sender, Landis.Library.BiomassCohorts.PartialDeathEventArgs eventArgs)
@@ -293,7 +412,7 @@ namespace Landis.Extension.Succession.DGS
 
             if (disturbanceType.IsMemberOf("disturbance:harvest"))
             {
-                SiteVars.HarvestPrescriptionName = PlugIn.ModelCore.GetSiteVar<string>("Harvest.PrescriptionName");
+                SiteVars.HarvestPrescriptionName = ModelCore.GetSiteVar<string>("Harvest.PrescriptionName");
                 if (!Disturbed[site]) // this is the first cohort killed/damaged
                 {
                     HarvestEffects.ReduceLayers(SiteVars.HarvestPrescriptionName[site], site);
@@ -304,7 +423,7 @@ namespace Landis.Extension.Succession.DGS
             if (disturbanceType.IsMemberOf("disturbance:fire"))
             {
 
-                SiteVars.FireSeverity = PlugIn.ModelCore.GetSiteVar<byte>("Fire.Severity");
+                SiteVars.FireSeverity = ModelCore.GetSiteVar<byte>("Fire.Severity");
 
                 if (!Disturbed[site]) // this is the first cohort killed/damaged
                 {
@@ -358,8 +477,8 @@ namespace Landis.Extension.Succession.DGS
 
                 if (disturbanceType.IsMemberOf("disturbance:fire"))
                 {
-                    SiteVars.FireSeverity = PlugIn.ModelCore.GetSiteVar<byte>("Fire.Severity");
-                    Landis.Library.Succession.Reproduction.CheckForPostFireRegen(eventArgs.Cohort, site);
+                    SiteVars.FireSeverity = ModelCore.GetSiteVar<byte>("Fire.Severity");
+                    Reproduction.CheckForPostFireRegen(eventArgs.Cohort, site);
 
                     if (!Disturbed[site])  // the first cohort killed/damaged
                     {
@@ -382,7 +501,7 @@ namespace Landis.Extension.Succession.DGS
                 {
                     if (disturbanceType.IsMemberOf("disturbance:harvest"))
                     {
-                        SiteVars.HarvestPrescriptionName = PlugIn.ModelCore.GetSiteVar<string>("Harvest.PrescriptionName");
+                        SiteVars.HarvestPrescriptionName = ModelCore.GetSiteVar<string>("Harvest.PrescriptionName");
                         if (!Disturbed[site])  // the first cohort killed/damaged
                         {
                             HarvestEffects.ReduceLayers(SiteVars.HarvestPrescriptionName[site], site);
@@ -390,9 +509,9 @@ namespace Landis.Extension.Succession.DGS
                         woodInput -= woodInput * (float)HarvestEffects.GetCohortWoodRemoval(site);
                         foliarInput -= foliarInput * (float)HarvestEffects.GetCohortLeafRemoval(site);
                     }
-                    
+
                     // If not fire, check for resprouting:
-                    Landis.Library.Succession.Reproduction.CheckForResprouting(eventArgs.Cohort, site);
+                    Reproduction.CheckForResprouting(eventArgs.Cohort, site);
                 }
             }
 
@@ -429,7 +548,7 @@ namespace Landis.Extension.Succession.DGS
         {
 
             //PlugIn.ModelCore.UI.WriteLine("  Calculating Sufficient Light from Succession.");
-            byte siteShade = PlugIn.ModelCore.GetSiteVar<byte>("Shade")[site];
+            byte siteShade = ModelCore.GetSiteVar<byte>("Shade")[site];
 
             double lightProbability = 0.0;
             bool found = false;
@@ -451,7 +570,7 @@ namespace Landis.Extension.Succession.DGS
             }
 
             if (!found)
-                PlugIn.ModelCore.UI.WriteLine("A Sufficient Light value was not found for {0}.", species.Name);
+                ModelCore.UI.WriteLine("A Sufficient Light value was not found for {0}.", species.Name);
 
             return modelCore.GenerateUniform() < lightProbability;
 
@@ -462,7 +581,8 @@ namespace Landis.Extension.Succession.DGS
         /// This is a Delegate method to base succession.
         /// </summary>
 
-        public void AddNewCohort(ISpecies species, ActiveSite site)
+       // public void AddNewCohort(ISpecies species, ActiveSite site)
+        public void AddNewCohort(ISpecies species, ActiveSite site, string reproductionType)
         {
             float[] initialBiomass = CohortBiomass.InitialBiomass(species, SiteVars.Cohorts[site], site);
             SiteVars.Cohorts[site].AddNewCohort(species, 1, initialBiomass[0], initialBiomass[1]);
@@ -513,14 +633,14 @@ namespace Landis.Extension.Succession.DGS
         public static void SiteDisturbed(object sender,
                                          Landis.Library.BiomassCohorts.DisturbanceEventArgs eventArgs)
         {
-            PlugIn.ModelCore.UI.WriteLine("  Calculating Fire or Harvest Effects.");
+            ModelCore.UI.WriteLine("  Calculating Fire or Harvest Effects.");
 
             ExtensionType disturbanceType = eventArgs.DisturbanceType;
             ActiveSite site = eventArgs.Site;
 
             if (disturbanceType.IsMemberOf("disturbance:fire"))
             {
-                SiteVars.FireSeverity = PlugIn.ModelCore.GetSiteVar<byte>("Fire.Severity");
+                SiteVars.FireSeverity = ModelCore.GetSiteVar<byte>("Fire.Severity");
                 if (SiteVars.FireSeverity != null && SiteVars.FireSeverity[site] > 0)
                     FireEffects.ReduceLayers(SiteVars.FireSeverity[site], site);
             }
@@ -545,12 +665,74 @@ namespace Landis.Extension.Succession.DGS
 
         private bool InitializeTempHydroUnits()
         {
+            string errorMessage;
+
+            // read shaw gipl config file paths
+            var inputFileParser = new SimpleFileParser(Parameters.ShawGiplConfigFile, out errorMessage);
+            if (!string.IsNullOrEmpty(errorMessage))
+                return false;
+
+            if (!inputFileParser.TryParse("ListThus", out string thuFilePath, out errorMessage))
+                throw new ApplicationException($"ShawGiplConfigFile : {errorMessage}");
+
+            if (!inputFileParser.TryParse("ShawGeneralInputs", out string shawInputFilePath, out errorMessage))
+                throw new ApplicationException($"ShawGiplConfigFile : {errorMessage}");
+
+            if (!inputFileParser.TryParse("ShawPlantTypes", out string plantFilePath, out errorMessage))
+                throw new ApplicationException($"ShawGiplConfigFile : {errorMessage}");
+
+            if (!inputFileParser.TryParse("ShawSoilTypes", out string soilFilePath, out errorMessage))
+                throw new ApplicationException($"ShawGiplConfigFile : {errorMessage}");
+
+            if (!inputFileParser.TryParse("GiplProperties", out string giplPropertiesFilePath, out errorMessage))
+                throw new ApplicationException($"ShawGiplConfigFile : {errorMessage}");
+
+
+            // read plant file data
+            if (!ReadThuCsvInputFile(out var plantFileData1, plantFilePath, TempHydroUnit.PlantFileHeaders, out errorMessage))
+                throw new ApplicationException($"Error reading THU plant file {plantFilePath} : '{errorMessage}'");
+
+            // convert list of tuples into a dictionary
+            var plantFileData = plantFileData1.ToDictionary(x => x.Item1, x => x.Item2);
+
+            // read soil file data
+            if (!ReadThuCsvInputFile(out var soilFileData1, soilFilePath, TempHydroUnit.SoilFileHeaders, out errorMessage))
+                throw new ApplicationException($"Error reading THU soil file {soilFilePath} : '{errorMessage}'");
+
+            // convert list of tuples into a dictionary
+            var soilFileData = soilFileData1.ToDictionary(x => x.Item1, x => x.Item2);
+
+            // read master thu file data
+            if (!ReadThuCsvInputFile(out var thuFileData, thuFilePath, TempHydroUnit.ThuFileHeaders, out errorMessage))
+                throw new ApplicationException($"Error reading master THU file {thuFilePath} : '{errorMessage}'");
+
+            // global initialization for Shaw
+            if (!ShawDamm.ShawDamm.GlobalInitialization(shawInputFilePath, out errorMessage))
+                throw new ApplicationException($"Error with Shaw Global Initialization: '{errorMessage}'");
+
+            // global initialization for Gipl
+            if (!GiplDamm.GiplDamm.GlobalInitialization(giplPropertiesFilePath, out errorMessage))
+                throw new ApplicationException($"Error with Gipl Global Initialization: '{errorMessage}'");
+
+            // check that all thus have unique names
+            var thuNames = thuFileData.Select(x => x.Item1).Distinct().ToList();
+            foreach (var name in thuNames)
+                if (thuFileData.Count(x => x.Item1.Equals(name, StringComparison.OrdinalIgnoreCase)) > 1)
+                    throw new ApplicationException($"Duplicate TempHydroUnit name: '{name}' in master THU file");
+
+            // instantiate THUs
+            TempHydroUnits = new List<TempHydroUnit>();
+            foreach (var row in thuFileData)
+            {
+                TempHydroUnits.Add(new TempHydroUnit(row.Item1, row.Item2, plantFileData, soilFileData));
+            }
+
             //_tempHydroUnits = new List<TempHydroUnit>();
 
             //var hu = new TempHydroUnit("THU1", "Fairbanks");
             //_tempHydroUnits.Add(hu);
 
-            TempHydroUnit = new TempHydroUnit("THU1", "First");
+            //TempHydroUnit = new TempHydroUnit("THU1", "First");
 
             //TempHydroUnits = new Dictionary<IEcoregion, TempHydroUnit>();
 
@@ -562,6 +744,57 @@ namespace Landis.Extension.Succession.DGS
             return true;
         }
 
+        /// <summary>Reads the CSV input file.
+        /// Returns each row as a Tuple with Item1 as the input in the first column.  Each row's data is a dictionary of headers -&gt; values as Item2</summary>
+        /// <param name="rowData">The row dictionary.</param>
+        /// <param name="filePath">The file path.</param>
+        /// <param name="headers">The headers.</param>
+        /// <param name="errorMessage">The error message.</param>
+        /// <returns></returns>
+        private bool ReadThuCsvInputFile(out List<Tuple<string, Dictionary<string, string>>> rowData, string filePath, string[] headers, out string errorMessage)
+        {
+            errorMessage = string.Empty;
+            rowData = new List<Tuple<string, Dictionary<string, string>>>();
 
+            string[] fileData;
+            try
+            {
+                fileData = File.ReadAllLines(filePath);
+            }
+            catch (Exception ex)
+            {
+                errorMessage = $"Exception : {ex.Message}";
+                return false;
+            }
+
+            // split the rows and remove blank rows
+            var data = fileData.Select(x => x.Split(',').Select(y => y.Trim()).ToList()).Where(x => x.Any(y => !string.IsNullOrEmpty(y))).ToList();
+
+            // the first row should have the headers
+            var headerIndices = headers.Select(x => data.First().IndexOf(x)).ToList();
+            var missingHeaders = headerIndices.Select((x, i) => x < 0 ? headers[i] : string.Empty).Where(x => !string.IsNullOrEmpty(x)).ToList();
+            if (missingHeaders.Any())
+            {
+                errorMessage = $"missing header(s) : '{string.Join(",", missingHeaders)}'";
+                return false;
+            }
+
+            // make key-value dictionaries for each row, keyed by the (non-blank) value in the first column
+            data.RemoveAt(0);
+            foreach (var row in data)
+            {
+                if (string.IsNullOrEmpty(row.First()))
+                    continue;
+
+                var rowDict = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+
+                for (var i = 0; i < headers.Length; ++i)
+                    rowDict[headers[i]] = headerIndices[i] < row.Count ? row[headerIndices[i]] : string.Empty;
+
+                rowData.Add(new Tuple<string, Dictionary<string, string>>(row.First(), rowDict));
+            }
+
+            return true;
+        }
     }
 }

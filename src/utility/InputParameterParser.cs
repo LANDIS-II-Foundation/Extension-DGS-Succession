@@ -107,6 +107,12 @@ namespace Landis.Extension.Succession.DGS
             ReadVar(lat);
             parameters.SetLatitude(lat.Value);
 
+            //-----------------Shaw Gipl----------------------------------------------------------------
+
+            InputVar<string> shawGiplConfigFile = new InputVar<string>("ShawGiplConfigFile");
+            ReadVar(shawGiplConfigFile);
+            parameters.ShawGiplConfigFile = shawGiplConfigFile.Value;
+
             //-----------------Soil Maps----------------------------------------------------------------
 
             InputVar<string> soilDepthMapName = new InputVar<string>("SoilDepthMapName");

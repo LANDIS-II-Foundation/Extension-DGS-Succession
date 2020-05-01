@@ -178,7 +178,8 @@ namespace Landis.Extension.Succession.DGS
 
             if (PlugIn.ShawGiplEnabled)
             {
-                var thu = PlugIn.TempHydroUnit;
+                //var thu = PlugIn.TempHydroUnit;
+                var thu = SiteVars.TempHydroUnit[site];
 
                 var rec = thu.MonthlySpeciesRecords[Main.Month][cohort.Species];
                 soilTemperature = rec.SoilTemperature;
@@ -661,7 +662,8 @@ namespace Landis.Extension.Succession.DGS
                 var hasAdventRoots = SpeciesData.AdventRoots[species];
                 var rootingdepth = SpeciesData.RootingDepth[species] / 100.0;   // convert rooting depth to meters
                                                                                 //var thu = PlugIn.TempHydroUnits[PlugIn.ModelCore.Ecoregion[site]];
-                var thu = PlugIn.TempHydroUnit;
+                //var thu = PlugIn.TempHydroUnit;
+                var thu = SiteVars.TempHydroUnit[site];
 
                 // integrate Shaw's soil moisture profile (at Shaw depths) to get the AvailableWater.
                 //  start the average at either the top of the profile (if the species has adventitious roots), 
@@ -775,7 +777,9 @@ namespace Landis.Extension.Succession.DGS
             {
                 var hasAdventRoots = SpeciesData.AdventRoots[species];
                 var rootingdepth = SpeciesData.RootingDepth[species] / 100.0;   // convert rooting depth to meters
-                var thu = PlugIn.TempHydroUnit;
+                //var thu = PlugIn.TempHydroUnit;
+                var thu = SiteVars.TempHydroUnit[site];
+
                 //var thu = PlugIn.TempHydroUnits[PlugIn.ModelCore.Ecoregion[site]];
 
                 // average Gipl's soil temperature profile (at Shaw depths) to get the A1 temperature.

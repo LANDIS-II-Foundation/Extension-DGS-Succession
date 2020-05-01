@@ -106,8 +106,10 @@ namespace Landis.Extension.Succession.DGS
         public static ISiteVar<Dictionary<int, Dictionary<int, double>>> CohortResorbedNallocation;
         public static ISiteVar<double> SmolderConsumption;
         public static ISiteVar<double> FlamingConsumption;
-        
 
+        public static ISiteVar<TempHydroUnit> TempHydroUnit;
+        public static ISiteVar<string> ForestTypeName;
+        public static ISiteVar<int> TimeOfLastBurn;
 
         //---------------------------------------------------------------------
 
@@ -214,6 +216,9 @@ namespace Landis.Extension.Succession.DGS
             PlugIn.ModelCore.RegisterSiteVar(SiteVars.SmolderConsumption, "Succession.SmolderConsumption");
             PlugIn.ModelCore.RegisterSiteVar(SiteVars.FlamingConsumption, "Succession.FlamingConsumption");
 
+            TempHydroUnit = PlugIn.ModelCore.Landscape.NewSiteVar<TempHydroUnit>();
+            //ForestTypeName = PlugIn.ModelCore.GetSiteVar<string>("Output.ForestType");
+            //TimeOfLastBurn = PlugIn.ModelCore.GetSiteVar<int>("Fire.TimeOfLast");
 
             foreach (ActiveSite site in PlugIn.ModelCore.Landscape)
             {

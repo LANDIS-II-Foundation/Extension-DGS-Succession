@@ -17,6 +17,7 @@ namespace Landis.Extension.Succession.DGS
         string InitialCommunities{ get;set;}
         string InitialCommunitiesMap{ get;set;}
         string ClimateConfigFile { get; set; }
+        string ShawGiplConfigFile { get; set; }
         string SoilDepthMapName { get; set; }
         string SoilDrainMapName { get; set; }
         string SoilBaseFlowMapName { get; set; }

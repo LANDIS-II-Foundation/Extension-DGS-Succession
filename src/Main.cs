@@ -95,7 +95,9 @@ namespace Landis.Extension.Succession.DGS
                     double baseFlow, stormFlow, AET;
                     if (PlugIn.ShawGiplEnabled)
                     {
-                        var thu = PlugIn.TempHydroUnit;
+                        //var thu = PlugIn.TempHydroUnit;
+                        var thu = SiteVars.TempHydroUnit[site];
+
                         //var thu = PlugIn.TempHydroUnits[PlugIn.ModelCore.Ecoregion[site]];
 
                         baseFlow = thu.MonthlyShawDammResults[Month].MonthDeepPercolationInCm;
@@ -132,7 +134,7 @@ namespace Landis.Extension.Succession.DGS
                         siteCohorts.Grow(site, (y == years && isSuccessionTimeStep), false);
 
                     WoodLayer.Decompose(site);
-                    LitterLayer.Decompose(site);
+                    LitterLayer.Decompose(site);                    
                     SoilLayer.Decompose(y, Month, site);
 
                     // Volatilization loss as a function of the mineral N which remains after uptake by plants.  

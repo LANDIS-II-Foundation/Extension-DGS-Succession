@@ -39,7 +39,7 @@ namespace Landis.Extension.Succession.DGS
                 //PlugIn.ModelCore.UI.WriteLine("Decompose wood.  C={0:0.00}, Cflow={1:0.00}, DecayRate={2:0.000}.", wood2c, totalCFlow, decayRate);
 
                 // Decompose large wood into SOM1 and SOM2 with CO2 loss.
-                SiteVars.SurfaceDeadWood[site].DecomposeLignin(totalCFlow, site);
+                //SiteVars.SurfaceDeadWood[site].DecomposeLignin(totalCFlow, site);
             }
 
 

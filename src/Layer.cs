@@ -257,7 +257,7 @@ namespace Landis.Extension.Succession.DGS
 
                 this.Respiration(co2loss, site);
 
-                //Net C flow to SOM1
+                //Net C flow to SOM1////
                 carbonToSOM1 -= co2loss;
 
                 //if(this.Type == LayerType.Surface)
@@ -329,7 +329,7 @@ namespace Landis.Extension.Succession.DGS
                     else
                         co2loss = totalCFlow * OtherData.MetabolicToCO2Soil;
 
-                    this.Respiration(co2loss, site);
+                    //this.Respiration(co2loss, site);  ML is turning this off for DAMM.
 
 
                     //Decompose metabolic into SOC / SON

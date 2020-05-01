@@ -18,6 +18,32 @@ namespace Landis.Extension.Succession.DGS
     {
         #region fields
 
+        public static string[] PlantFileHeaders = {
+            "LeafOnDay", "LeafOffDay",
+            "DryBiomass", "LAI", "Height", "RootingDepth", "CharacteristicDimension", "ClumpingParameter",
+            "PlantType", "MaxPrecipInterceptPerLAI", "LeafAngleVertical", "Albedo", "MinTranspirationTemp",
+            "MinStomatalResistance", "StomatalResistanceExponent", "CriticalLeafWaterPotential", "LeafResistance",
+            "RootResistance", "SolarRadiationInfluence", "TranspirationLowerLimit", "TranspirationUpperLimit", "TranspirationOptimum",
+            "VPDMaximumReduction", "StomatalConductanceCoefficient" };
+
+        public static string[] SoilFileHeaders = {
+            "Sand", "Silt", "Clay", "Rock", "Organic", "BulkDensity", "Ksat", "KsatLateral", "AirEntry",
+            "ThetaSat", "Campbells", "BrooksCoreyPoreSize", "ThetaResidual", "BrooksCoreyPoreConnectivity",
+            "nVanGenuchten", "vanGenuchtenPoreConnectivity", "alphaVanGenuchten" };
+
+        public static string[] ThuFileHeaders = {
+            "ClimateRegion", "ReclassVegetation", "VegetationType1", "VegetationType2", "MinAge", "MaxAge", "MinSlope", "MaxSlope",
+            "MinAspect", "MaxAspect", "MinSand", "MaxSand", "MinSilt", "MaxSilt", "MinLatitude", "MaxLatitude",
+            "MinElevation", "MaxElevation", "NumberLitterNodes", "LitterThickness", "LitterDryWeight", "FractionGroundCoveredLitter", 
+            "MaxSnowThickness", "SnowNodes", "InitSnowTemperature",
+            "ShawSoilType1", "GiplSoilType1", "MaxDepth1", "Nodes1", "InitTemperature1", "InitWaterContent1",
+            "ShawSoilType2", "GiplSoilType2", "MaxDepth2", "Nodes2", "InitTemperature2", "InitWaterContent2",
+            "ShawSoilType3", "GiplSoilType3", "MaxDepth3", "Nodes3", "InitTemperature3", "InitWaterContent3",
+            "ShawSoilType4", "GiplSoilType4", "MaxDepth4", "Nodes4", "InitTemperature4", "InitWaterContent4",
+            "ShawSoilType5", "GiplSoilType5", "MaxDepth5", "Nodes5", "InitTemperature5", "InitWaterContent5",
+            "ShawSoilType6", "GiplSoilType6", "MaxDepth6", "Nodes6", "InitTemperature6", "InitWaterContent6",
+            "BottomGiplSoilType", "BottomGiplMaxDepth", "BottomGiplNodes", "BottomGiplInitTemperature", "BottomGiplWaterContent" };
+
         private bool _firstMonthHasRun;
         private static int[] _firstDayOfMonth = { 0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334 };  // zero-based.  note: without leap year
         private static int[] _lengthOfMonth = { 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31 };  // note: without leap year
@@ -28,49 +54,144 @@ namespace Landis.Extension.Succession.DGS
 
         #region constructor
 
-        public TempHydroUnit(string name, string climateRegionName)
+        public TempHydroUnit(string name, Dictionary<string, string> thuFileData, Dictionary<string, Dictionary<string, string>> plantFileData, Dictionary<string, Dictionary<string, string>> soilFileData)
         {
-            ClimateRegion = PlugIn.ModelCore.Ecoregions[climateRegionName];
+            Name = name;
 
-            // **
-            // set up Shaw instance
-            var shawInputFilePath = GetShawInputFilePath();
+            var errorPrefix = $"Error with THU '{name}' initialization:";
+            
+            // set THU properties
+            //ClimateRegion = PlugIn.ModelCore.Ecoregions.FirstOrDefault(x => x.Name.Equals(thuFileData["ClimateRegion"]));
+            //if (ClimateRegion == null)
+            //    throw new ApplicationException($"Error with THU '{name}' initialization: cannot find Climate Region '{thuFileData["ClimateRegion"]}'");
+
+            ClimateRegionName = thuFileData["ClimateRegion"];
+            ReclassVegetation = thuFileData["ReclassVegetation"];
+            
+            double val;
+            string errorMessage;
+
+            if (!SimpleFileParser.TryParseInput($"{errorPrefix} : MinAge", thuFileData["MinAge"], out val, out errorMessage, 0.0))
+                throw new ApplicationException(errorMessage);
+            MinAge = val;
+
+            if (!SimpleFileParser.TryParseInput($"{errorPrefix} : MaxAge", thuFileData["MaxAge"], out val, out errorMessage, 0.0))
+                throw new ApplicationException(errorMessage);
+            MaxAge = val;
+
+            if (!SimpleFileParser.TryParseInput($"{errorPrefix} : MinSlope", thuFileData["MinSlope"], out val, out errorMessage, 0.0, 90.0))
+                throw new ApplicationException(errorMessage);
+            MinSlope = val;
+
+            if (!SimpleFileParser.TryParseInput($"{errorPrefix} : MaxSlope", thuFileData["MaxSlope"], out val, out errorMessage, 0.0, 90.0))
+                throw new ApplicationException(errorMessage);
+            MaxSlope = val;
+
+            if (!SimpleFileParser.TryParseInput($"{errorPrefix} : MinAspect", thuFileData["MinAspect"], out val, out errorMessage, 0.0, 360.0))
+                throw new ApplicationException(errorMessage);
+            MinAspect = val;
+
+            if (!SimpleFileParser.TryParseInput($"{errorPrefix} : MaxAspect", thuFileData["MaxAspect"], out val, out errorMessage, 0.0, 360.0))
+                throw new ApplicationException(errorMessage);
+            MaxAspect = val;
+
+            if (!SimpleFileParser.TryParseInput($"{errorPrefix} : MinSand", thuFileData["MinSand"], out val, out errorMessage, 0.0, 100.0))
+                throw new ApplicationException(errorMessage);
+            MinSand = val;
+
+            if (!SimpleFileParser.TryParseInput($"{errorPrefix} : MaxSand", thuFileData["MaxSand"], out val, out errorMessage, 0.0, 100.0))
+                throw new ApplicationException(errorMessage);
+            MaxSand = val;
+
+            if (!SimpleFileParser.TryParseInput($"{errorPrefix} : MinSilt", thuFileData["MinSilt"], out val, out errorMessage, 0.0, 100.0))
+                throw new ApplicationException(errorMessage);
+            MinSilt = val;
+
+            if (!SimpleFileParser.TryParseInput($"{errorPrefix} : MaxSilt", thuFileData["MaxSilt"], out val, out errorMessage, 0.0, 100.0))
+                throw new ApplicationException(errorMessage);
+            MaxSilt = val;
+
+            if (!SimpleFileParser.TryParseInput($"{errorPrefix} : MinLatitude", thuFileData["MinLatitude"], out val, out errorMessage, -90.0, 90.0))
+                throw new ApplicationException(errorMessage);
+            MinLatitude = val;
+
+            if (!SimpleFileParser.TryParseInput($"{errorPrefix} : MaxLatitude", thuFileData["MaxLatitude"], out val, out errorMessage, -90.0, 90.0))
+                throw new ApplicationException(errorMessage);
+            MaxLatitude = val;
+
+            if (!SimpleFileParser.TryParseInput($"{errorPrefix} : MinElevation", thuFileData["MinElevation"], out val, out errorMessage, 0.0))
+                throw new ApplicationException(errorMessage);
+            MinElevation = val;
+
+            if (!SimpleFileParser.TryParseInput($"{errorPrefix} : MaxElevation", thuFileData["MaxElevation"], out val, out errorMessage, 0.0))
+                throw new ApplicationException(errorMessage);
+            MaxElevation = val;
+
+            //ClimateRegion = PlugIn.ModelCore.Ecoregions[climateRegionName];
+
+            //// **
+            //// set up Shaw instance
+            //var shawInputFilePath = GetShawInputFilePath();
 
             ShawInstance = new ShawDamm.ShawDamm();
-            if (!ShawDamm.ShawDamm.HasGlobalSetup)
-                ShawInstance.GlobalInitialization(shawInputFilePath);
+            //if (!ShawDamm.ShawDamm.HasGlobalSetup)
+            //{
+            //    if (!ShawDamm.ShawDamm.GlobalInitialization(shawInputFilePath, out errorMessage))
+            //        throw new ApplicationException($"Error with Shaw Global Initialization: '{errorMessage}'");
+            //}
 
-            if (!ShawInstance.Initialize(name))
-                return;
+            // temporary code
+            //if (!ShawDamm.ShawDamm.HasGlobalSetup)
+            //    ShawInstance.GlobalInitialization(@"C:\Users\mslucash\Documents\John\DammLandis\DGS_SingleCell_Vogel\UP1A_Birch\UP1A.inp");
+
+            // use the midrange of thu latitude (in degrees and minutes), slope, aspect, and elev to pass to the Shaw instance
+            var aveLat = (MinLatitude + MaxLatitude) / 2.0;
+            var shawLatDeg = (int)aveLat;
+            var shawLatMin = (aveLat - shawLatDeg) * 60.0;
+
+            var shawSlope = (MinSlope + MaxSlope) / 2.0;
+
+            // subtract 360 from MinAspect if it is > MaxAspect, i.e. if the range brackets 0 (due north)
+            var shawAspect = MinAspect > MaxAspect ? (MinAspect - 360.0 + MaxAspect) / 2.0 : (MinAspect + MaxAspect) / 2.0;
+
+            var shawElevation = (MinElevation + MaxElevation) / 2.0;
+
+            var hrNoon = 12.0;
+            if (!ShawInstance.Initialize(name, shawLatDeg, shawLatMin, shawSlope, shawAspect, shawElevation, hrNoon, thuFileData, plantFileData, soilFileData, out errorMessage))
+                throw new ApplicationException($"Error with THU '{name}' Shaw initialization: {errorMessage}");
 
             // get Shaw depths
             ShawDepths = ShawInstance.GetDepths();
 
-            // read and
-            // set the initial soil moisture from the first line of the soil moisture file
-            var soilMoistureData = File.ReadAllLines(ShawInstance.SoilMoistureFile).Where(x => !string.IsNullOrEmpty(x)).ToArray();
-            var t = ParseLine(soilMoistureData.First());
-            t = t.GetRange(3, t.Count - 3);    // remove day-hr-time
+            //// read and
+            //// set the initial soil moisture from the first line of the soil moisture file
+            //var soilMoistureData = File.ReadAllLines(@"C:\Users\mslucash\Documents\John\DammLandis\DGS_SingleCell_Vogel\UP1A_Birch\UP1A.moi").Where(x => !string.IsNullOrEmpty(x)).ToArray();
+            //var t = ParseLine(soilMoistureData.First());
+            //t = t.GetRange(3, t.Count - 3);    // remove day-hr-time
 
-            if (t.Count != ShawDepths.Count)
-                throw new ApplicationException($"The number of initial Shaw moisture points {t.Count} for THU {Name} does not equal the number of Shaw depth points {ShawDepths.Count}");
+            //if (t.Count != ShawDepths.Count)
+            //    throw new ApplicationException($"The number of initial Shaw moisture points {t.Count} for THU {Name} does not equal the number of Shaw depth points {ShawDepths.Count}");
 
-            var soilMoistureInit = t.Select(x => double.Parse(x)).ToArray();
+            //var soilMoistureInit = t.Select(x => double.Parse(x)).ToArray();
 
-            ShawInstance.SetInitialSoilMoisture(soilMoistureInit);
+            //ShawInstance.SetInitialSoilMoisture(soilMoistureInit);
 
 
-            // **
-            // set up Gipl instance
-            var giplInputFilePath = GetGiplInputPath();
+            //// **
+            //// set up Gipl instance
+            //var giplInputFilePath = GetGiplInputPath();
 
-            // setup global properties inputs
-            if (!GiplDamm.GiplDamm.HasGlobalSetup)
-                GiplDamm.GiplDamm.GlobalInitialization(giplInputFilePath);
+            //// setup global properties inputs
+            //if (!GiplDamm.GiplDamm.HasGlobalSetup)
+            //    GiplDamm.GiplDamm.GlobalInitialization(giplInputFilePath);
 
             GiplInstance = new GiplDamm.GiplDamm();
-            if (!GiplInstance.Initialize(giplInputFilePath, name, ShawDepths))
-                return;
+
+            if (!GiplInstance.Initialize(name, thuFileData, out errorMessage))
+                throw new ApplicationException($"Error with THU '{name}' Gipl initialization: {errorMessage}");
+
+            //if (!GiplInstance.Initialize(giplInputFilePath, "THU1", ShawDepths))
+            //    return;
 
             // get Gipl depths
             GiplDepths = GiplInstance.GetGiplDepths();
@@ -105,6 +226,25 @@ namespace Landis.Extension.Succession.DGS
 
         public string Name { get; set; }
         public IEcoregion ClimateRegion { get; set; }
+        public string ClimateRegionName { get; set; }
+        public string ReclassVegetation { get; set; }
+        public double MinAge { get; set; }
+        public double MaxAge { get; set; }
+        public double MinSlope { get; set; }
+        public double MaxSlope { get; set; }
+        public double MinAspect { get; set; }
+        public double MaxAspect { get; set; }
+        public double MinSand { get; set; }
+        public double MaxSand { get; set; }
+        public double MinSilt { get; set; }
+        public double MaxSilt { get; set; }
+        public double MinLatitude { get; set; }
+        public double MaxLatitude { get; set; }
+        public double MinElevation { get; set; }
+        public double MaxElevation { get; set; }
+
+        public bool InUseForYear { get; set; }
+        public int SiteCount { get; set; }
 
         public ShawDamm.ShawDamm ShawInstance { get; }
         public GiplDamm.GiplDamm GiplInstance { get; }
@@ -128,8 +268,15 @@ namespace Landis.Extension.Succession.DGS
 
         #region methods
 
-        public void RunForYear(int year, AnnualClimate_Daily dailyWeather)
+        public override string ToString()
         {
+            return $"{Name} -> {SiteCount}";
+        }
+
+        public void RunForYear(int year)//, AnnualClimate_Daily dailyWeather)
+        {
+            var dailyWeather = ClimateRegionData.AnnualDailyWeather[ClimateRegion];
+
             // convert weather data to lists so each month can be grabbed
             var precips = dailyWeather.DailyPrecip.ToList();
             var tmaxs = dailyWeather.DailyMaxTemp.ToList();
@@ -217,7 +364,7 @@ namespace Landis.Extension.Succession.DGS
                 //  also pass an average temperature in case Gipl is not used.  todo: this is not currently enabled in the code.
                 // Shaw will return the daily soil moisture profiles, daily snow thickness, daily snow heat capacity, and daily snow volumetric heat capacity.
                 //  currently the snow heat capacity and volumetric heat capacity are not used.
-                var shawResults = MonthlyShawDammResults[month] = ShawInstance.CalculateSoilResults(year, startingDay, shawWeatherData, MonthlyGiplDammResults[month].DailySoilTemperatureProfilesAtShawDepths, -1.0);
+                var shawResults = MonthlyShawDammResults[month] = ShawInstance.CalculateSoilResults(year, month, startingDay, shawWeatherData, MonthlyGiplDammResults[month].DailySoilTemperatureProfilesAtShawDepths, -1.0);
 
                 // calculate species records for this month based on gipl and shaw results
                 foreach (var species in PlugIn.ModelCore.Species)
@@ -248,6 +395,10 @@ namespace Landis.Extension.Succession.DGS
                 // calculate soil moisture and temperature for decomposition
                 MonthlySoilTemperatureDecomp[month] = AverageOverProfile(giplResults.AverageSoilTemperatureProfileAtShawDepths, 0.0, DecompositionDepth);
                 MonthlySoilMoistureDecomp[month] = IntegrateOverProfile(shawResults.MonthSoilMoistureProfile, 0.0, DecompositionDepth);
+
+                // stop for debugging
+                //if (month == 1)
+                //    break;
             }
         }
 
@@ -255,35 +406,38 @@ namespace Landis.Extension.Succession.DGS
 
         #region private methods
 
-        private static string GetShawInputFilePath()
-        {
-            //return @"C:\Users\mslucash\Dropbox\SHAW\POC 10.10.2019\POC.inp"; //John's POC path
-            //return @"C:\Users\mslucash\Dropbox\SHAW\UP1A_Birch\UP1A.inp"; //John's birch path
-            return @"C:\Users\lucash\Dropbox\SHAW\UP1A_Birch\UP1A.inp"; //Mel's birch path
-            //return @"D:\Shelbys Files\AK_DGS_Runs\SHAW\UP1A_Birch\UP1A.inp"; //Shelby's birch path
-            //return @"C:\Users\mslucash\Documents\John\SHAW\TestCases\POC\POC.inp";
+        //private static string GetShawInputFilePath()
+        //{
+        //    //return @"C:\Users\mslucash\Dropbox\SHAW\POC 10.10.2019\POC.inp"; //John's POC path
+        //    return @"C:\Users\mslucash\Documents\John\DammLandis\DGS_SingleCell_Vogel\UP1A_Birch\general_input.txt"; //John's birch path
+        //    return @"C:\Users\mslucash\Documents\John\DammLandis\DGS_SingleCell_Vogel\UP1A_Birch\UP1A.inp"; //John's birch path
+        //    //return @"C:\Users\lucash\Dropbox\SHAW\UP1A_Birch\UP1A.inp"; //Mel's birch path
+        //    //return @"D:\Shelbys Files\AK_DGS_Runs\SHAW\UP1A_Birch\UP1A.inp"; //Shelby's birch path
+        //    //return @"C:\Users\mslucash\Documents\John\SHAW\TestCases\POC\POC.inp";
 
-            Console.WriteLine();
-            Console.WriteLine(">>>>>>> Simultaneous Heat And Water (SHAW) Model <<<<<<<");
-            Console.WriteLine("                    Version 3.0.1");
-            Console.WriteLine("Enter the file path containing the list of input/output files:");
+        //    Console.WriteLine();
+        //    Console.WriteLine(">>>>>>> Simultaneous Heat And Water (SHAW) Model <<<<<<<");
+        //    Console.WriteLine("                    Version 3.0.1");
+        //    Console.WriteLine("Enter the file path containing the list of input/output files:");
 
-            return Console.ReadLine() ?? string.Empty;
-        }
+        //    return Console.ReadLine() ?? string.Empty;
+        //}
+    
         
-        private static string GetGiplInputPath()
-        {
-            //return @"C:\Users\mslucash\Dropbox\GIPL\POC 10.10.2019";  // John's path
-            return @"C:\Users\lucash\Dropbox\GIPL\POC 10.10.2019";  // Mel's path
-            //return @"D:\Shelbys Files\AK_DGS_Runs\GIPL\POC 10.10.2019";  // Shelby's path
-            //return @"C:\Users\mslucash\Documents\John\GIPL\TestCases\POC";
 
-            Console.WriteLine();
-            Console.WriteLine(">>>>>>> GIPL DAMM <<<<<<<");
-            Console.WriteLine("Enter the directory path containing the list of input files:");
+        //private static string GetGiplInputPath()
+        //{
+        //    return @"C:\Users\mslucash\Documents\John\DammLandis\DGS_SingleCell_Vogel\POC 10.10.2019";  // John's path
+        //    //return @"C:\Users\lucash\Dropbox\GIPL\POC 10.10.2019";  // Mel's path
+        //    //return @"D:\Shelbys Files\AK_DGS_Runs\GIPL\POC 10.10.2019";  // Shelby's path
+        //    //return @"C:\Users\mslucash\Documents\John\GIPL\TestCases\POC";
 
-            return Console.ReadLine() ?? string.Empty;
-        }
+        //    Console.WriteLine();
+        //    Console.WriteLine(">>>>>>> GIPL DAMM <<<<<<<");
+        //    Console.WriteLine("Enter the directory path containing the list of input files:");
+
+        //    return Console.ReadLine() ?? string.Empty;
+        //}
 
         private static void GetDailyWeatherRangeForMonth(int month, int year, out int startingDay, out int dayCount)
         {
@@ -327,7 +481,8 @@ namespace Landis.Extension.Succession.DGS
             const double snowPackMelting = 0.8;
 
             const double timeStep = 3600.0 * 24.0;            // s - number of seconds in one day
-            const double C1 = 0.01e-2 / 3600;
+            //const double C1 = 0.01e-2 / 3600;  // original code, modified to below code based on 4.22.20 email from DN
+            const double C1 = 0.03e-2 / 3600;
             const double C2 = 21.0;
 
             var dailySnowDepth = new double[dailyPrecipitation.Count];
