@@ -11,6 +11,7 @@ using Landis.Library.Climate;
 using Landis.Library.Metadata;
 
 using System;
+using System.Diagnostics;
 using System.Collections.Generic;
 using System.Linq;
 using System.IO;
@@ -55,6 +56,7 @@ namespace Landis.Extension.Succession.DGS
 
         public static bool ShawGiplEnabled { get; set; }
 
+        private uint? prevSiteDataIndex;
 
         //private List<TempHydroUnit> _tempHydroUnits;
 
@@ -165,7 +167,11 @@ namespace Landis.Extension.Succession.DGS
             Outputs.WritePrimaryLogFile(0);
             Outputs.WriteShortPrimaryLogFile(0);
 
-            
+            //Main.timer1 = new System.Diagnostics.Stopwatch();
+            //Main.soilLayerTimer = new System.Diagnostics.Stopwatch();
+
+            //Main.SiteMonth = new int[ModelCore.Landscape.ActiveSiteCount + 1];
+            //Main.SiteMonthCnt = new int[ModelCore.Landscape.ActiveSiteCount + 1];
         }
 
         //---------------------------------------------------------------------
@@ -185,10 +191,19 @@ namespace Landis.Extension.Succession.DGS
             }
 
             //base.RunReproductionFirst();
+            //Main.siteCounter = 0;
+            //Main.soilLayerTimer.Reset();
+            //Main.timer1.Reset();
 
+            ModelCore.UI.WriteLine("ExtensionBaseRun: Start");
             base.Run();
+            //ExtensionBaseRun();
+            ModelCore.UI.WriteLine("ExtensionBaseRun: Stop");
+            //ModelCore.UI.WriteLine($"Main.Run Total ElapsedTime: {Main.timer1.Elapsed}");
+            //ModelCore.UI.WriteLine($"Main.Run SoilLayer ElapsedTime: {Main.soilLayerTimer.Elapsed}");
 
-            if(Timestep > 0)
+
+            if (Timestep > 0)
                 ClimateRegionData.SetAllEcoregions_FutureAnnualClimate(ModelCore.CurrentTime);
 
             if (ModelCore.CurrentTime % Timestep == 0)
@@ -213,8 +228,124 @@ namespace Landis.Extension.Succession.DGS
 
         }
 
+        public void ExtensionBaseRun()
+        {
+            //bool isSuccessionTimestep = (Model.Core.CurrentTime % Timestep == 0);
+            //IEnumerable<ActiveSite> sites;
+            //if (isSuccessionTimestep)
+            //    sites = Model.Core.Landscape.ActiveSites;
+            //else
+            //    sites = disturbedSites;
+
+            var sites = ModelCore.Landscape.ActiveSites;
+
+            var s = new Stopwatch();
+            s.Restart();
+            ExtensionBaseAgeCohorts(sites);
+            ModelCore.UI.WriteLine($"ExtensionBase.Run.AgeCohorts time: {s.Elapsed}");
+            s.Restart();
+            ComputeShade(sites);
+            ModelCore.UI.WriteLine($"ExtensionBase.Run.ComputeShade time: {s.Elapsed}");
+            s.Restart();
+            ReproduceCohorts(sites);
+            ModelCore.UI.WriteLine($"ExtensionBase.Run.ReproduceCohorts time: {s.Elapsed}");
+
+            //if (!isSuccessionTimestep)
+            //    SiteVars.Disturbed.ActiveSiteValues = false;
+        }
+
+        public void ExtensionBaseAgeCohorts(IEnumerable<ActiveSite> sites)
+        {
+            //int? succTimestep = null;
+            //if (isSuccessionTimestep)
+            //{
+            //    succTimestep = Timestep;
+            //    ShowProgress = true;
+            //}
+            //else
+            //{
+            //    ShowProgress = false;
+            //}
+
+            ShowProgress = true;
+
+            ProgressBar progressBar = null;
+            if (ShowProgress)
+            {
+                System.Console.WriteLine("growing cohorts ...");
+                prevSiteDataIndex = null;
+                progressBar = ModelCore.UI.CreateProgressMeter(ModelCore.Landscape.ActiveSiteCount); // NewProgressBar();
+            }
+
+            var locker = new object();
+
+            //AvailableN.CohortMineralNfraction = new Dictionary<ActiveSite, Dictionary<int, Dictionary<int, double>>>();
+            //AvailableN.CohortMineralNallocation = new Dictionary<ActiveSite, Dictionary<int, Dictionary<int, double>>>();
+
+            var parallel = false;
+            if (parallel)
+            {
+                Parallel.ForEach(sites, site => 
+                {
+                    //ushort deltaTime = (ushort)(ModelCore.CurrentTime - SiteVars.TimeOfLast[site]);
+                    AgeCohorts(site, 1, 1);
+                    SiteVars.TimeOfLast[site] = ModelCore.CurrentTime;
+
+                    if (ShowProgress)
+                    {
+                        lock (locker)
+                            progressBar.IncrementWorkDone(1);
+                    }
+                });
+            }
+            else
+            {
+                foreach (ActiveSite site in sites)
+                {
+                    //ushort deltaTime = (ushort)(ModelCore.CurrentTime - SiteVars.TimeOfLast[site]);
+                    AgeCohorts(site, 1, 1);
+                    SiteVars.TimeOfLast[site] = ModelCore.CurrentTime;
+
+                    if (ShowProgress)
+                    {
+                        lock (locker)
+                            progressBar.IncrementWorkDone(1);
+                    }
+                }
+            }
+
+            //if (ShowProgress)
+            //    CleanUp(progressBar);
+        }
+
+        //private void Update(ProgressBar progressBar,
+        //            uint currentSiteDataIndex)
+        //{
+        //    uint increment = (uint)(prevSiteDataIndex.HasValue
+        //                                ? (currentSiteDataIndex - prevSiteDataIndex.Value)
+        //                                : currentSiteDataIndex);
+        //    progressBar.IncrementWorkDone(increment);
+        //    prevSiteDataIndex = currentSiteDataIndex;
+        //}
+
+
+        ////---------------------------------------------------------------------
+
+        //private void CleanUp(ProgressBar progressBar)
+        //{
+        //    if (!prevSiteDataIndex.HasValue)
+        //    {
+        //        //    Then no sites were processed; the site iterator was a
+        //        //    disturbed-sites iterator, and there were no disturbed
+        //        //    sites.  So increment the progress bar to 100%.
+        //        progressBar.IncrementWorkDone((uint)ModelCore.Landscape.ActiveSiteCount);
+        //    }
+        //}
+
         private void AssignTempHydroUnits()
         {
+            ModelCore.UI.WriteLine("AssignTempHydroUnits: Start");
+
             // disable all thus, so I only turn on those that are needed for the year
             foreach (var thu in TempHydroUnits)
             {
@@ -245,6 +376,16 @@ namespace Landis.Extension.Succession.DGS
                 {
                     age = ModelCore.CurrentTime - SiteVars.TimeOfLastBurn[site] - 1;
                     if (age < 0) age = 0;
+                }
+                else
+                {
+                    foreach (ISpeciesCohorts speciesCohorts in SiteVars.Cohorts[site])
+                    {
+                        foreach (ICohort cohort in speciesCohorts)
+                        {
+                            if (cohort.Age > age) age = cohort.Age;
+                        }
+                    }
                 }
 
                 if (!timeSinceLastBurn.TryGetValue(age, out var ageCount))
@@ -283,6 +424,10 @@ namespace Landis.Extension.Succession.DGS
 
                 SiteVars.TempHydroUnit[site] = thu;
             }
+
+            ModelCore.UI.WriteLine($"AssignTempHydroUnits: {TempHydroUnits.Count(x => x.InUseForYear)} THUs in use");
+
+            ModelCore.UI.WriteLine("AssignTempHydroUnits: End");
         }
 
         private void RunTempHydroUnits()
@@ -297,26 +442,21 @@ namespace Landis.Extension.Succession.DGS
                     ClimateRegionData.AnnualDailyWeather[climateRegion] = Climate.Future_DailyData[year][climateRegion.Index];
             }
 
-            ModelCore.UI.WriteLine("RunTemHydroUnits: Start");
+            ModelCore.UI.WriteLine("RunTempHydroUnits: Start");
 
-            // temporary
-            //var weather = ClimateRegionData.AnnualDailyWeather[ModelCore.Ecoregions.First(x => x.Active)];
-            //TempHydroUnit.RunForYear(year, weather);
+            var parallel = false;
+            if (parallel)
+            {
+                Parallel.ForEach(TempHydroUnits.Where(x => x.InUseForYear), thu => { thu.RunForYear(year); });
+            }
+            else
+            {
+                //TempHydroUnits = TempHydroUnits.Where(x => x.Name == "BurnedConifer_1_all_all").ToList();
+                foreach (var thu in TempHydroUnits.Where(x => x.InUseForYear))
+                    thu.RunForYear(year);
+            }
 
-            //Parallel.ForEach(TempHydroUnits.Where(x => x.InUseForYear), thu => { thu.RunForYear(year); });
-            foreach (var thu in TempHydroUnits.Where(x => x.InUseForYear))
-                thu.RunForYear(year);
-
-
-            ModelCore.UI.WriteLine("RunTemHydroUnits: End");
-
-            //// run each temp hydro unit for the year
-            //foreach (var thu in TempHydroUnits.Values)
-            //{
-            //    thu.RunForYear(year, ClimateRegionData.AnnualDailyWeather[thu.ClimateRegion]);
-
-            //    var xt = 0;
-            //}
+            ModelCore.UI.WriteLine("RunTempHydroUnits: End");
         }
 
         //---------------------------------------------------------------------
@@ -663,14 +803,14 @@ namespace Landis.Extension.Succession.DGS
             return (poolInput - reduction);
         }
 
-        private bool InitializeTempHydroUnits()
+        private void InitializeTempHydroUnits()
         {
             string errorMessage;
 
             // read shaw gipl config file paths
             var inputFileParser = new SimpleFileParser(Parameters.ShawGiplConfigFile, out errorMessage);
             if (!string.IsNullOrEmpty(errorMessage))
-                return false;
+                throw new ApplicationException($"ShawGiplConfigFile : {errorMessage}");
 
             if (!inputFileParser.TryParse("ListThus", out string thuFilePath, out errorMessage))
                 throw new ApplicationException($"ShawGiplConfigFile : {errorMessage}");
@@ -714,11 +854,6 @@ namespace Landis.Extension.Succession.DGS
             if (!GiplDamm.GiplDamm.GlobalInitialization(giplPropertiesFilePath, out errorMessage))
                 throw new ApplicationException($"Error with Gipl Global Initialization: '{errorMessage}'");
 
-            // check that all thus have unique names
-            var thuNames = thuFileData.Select(x => x.Item1).Distinct().ToList();
-            foreach (var name in thuNames)
-                if (thuFileData.Count(x => x.Item1.Equals(name, StringComparison.OrdinalIgnoreCase)) > 1)
-                    throw new ApplicationException($"Duplicate TempHydroUnit name: '{name}' in master THU file");
 
             // instantiate THUs
             TempHydroUnits = new List<TempHydroUnit>();
@@ -727,21 +862,10 @@ namespace Landis.Extension.Succession.DGS
                 TempHydroUnits.Add(new TempHydroUnit(row.Item1, row.Item2, plantFileData, soilFileData));
             }
 
-            //_tempHydroUnits = new List<TempHydroUnit>();
-
-            //var hu = new TempHydroUnit("THU1", "Fairbanks");
-            //_tempHydroUnits.Add(hu);
-
-            //TempHydroUnit = new TempHydroUnit("THU1", "First");
-
-            //TempHydroUnits = new Dictionary<IEcoregion, TempHydroUnit>();
-
-            //foreach (var climateRegion in ModelCore.Ecoregions.Where(x => x.Active))
-            //{
-            //    TempHydroUnits[climateRegion] = new TempHydroUnit($"THU{climateRegion.Name}", climateRegion.Name);
-            //}
-
-            return true;
+            var thuNumbers = TempHydroUnits.Select(x => x.Number).ToList();
+            var duplicateThuNumbers = thuNumbers.Where(x => TempHydroUnits.Count(y => y.Number == x) > 1).ToList();
+            if (duplicateThuNumbers.Any())
+                throw new ApplicationException($"Duplicate ThuNumbers found: '{string.Join(",", duplicateThuNumbers)}'");
         }
 
         /// <summary>Reads the CSV input file.
@@ -779,19 +903,35 @@ namespace Landis.Extension.Succession.DGS
                 return false;
             }
 
+            var hasEnabledCol = data[0][0].Equals("Enabled", StringComparison.OrdinalIgnoreCase);
+            var keyColumn = hasEnabledCol ? 1 : 0;
+            var keyHeader = data[0][keyColumn];
+
             // make key-value dictionaries for each row, keyed by the (non-blank) value in the first column
             data.RemoveAt(0);
             foreach (var row in data)
             {
-                if (string.IsNullOrEmpty(row.First()))
+                // skip disabled rows
+                if (hasEnabledCol && (!bool.TryParse(row[0], out var enabled) || !enabled))
                     continue;
+
+                var key = row[keyColumn];
+
+                if (string.IsNullOrEmpty(key))
+                    continue;
+
+                if (rowData.Find(x => x.Item1.Equals(key, StringComparison.OrdinalIgnoreCase)) != null)
+                {
+                    errorMessage = $"Duplicate {keyHeader} '{key}'";
+                    return false;
+                }
 
                 var rowDict = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
 
                 for (var i = 0; i < headers.Length; ++i)
                     rowDict[headers[i]] = headerIndices[i] < row.Count ? row[headerIndices[i]] : string.Empty;
 
-                rowData.Add(new Tuple<string, Dictionary<string, string>>(row.First(), rowDict));
+                rowData.Add(new Tuple<string, Dictionary<string, string>>(key, rowDict));
             }
 
             return true;

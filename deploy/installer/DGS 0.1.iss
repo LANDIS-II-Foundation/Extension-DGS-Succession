@@ -1,7 +1,7 @@
 ; LANDIS-II Extension infomation
 #define CoreRelease "LANDIS-II-V7"
 #define ExtensionName "DGS Succession"
-#define AppVersion "0.1"
+#define AppVersion "0.2"
 #define AppPublisher "LANDIS-II Foundation"
 #define AppURL "http://www.landis-ii.org/"
 
@@ -59,15 +59,17 @@ Source: {#BuildDir}\Landis.Library.LeafBiomassCohorts-v2.dll; DestDir: {#ExtDir}
 Source: {#BuildDir}\Landis.Library.Metadata-v2.dll; DestDir: {#ExtDir}; Flags: uninsneveruninstall replacesameversion
 Source: {#BuildDir}\Landis.Library.Parameters-v2.dll; DestDir: {#ExtDir}; Flags: uninsneveruninstall replacesameversion
 Source: {#BuildDir}\Landis.Library.Biomass-v2.dll; DestDir: {#ExtDir}; Flags: uninsneveruninstall replacesameversion
-Source: {#BuildDir}\Landis.Library.Climate-v4.dll; DestDir: {#ExtDir}; Flags: uninsneveruninstall replacesameversion
-; Source: {#BuildDir}\Landis.Library.Climate-v3.pdb; DestDir: {#ExtDir}; Flags: uninsneveruninstall replacesameversion
+Source: {#BuildDir}\Landis.Library.Climate-v4.1.dll; DestDir: {#ExtDir}; Flags: uninsneveruninstall replacesameversion      
 Source: {#BuildDir}\Landis.Library.Succession-InputAGB.dll; DestDir: {#ExtDir}; Flags: uninsneveruninstall replacesameversion
 
 ; Complete example for testing the extension
 Source: ..\examples\*.txt; DestDir: {#AppDir}\examples\{#ExtensionName}; Flags: replacesameversion
-Source: ..\examples\*.tif; DestDir: {#AppDir}\examples\{#ExtensionName}; Flags: replacesameversion
+Source: ..\examples\SingleCellRasters\*.tif; DestDir: {#AppDir}\examples\{#ExtensionName}; Flags: replacesameversion
 Source: ..\examples\*.bat; DestDir: {#AppDir}\examples\{#ExtensionName}; Flags: replacesameversion
 Source: ..\examples\*.csv; DestDir: {#AppDir}\examples\{#ExtensionName}; Flags: replacesameversion
+Source: ..\examples\SHAW\*.csv; DestDir: {#AppDir}\examples\{#ExtensionName}; Flags: replacesameversion
+Source: ..\examples\SHAW\*.txt; DestDir: {#AppDir}\examples\{#ExtensionName}; Flags: replacesameversion
+Source: ..\examples\GIPL\*.txt; DestDir: {#AppDir}\examples\{#ExtensionName}; Flags: replacesameversion
 
 
 ; LANDIS-II identifies the extension with the info in this .txt file

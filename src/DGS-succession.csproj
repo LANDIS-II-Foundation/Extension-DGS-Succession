@@ -25,13 +25,22 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="SoilLayer-old.cs" />
+    <Compile Remove="SoilLayer-reallyold.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Remove="lib\Landis.Library.Climate-v4.pdb" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="Landis.Core" Version="2.0.0" />
     <PackageReference Include="Landis.Core.Implementation" Version="2.0.0" />
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\..\..\GIPL\CSharpCode\GiplDamm\GiplDamm\GiplDamm.csproj" />
-    <ProjectReference Include="..\..\..\..\SHAW\CSharpCode\ShawDammNewInputs\ShawDamm\ShawDammNewInputs.csproj" />
+    <ProjectReference Include="..\..\..\..\GIPL\CSharpCode\GiplDammNewInputs.03.11.2020\GiplDamm\GiplDamm.csproj" />
+    <ProjectReference Include="..\..\..\..\SHAW\CSharpCode\ShawDammNewInputs.03.11.2020\ShawDamm\ShawDammNewInputs.csproj" />
   </ItemGroup>
   
   <ItemGroup>
@@ -50,6 +59,9 @@
     <Reference Include="Landis.Library.Cohorts-v2">
       <HintPath>lib\Landis.Library.Cohorts-v2.dll</HintPath>
     </Reference>
+    <Reference Include="Landis.Library.InitialCommunity-vInputBiomass">
+      <HintPath>lib\Landis.Library.InitialCommunity-vInputBiomass.dll</HintPath>
+    </Reference>
     <Reference Include="Landis.Library.LeafBiomassCohorts-v2">
       <HintPath>lib\Landis.Library.LeafBiomassCohorts-v2.dll</HintPath>
     </Reference>
@@ -59,8 +71,8 @@
     <Reference Include="Landis.Library.Parameters-v2">
       <HintPath>lib\Landis.Library.Parameters-v2.dll</HintPath>
     </Reference>
-    <Reference Include="Landis.Library.Succession-InputAGB">
-      <HintPath>lib\Landis.Library.Succession-InputAGB.dll</HintPath>
+    <Reference Include="Landis.Library.Succession-v8">
+      <HintPath>lib\Landis.Library.Succession-v8.dll</HintPath>
     </Reference>
   </ItemGroup>
 </Project>

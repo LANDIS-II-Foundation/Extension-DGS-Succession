@@ -34,6 +34,7 @@ namespace Landis.Extension.Succession.DGS
         // Soil layers
         //private static ISiteVar<Layer> som1surface;
         private static ISiteVar<SoilLayer> soilPrimary;
+        private static ISiteVar<SoilLayer> availableSoilC;
         //private static ISiteVar<Layer> dissolved_organic;
         //private static ISiteVar<Layer> som2;
         //private static ISiteVar<Layer> som3;
@@ -139,6 +140,7 @@ namespace Landis.Extension.Succession.DGS
             //som2                = PlugIn.ModelCore.Landscape.NewSiteVar<Layer>();
             //som3                = PlugIn.ModelCore.Landscape.NewSiteVar<Layer>();
             soilPrimary = PlugIn.ModelCore.Landscape.NewSiteVar<SoilLayer>();
+            availableSoilC = PlugIn.ModelCore.Landscape.NewSiteVar<SoilLayer>();
             soilDepth = PlugIn.ModelCore.Landscape.NewSiteVar<int>();
             soilDrain           = PlugIn.ModelCore.Landscape.NewSiteVar<double>();
             soilBaseFlowFraction = PlugIn.ModelCore.Landscape.NewSiteVar<double>();
@@ -229,7 +231,9 @@ namespace Landis.Extension.Succession.DGS
                 surfaceMetabolic[site]      = new Layer(LayerName.Metabolic, LayerType.Surface);
                 soilStructural[site]        = new Layer(LayerName.Structural, LayerType.Soil);
                 soilMetabolic[site]         = new Layer(LayerName.Metabolic, LayerType.Soil);
-                soilPrimary[site] = new SoilLayer(SoilName.Primary); //, LayerType.Soil);
+                soilPrimary[site]           = new SoilLayer(SoilName.Primary); //, LayerType.Soil);  
+                availableSoilC[site]        = new SoilLayer(SoilName.Primary); //, LayerType.Soil);  
+                //LayerType.Soil)[site] = new SoilLayer(SoilName.Primary); //, LayerType.Soil);
                 //som1surface[site]           = new Layer(LayerName.SOM1, LayerType.Surface);
                 //som2[site]                  = new Layer(LayerName.SOM2, LayerType.Soil);
                 //som3[site]                  = new Layer(LayerName.SOM3, LayerType.Soil);
@@ -455,6 +459,18 @@ namespace Landis.Extension.Succession.DGS
         {
             get {
                 return soilPrimary;
+            }
+        }
+        //---------------------------------------------------------------------
+
+        /// <summary>
+        /// The soil C available for decomposition.
+        /// </summary>
+        public static ISiteVar<SoilLayer> AvailableSoilC
+        {
+            get
+            {
+                return availableSoilC;
             }
         }
         //---------------------------------------------------------------------

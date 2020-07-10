@@ -8,7 +8,7 @@ using Landis.Library.Climate;
 
 namespace Landis.Extension.Succession.DGS
 {
-    public enum SoilName { Primary, Secondary, Tertiary, Other };
+    public enum SoilName { Primary, AvailableSoilC};
     /// <summary>
     /// </summary>
     public class SoilLayer
@@ -224,25 +224,34 @@ namespace Landis.Extension.Succession.DGS
         private static double saturation = 0.492526227563312;     //p[29] #saturation level (was: sat)
         public static double r = 0.008314;                 // gas constant
 
-        public static void Decompose(int Year, int Month, ActiveSite site)
+        public static void Decompose(int year, int month, ActiveSite site)
         {
-            double month_to_hr = 24.0 * (double)AnnualClimate.DaysInMonth(Month, Year);
+            double month_to_hr = 24.0 * (double)AnnualClimate.DaysInMonth(month, year);
             double g_to_mg = 1000;           
             double m2_to_cm2 = 10000;            
             double depth_to_volume = 10.0; //We are simulating just the top 10cm.
             var soilTemperature = 0.0;
             var availableWater = 0.0;
 
+            double soc_available = SocAvailableForRespiration(site, month);
+            SiteVars.AvailableSoilC[site].Carbon = soc_available;
+
+            if (soc_available < 0.0000001)
+            {
+                SiteVars.SoilPrimary[site].MonthlyCarbonInputs = 0.0;  // Reset to zero each timestep.
+                return;
+            }
+
             double SOC = SiteVars.SoilPrimary[site].Carbon;
-            if (SOC > 0.0000001)
+            if (SOC > 0.0000001)               
             {
                 if (PlugIn.ShawGiplEnabled)
                 {
                     //var thu = PlugIn.TempHydroUnit;
                     var thu = SiteVars.TempHydroUnit[site];
 
-                    soilTemperature = thu.MonthlySoilTemperatureDecomp[Month];
-                    availableWater = thu.MonthlySoilMoistureDecomp[Month];
+                    soilTemperature = thu.MonthlySoilTemperatureDecomp[month];
+                    availableWater = thu.MonthlySoilMoistureDecomp[month];
                 }
                 else
                 {
@@ -256,18 +265,23 @@ namespace Landis.Extension.Succession.DGS
             //soilTemperature = 10.0;  
 
             //availableWater = 0.30; //Email from Dmitry with SM data from Dalton gives BNZ a SM of 0.40 3/26/20 
-           //if (Month==6)
-           //{
-           //    SiteVars.SoilPrimary[site].Carbon = 652.5;
-             //    SiteVars.SoilPrimary[site].Nitrogen = 21.917;
-             //    SiteVars.SoilPrimary[site].DOC = 0.020000000;
-             //    SiteVars.SoilPrimary[site].DON = 0.011;
-             //}           
+            //if (Month==6)
+            //{
+            //    SiteVars.SoilPrimary[site].Carbon = 652.5;
+            //    SiteVars.SoilPrimary[site].Nitrogen = 21.917;
+            //    SiteVars.SoilPrimary[site].DOC = 0.020000000;
+            //    SiteVars.SoilPrimary[site].DON = 0.011;
+            //}           
 
-            // convert Landis units to Rose's units, * g_to_mg) / (m2_to_cm2)          
-            SOC = (SiteVars.SoilPrimary[site].Carbon * g_to_mg) / (m2_to_cm2 * depth_to_volume);
-                //SOC = 65.25; //(Rose);
-                double SON = (SiteVars.SoilPrimary[site].Nitrogen * g_to_mg) / (m2_to_cm2 * depth_to_volume);
+            // convert Landis units to Rose's units, * g_to_mg) / (m2_to_cm2)   
+
+
+            //double SOC = (soc_available * g_to_mg) / (m2_to_cm2 * depth_to_volume);
+            SOC *= g_to_mg / (m2_to_cm2 * depth_to_volume);
+            double soc_available_DAMM = (soc_available * g_to_mg) / (m2_to_cm2 * depth_to_volume);
+            //SOC = 65.25; //(Rose);
+            double son_available_DAMM = (soc_available_DAMM * SiteVars.SoilPrimary[site].Nitrogen)/ SiteVars.SoilPrimary[site].Carbon;
+            double SON = (SiteVars.SoilPrimary[site].Nitrogen * g_to_mg) / (m2_to_cm2 * depth_to_volume);
             //double SON = 2.1917; //(Rose);
             //double bulk_density = SiteVars.SoilBulkDensity[site];   //double bulk_density = 0.0377 (Jason);
             //double bulk_density = 0.156152207886358;   //original testing
@@ -304,8 +318,8 @@ namespace Landis.Extension.Succession.DGS
                 soilm = (soilm > saturation) ? saturation : soilm;                                          //set upper bound on soil moisture (saturation)
                 soilm = (soilm < 0.1) ? 0.1 : soilm;                                                        //set lower bound on soil moisture               
                 double o2 = dgas * o2airfrac * Math.Pow((porosity - soilm), (4.0 / 3.0));                   //calculate oxygen concentration
-                double sol_soc = dliq * Math.Pow(soilm, 3.0) * frac * SOC;
-                double sol_son = dliq * Math.Pow(soilm, 3.0) * frac * SON;                                    //calculate unprotected SON
+                double sol_soc = dliq * Math.Pow(soilm, 3.0) * frac * soc_available_DAMM;
+                double sol_son = dliq * Math.Pow(soilm, 3.0) * frac * son_available_DAMM;                                    //calculate unprotected SON
                 double vmax_dep = a_dep * Math.Exp(-ea_dep / (r * (soilTemperature + 273.0)));                          //calculate maximum depolymerization rate         
                 double vmax_upt = a_upt * Math.Exp(-ea_upt / (r * (soilTemperature + 273.0)));                          //calculate maximum depolymerization rate
                 double upt_c = microbial_C * vmax_upt * DOC / (km_upt + DOC) * o2 / (km_o2 + o2);           //calculate DOC uptake
@@ -336,9 +350,9 @@ namespace Landis.Extension.Succession.DGS
                 double dsoc = LitterCinput + death_c * mic_to_som - decom_c;                    //calculate change in SOC pool
                 double dson = (LitterCinput / cn_litter) + death_n * mic_to_som - decom_n;                    //calculate change in SON pool              
                 double ddoc = DOCinput + decom_c + death_c * (1.0 - mic_to_som) + cn_enzymes * eloss - upt_c; //calculate change in DOC pool                
-                double ddon = (DOCinput / SOC / SON) + decom_n + death_n * (1.0 - mic_to_som) + eloss - upt_n; //calculate change in DON pool
+                double ddon = (DOCinput / soc_available_DAMM / son_available_DAMM) + decom_n + death_n * (1.0 - mic_to_som) + eloss - upt_n; //calculate change in DON pool
 
-                // convert Rose's results to Landis units, * m2_to_cm2 / (g_to_mg)
+                
                 SOC += dsoc;
                 SON += dson;
                 DOC += ddoc;
@@ -354,8 +368,8 @@ namespace Landis.Extension.Succession.DGS
                 gross_mineralizaton += nmin;
 
             }
-                                 
-            // adjust pools, to LANDIS units
+
+            // adjust pools, convert Rose's results to Landis units, * m2_to_cm2 / (g_to_mg)
             SiteVars.SoilPrimary[site].Carbon = SOC * m2_to_cm2 * depth_to_volume / (g_to_mg);
             SiteVars.SoilPrimary[site].Nitrogen = SON * m2_to_cm2 * depth_to_volume / (g_to_mg);
             SiteVars.SoilPrimary[site].DOC = DOC * m2_to_cm2 * depth_to_volume / (g_to_mg);
@@ -491,6 +505,39 @@ namespace Landis.Extension.Succession.DGS
             //this.NetMineralization += mineralNFlow;
 
             return;
+        }
+
+        public static double SocAvailableForRespiration(ActiveSite site, int month)
+        {
+            // inputs needed:
+            var landisDepth = SiteVars.SoilDepth[site]/100.0;  // LANDIS is is cm but need to convert m for GIPL soil temp profile below. 
+            //var k = 11.791;  // original value was set to 1.0           
+            var k = 2.618;  // seems to produce more realistic values      
+
+            var thu = SiteVars.TempHydroUnit[site];
+
+            var giplTempProfile = thu.MonthlyGiplDammResults[month].AverageSoilTemperatureProfile;
+
+            var soc = SiteVars.SoilPrimary[site].Carbon;
+
+            // find the lowest depth at which the soil temperature goes from positive to negative
+            var j = -1;
+            for (var i = 0; i < giplTempProfile.Count - 1; ++i)
+            {
+                if (giplTempProfile[i] > 0.0 && giplTempProfile[i + 1] <= 0.0) j = i;
+            }
+
+            if (j == -1 && giplTempProfile[0] > 0.0)
+                return soc;     // all temps above zero
+
+            if (j == -1 && giplTempProfile[0] <= 0.0)
+                return 0.0;     // all temps below zero
+
+            // interpolate the gipl depth points bracketing the freezing point to find the freezing depth
+            var d = thu.GiplDepths[j] + thu.GiplDepthIncrements[j] * giplTempProfile[j] / (giplTempProfile[j] - giplTempProfile[j + 1]);
+
+            // return the portion of the soc down to d assuming a decaying exponential profile that stops at landisDepth
+            return d > landisDepth ? soc : soc * (1.0 - Math.Exp(-k * d)) / (1.0 - Math.Exp(-k * landisDepth));            
         }
     }
 }

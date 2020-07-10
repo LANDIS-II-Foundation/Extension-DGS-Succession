@@ -14,8 +14,11 @@ namespace Landis.Extension.Succession.DGS
     public class AvailableN
     {
         //Nested dictionary of species,cohort
-        public static Dictionary<int, Dictionary<int,double>> CohortMineralNfraction;  //calculated once per year
+        public static Dictionary<int, Dictionary<int, double>> CohortMineralNfraction;  //calculated once per year
         public static Dictionary<int, Dictionary<int, double>> CohortMineralNallocation;  //calculated monthly
+
+        //private static object _cohortMineralNfractionLock = new object();
+        //private static object _cohortMineralNallocationLock = new object();
 
         //---------------------------------------------------------------------
         // Method for retrieving the available resorbed N for each cohort.
@@ -105,9 +108,11 @@ namespace Landis.Extension.Succession.DGS
         // Iterates through cohorts, assigning each a portion of mineral N based on coarse root biomass.  Uses an exponential function to "distribute" 
         // the N more evenly between spp. so that the ones with the most woody biomass don't get all the N (L122).
 
-        public static void CalculateMineralNfraction(Site site)
+        public static void CalculateMineralNfraction(ActiveSite site)
         {
-            AvailableN.CohortMineralNfraction = new Dictionary<int, Dictionary<int, double>>();
+            //lock (_cohortMineralNfractionLock)
+                CohortMineralNfraction = new Dictionary<int, Dictionary<int, double>>();
+
             double NAllocTotal = 0.0;
             
             foreach (ISpeciesCohorts speciesCohorts in SiteVars.Cohorts[site])
@@ -167,9 +172,10 @@ namespace Landis.Extension.Succession.DGS
 
         // Calculates how much N a cohort gets, based on the amount of N available.
 
-        public static void SetMineralNallocation(Site site)
+        public static void SetMineralNallocation(ActiveSite site)
         {
-            AvailableN.CohortMineralNallocation = new Dictionary<int, Dictionary<int, double>>();
+            //lock (_cohortMineralNallocationLock)
+                CohortMineralNallocation = new Dictionary<int, Dictionary<int, double>>();
             
            double availableN = SiteVars.MineralN[site];  // g/m2
            Math.Max(availableN, 0.01);
@@ -217,13 +223,13 @@ namespace Landis.Extension.Succession.DGS
         //---------------------------------------------------------------------
         // Method for retrieving the available mineral N for each cohort.
         // Return amount of resorbed N in g N m-2.
-        public static double GetMineralNallocation(ICohort cohort)
+        public static double GetMineralNallocation(ICohort cohort, ActiveSite site)
         {
            
             int cohortAddYear = GetAddYear(cohort);             
             double mineralNallocation = 0.0;
             Dictionary<int, double> cohortDict;
-
+            
             if (AvailableN.CohortMineralNallocation.TryGetValue(cohort.Species.Index, out cohortDict))
                 cohortDict.TryGetValue(cohortAddYear, out mineralNallocation);
 
@@ -343,6 +349,7 @@ namespace Landis.Extension.Succession.DGS
         {
             int currentYear = PlugIn.ModelCore.CurrentTime;
             int cohortAddYear = currentYear - (cohort.Age - Main.Year);
+            //int cohortAddYear = currentYear - (cohort.Age - 2);
             if (Main.MonthCnt == 11)
                 cohortAddYear++; 
             return cohortAddYear;

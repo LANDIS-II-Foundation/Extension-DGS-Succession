@@ -244,9 +244,10 @@ namespace Landis.Extension.Succession.DGS
                         
             if (Double.IsNaN(leafNPP) || Double.IsNaN(woodNPP))
             {
+                throw new ApplicationException($"Wood or leaf NPP is NaN Year={PlugIn.ModelCore.CurrentTime} Month={Main.Month} woodNPP={woodNPP} leafNPP= {leafNPP} for site {site}");
                 PlugIn.ModelCore.UI.WriteLine("  EITHER WOOD or LEAF NPP = NaN!  Will set to zero.");
                 //PlugIn.ModelCore.UI.WriteLine("  Yr={0},Mo={1}, SpeciesName={2}, CohortAge={3}.   GROWTH LIMITS: LAI={4:0.00}, H20={5:0.00}, N={6:0.00}, T={7:0.00}, Capacity={8:0.0}.", PlugIn.ModelCore.CurrentTime, Main.Month + 1, cohort.Species.Name, cohort.Age, limitLAI, limitH20, limitN, limitT, limitCapacity);
-                PlugIn.ModelCore.UI.WriteLine("  Yr={0},Mo={1}.     Other Information: MaxB={2}, Bsite={3}, Bcohort={4:0.0}.", PlugIn.ModelCore.CurrentTime, Main.Month + 1, maxBiomass, (int)siteBiomass, (cohort.WoodBiomass + cohort.LeafBiomass));
+                PlugIn.ModelCore.UI.WriteLine("  Yr={0},Mo={1}.     Other Information: MaxB={2}, Bsite={3}, Bcohort={4:0.0}.", PlugIn.ModelCore.CurrentTime, Main.Month, maxBiomass, (int)siteBiomass, (cohort.WoodBiomass + cohort.LeafBiomass));
                 PlugIn.ModelCore.UI.WriteLine("  Yr={0},Mo={1}.     WoodNPP={2:0.00}, LeafNPP={3:0.00}.", PlugIn.ModelCore.CurrentTime, Main.Month + 1, woodNPP, leafNPP);
                 if (Double.IsNaN(leafNPP))
                     leafNPP = 0.0;
@@ -485,7 +486,7 @@ namespace Landis.Extension.Succession.DGS
         {
 
             //Get Cohort Mineral and Resorbed N allocation.
-            double mineralNallocation = AvailableN.GetMineralNallocation(cohort);
+            double mineralNallocation = AvailableN.GetMineralNallocation(cohort, site);
             double resorbedNallocation = AvailableN.GetResorbedNallocation(cohort, site);
 
             //double LeafNPP = Math.Max(NPP * leafFractionNPP, 0.002 * cohort.WoodBiomass);  This allowed for Ndemand in winter when there was no leaf NPP
@@ -847,7 +848,7 @@ namespace Landis.Extension.Succession.DGS
             return U1;
         }
 
-        private static double AverageOrIntegrateOverProfile(bool makeAverage, double[] profile, List<double> depths, List<double> depthIncrements, double startingDepth, double endingDepth)
+        private static double AverageOrIntegrateOverProfile(bool makeAverage, List<double> profile, List<double> depths, List<double> depthIncrements, double startingDepth, double endingDepth)
         {
             // assumes the depths start at 0.0.
 

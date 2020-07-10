@@ -112,7 +112,9 @@ namespace Landis.Extension.Succession.DGS
             double[] avgSoilMetaNetMin = new double[PlugIn.ModelCore.Ecoregions.Count];
 
             double[] avgSOM1surfC = new double[PlugIn.ModelCore.Ecoregions.Count];
+            double[] avgAvailableSoilC = new double[PlugIn.ModelCore.Ecoregions.Count];
             double[] avgSoilPrimaryC = new double[PlugIn.ModelCore.Ecoregions.Count];
+            
             //double[] avgSOM2C = new double[PlugIn.ModelCore.Ecoregions.Count];
             //double[] avgSOM3C = new double[PlugIn.ModelCore.Ecoregions.Count];
 
@@ -180,18 +182,20 @@ namespace Landis.Extension.Succession.DGS
                     avgSoilStrucN[ecoregion.Index] = 0.0;
                     avgSoilMetaN[ecoregion.Index] = 0.0;
 
-                    //avgSurfStrucNetMin[ecoregion.Index] = 0.0;
-                    //avgSurfMetaNetMin[ecoregion.Index] = 0.0;
-                    //avgSoilStrucNetMin[ecoregion.Index] = 0.0;
-                    //avgSoilMetaNetMin[ecoregion.Index] = 0.0;
+                //avgSurfStrucNetMin[ecoregion.Index] = 0.0;
+                //avgSurfMetaNetMin[ecoregion.Index] = 0.0;
+                //avgSoilStrucNetMin[ecoregion.Index] = 0.0;
+                //avgSoilMetaNetMin[ecoregion.Index] = 0.0;
 
-                    //avgSOM1surfC[ecoregion.Index] = 0.0;
-                    avgSoilPrimaryC[ecoregion.Index] = 0.0;
-                    //avgSOM2C[ecoregion.Index] = 0.0;
-                    //avgSOM3C[ecoregion.Index] = 0.0;
+                //avgSOM1surfC[ecoregion.Index] = 0.0;
+                avgAvailableSoilC[ecoregion.Index] = 0.0;
+                avgSoilPrimaryC[ecoregion.Index] = 0.0;
+                
+                //avgSOM2C[ecoregion.Index] = 0.0;
+                //avgSOM3C[ecoregion.Index] = 0.0;
 
-                    //avgSOM1surfN[ecoregion.Index] = 0.0;
-                    avgSoilPrimaryN[ecoregion.Index] = 0.0;
+                //avgSOM1surfN[ecoregion.Index] = 0.0;
+                avgSoilPrimaryN[ecoregion.Index] = 0.0;
                     //avgSOM2N[ecoregion.Index] = 0.0;
                     //avgSOM3N[ecoregion.Index] = 0.0;
 
@@ -243,7 +247,8 @@ namespace Landis.Extension.Succession.DGS
                 avgSoilMetaC[ecoregion.Index] += SiteVars.SoilMetabolic[site].Carbon;
 
                 //avgSOM1surfC[ecoregion.Index] += SiteVars.SOM1surface[site].Carbon;
-                avgSoilPrimaryC[ecoregion.Index] += SiteVars.SoilPrimary[site].Carbon;
+                avgAvailableSoilC[ecoregion.Index] += SiteVars.AvailableSoilC[site].Carbon;
+                avgSoilPrimaryC[ecoregion.Index] += SiteVars.SoilPrimary[site].Carbon;                
                 //avgSOM2C[ecoregion.Index] += SiteVars.SOM2[site].Carbon;
                 //avgSOM3C[ecoregion.Index] += SiteVars.SOM3[site].Carbon;
 
@@ -321,6 +326,7 @@ namespace Landis.Extension.Succession.DGS
                 pl.C_DeadFRoot_Struc = (avgSoilStrucC[ecoregion.Index] / (double)ClimateRegionData.ActiveSiteCount[ecoregion]);
                 pl.C_DeadFRoot_Meta = (avgSoilMetaC[ecoregion.Index] / (double)ClimateRegionData.ActiveSiteCount[ecoregion]);
                 //pl.C_SOM1surf = (avgSOM1surfC[ecoregion.Index] / (double)ClimateRegionData.ActiveSiteCount[ecoregion]);
+                pl.C_SoilAvailable = (avgAvailableSoilC[ecoregion.Index] / (double)ClimateRegionData.ActiveSiteCount[ecoregion]);
                 pl.C_SoilPrimary = (avgSoilPrimaryC[ecoregion.Index] / (double)ClimateRegionData.ActiveSiteCount[ecoregion]);
                 //pl.C_SOM2 = (avgSOM2C[ecoregion.Index] / (double)ClimateRegionData.ActiveSiteCount[ecoregion]);
                 //pl.C_SOM3 = (avgSOM3C[ecoregion.Index] / (double)ClimateRegionData.ActiveSiteCount[ecoregion]);
@@ -644,6 +650,25 @@ namespace Landis.Extension.Succession.DGS
 
                 }
 
+            string pathTHU = MapNames.ReplaceTemplateVars(@"DGS\THU-{timestep}.img", PlugIn.ModelCore.CurrentTime);
+            using (IOutputRaster<IntPixel> outputRaster = PlugIn.ModelCore.CreateRaster<IntPixel>(pathTHU, PlugIn.ModelCore.Landscape.Dimensions))
+            {
+                IntPixel pixel = outputRaster.BufferPixel;
+                foreach (Site site in PlugIn.ModelCore.Landscape.AllSites)
+                {
+                    if (site.IsActive)
+                    {
+                        pixel.MapCode.Value = SiteVars.TempHydroUnit[site].Number;
+                    }
+                    else
+                    {
+                        //  Inactive site
+                        pixel.MapCode.Value = 0;
+                    }
+                    outputRaster.WriteBufferPixel();
+                }
+            }
+
             if (PlugIn.Parameters.SmokeModelOutputs)
             {
                 string pathNeedles = MapNames.ReplaceTemplateVars(@"DGS\ConiferNeedleBiomass-{timestep}.img", PlugIn.ModelCore.CurrentTime);
@@ -722,6 +747,7 @@ namespace Landis.Extension.Succession.DGS
                 //        outputRaster.WriteBufferPixel();
                 //    }
                 //}
+                
             }
         }
         

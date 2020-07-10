@@ -6,6 +6,7 @@ using Landis.Library.LeafBiomassCohorts;
 using System.Collections.Generic;
 using Landis.Library.Climate;
 using System.Linq;
+using System.Diagnostics;
 
 namespace Landis.Extension.Succession.DGS
 {
@@ -18,6 +19,15 @@ namespace Landis.Extension.Succession.DGS
         public static int Month;
         public static int MonthCnt;
 
+        //public static int[] SiteMonth;
+        //public static int[] SiteMonthCnt;
+
+        //public static int siteCounter;
+        //public static Stopwatch timer1;
+        //public static Stopwatch soilLayerTimer;
+
+        //private static object _locker = new object();
+
         /// <summary>
         /// Grows all cohorts at a site for a specified number of years.
         /// Litter is decomposed following the Century model.
@@ -26,14 +36,27 @@ namespace Landis.Extension.Succession.DGS
                                        int         years,
                                        bool        isSuccessionTimeStep)
         {
-            
+            //++siteCounter;
+
+            //if (siteCounter % 100000 == 0)
+            //{
+            //    PlugIn.ModelCore.UI.WriteLine($"Main.Run SiteCounter: {siteCounter}");
+            //    PlugIn.ModelCore.UI.WriteLine($"Main.Run Total ElapsedTime: {timer1.Elapsed}");
+            //    PlugIn.ModelCore.UI.WriteLine($"Main.Run SoilLayer ElapsedTime: {soilLayerTimer.Elapsed}");
+
+            //    timer1.Reset();
+            //    soilLayerTimer.Reset();
+            //}
+
+            //timer1.Start();
+
             ISiteCohorts siteCohorts = SiteVars.Cohorts[site];
             IEcoregion ecoregion = PlugIn.ModelCore.Ecoregion[site];
 
             for (int y = 0; y < years; ++y) {
 
                 Year = y + 1;
-                
+
                 if (Climate.Future_MonthlyData.ContainsKey(PlugIn.FutureClimateBaseYear + y + PlugIn.ModelCore.CurrentTime - years))
                     ClimateRegionData.AnnualWeather[ecoregion] = Climate.Future_MonthlyData[PlugIn.FutureClimateBaseYear + y - years + PlugIn.ModelCore.CurrentTime][ecoregion.Index];
 
@@ -52,6 +75,11 @@ namespace Landis.Extension.Succession.DGS
 
                 for (MonthCnt = 0; MonthCnt < 12; MonthCnt++)
                 {
+                    //var mon = months[MonthCnt];
+
+                    //SiteMonthCnt[site.DataIndex] = MonthCnt;
+                    //SiteMonth[site.DataIndex] = Month;
+
                     // Calculate mineral N fractions based on coarse root biomass.  Only need to do once per year.
                     if (MonthCnt == 0)
                     {
@@ -87,7 +115,8 @@ namespace Landis.Extension.Succession.DGS
 
                     ClimateRegionData.MonthlyNDeposition[ecoregion][Month] = monthlyNdeposition;
                     ClimateRegionData.AnnualNDeposition[ecoregion] += monthlyNdeposition;
-                    SiteVars.MineralN[site] += monthlyNdeposition;
+                    //lock (_locker)
+                        SiteVars.MineralN[site] += monthlyNdeposition;
                     //PlugIn.ModelCore.UI.WriteLine("Ndeposition={0},MineralN={1:0.00}.", monthlyNdeposition, SiteVars.MineralN[site]);
 
                     //SiteVars.DecayFactor[site] = 1;
@@ -120,7 +149,8 @@ namespace Landis.Extension.Succession.DGS
                         SoilWater.Run(y, Month, liveBiomass, site, out baseFlow, out stormFlow, out AET);
                     }
 
-                    PlugIn.AnnualWaterBalance += ppt - AET;
+                    //lock (_locker)
+                        PlugIn.AnnualWaterBalance += ppt - AET;
 
                     //
                     // **
@@ -128,14 +158,16 @@ namespace Landis.Extension.Succession.DGS
                     // Calculate N allocation for each cohort
                     AvailableN.SetMineralNallocation(site);
 
-                    if (MonthCnt==11)
+                    if (MonthCnt == 11)
                         siteCohorts.Grow(site, (y == years && isSuccessionTimeStep), true);
                     else
                         siteCohorts.Grow(site, (y == years && isSuccessionTimeStep), false);
 
                     WoodLayer.Decompose(site);
-                    LitterLayer.Decompose(site);                    
+                    LitterLayer.Decompose(site);
+                    //soilLayerTimer.Start();
                     SoilLayer.Decompose(y, Month, site);
+                    //soilLayerTimer.Stop();
 
                     // Volatilization loss as a function of the mineral N which remains after uptake by plants.  
                     // ML added a correction factor for wetlands since their denitrification rate is double that of wetlands
@@ -161,6 +193,8 @@ namespace Landis.Extension.Succession.DGS
             }
 
             ComputeTotalCohortCN(site, siteCohorts);
+
+            //timer1.Stop();
 
             return siteCohorts;
         }

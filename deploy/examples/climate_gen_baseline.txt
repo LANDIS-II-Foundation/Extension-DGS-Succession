@@ -1,0 +1,14 @@
+LandisData "Climate Config"				
+		
+ClimateTimeSeries			Daily_SequencedYears
+ClimateFile				ncar_climate_formatted_AK_V2_historical_CR5-starts1999.csv
+ClimateFileFormat			Daily_Temp-K_Precip-mmDay
+
+SpinUpClimateTimeSeries			Daily_SequencedYears
+SpinUpClimateFile			ncar_climate_formatted_AK_V2_historical_CR5-starts1999.csv
+SpinUpClimateFileFormat			Daily_Temp-K_Precip-mmDay
+
+UsingFireClimate			yes
+SpringStart				90  << 120, April 1, a month before AFF starts getting FWI>0 https://akff.mesowest.org/map/#/c6672,-15531,6/g1/mc/vfwi/sAK/n/zt
+WinterStart 				320 << 270, Nov 1st, a month after AFF gets FWI close to zero
+AtmosphericPressure			100
