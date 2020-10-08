@@ -14,6 +14,14 @@ using Landis.Library.Climate;
 
 namespace Landis.Extension.Succession.DGS
 {
+    public enum ThuAspect
+    {
+        North,
+        South,
+        Other,
+        All
+    }
+
     public class TempHydroUnit
     {
         #region fields
@@ -33,7 +41,7 @@ namespace Landis.Extension.Succession.DGS
 
         public static string[] ThuFileHeaders = {
             "THUNumber", "ClimateRegion", "ReclassVegetation", "VegetationType1", "VegetationType2", "MinAge", "MaxAge", "MinSlope", "MaxSlope",
-            "MinAspect", "MaxAspect", "MinSand", "MaxSand", "MinSilt", "MaxSilt", "MinLatitude", "MaxLatitude",
+            "Aspect", "MinSand", "MaxSand", "MinSilt", "MaxSilt", "MinLatitude", "MaxLatitude",
             "MinElevation", "MaxElevation", "NumberLitterNodes", "LitterThickness", "LitterDryWeight", "FractionGroundCoveredLitter",
             "MaxSnowThickness", "SnowNodes", "InitSnowTemperature",
             "ShawSoilType1", "GiplSoilType1", "MaxDepth1", "Nodes1", "InitTemperature1", "InitWaterContent1",
@@ -61,9 +69,6 @@ namespace Landis.Extension.Succession.DGS
             var errorPrefix = $"Error with THU '{name}' initialization:";
 
             // set THU properties
-            //ClimateRegion = PlugIn.ModelCore.Ecoregions.FirstOrDefault(x => x.Name.Equals(thuFileData["ClimateRegion"]));
-            //if (ClimateRegion == null)
-            //    throw new ApplicationException($"Error with THU '{name}' initialization: cannot find Climate Region '{thuFileData["ClimateRegion"]}'");
 
             ClimateRegionName = thuFileData["ClimateRegion"];
             ReclassVegetation = thuFileData["ReclassVegetation"];
@@ -71,6 +76,7 @@ namespace Landis.Extension.Succession.DGS
             int ival;
             double val;
             string errorMessage;
+            bool isMissing;
 
             if (!SimpleFileParser.TryParseInput($"{errorPrefix} : ThuNumber", thuFileData["ThuNumber"], out ival, out errorMessage))
                 throw new ApplicationException(errorMessage);
@@ -84,21 +90,20 @@ namespace Landis.Extension.Succession.DGS
                 throw new ApplicationException(errorMessage);
             MaxAge = val;
 
-            if (!SimpleFileParser.TryParseInput($"{errorPrefix} : MinSlope", thuFileData["MinSlope"], out val, out errorMessage, 0.0, 90.0))
+            // default MinSlope to negative infinity if blank
+            if (!SimpleFileParser.TryParseInputOptional($"{errorPrefix} : MinSlope", thuFileData["MinSlope"], out val, out errorMessage, double.NegativeInfinity))
                 throw new ApplicationException(errorMessage);
             MinSlope = val;
 
-            if (!SimpleFileParser.TryParseInput($"{errorPrefix} : MaxSlope", thuFileData["MaxSlope"], out val, out errorMessage, 0.0, 90.0))
+            // default MaxSlope to infinity if blank
+            if (!SimpleFileParser.TryParseInputOptional($"{errorPrefix} : MaxSlope", thuFileData["MaxSlope"], out val, out errorMessage, double.PositiveInfinity))
                 throw new ApplicationException(errorMessage);
             MaxSlope = val;
 
-            if (!SimpleFileParser.TryParseInput($"{errorPrefix} : MinAspect", thuFileData["MinAspect"], out val, out errorMessage, 0.0, 360.0))
+            // default Aspect to All if blank
+            if (!SimpleFileParser.TryParseInputOptional($"{errorPrefix} : Aspect", thuFileData["Aspect"], out ThuAspect aspectVal, out errorMessage, ThuAspect.All))
                 throw new ApplicationException(errorMessage);
-            MinAspect = val;
-
-            if (!SimpleFileParser.TryParseInput($"{errorPrefix} : MaxAspect", thuFileData["MaxAspect"], out val, out errorMessage, 0.0, 360.0))
-                throw new ApplicationException(errorMessage);
-            MaxAspect = val;
+            Aspect = aspectVal;
 
             if (!SimpleFileParser.TryParseInput($"{errorPrefix} : MinSand", thuFileData["MinSand"], out val, out errorMessage, 0.0, 100.0))
                 throw new ApplicationException(errorMessage);
@@ -132,22 +137,11 @@ namespace Landis.Extension.Succession.DGS
                 throw new ApplicationException(errorMessage);
             MaxElevation = val;
 
-            //ClimateRegion = PlugIn.ModelCore.Ecoregions[climateRegionName];
 
-            //// **
-            //// set up Shaw instance
-            //var shawInputFilePath = GetShawInputFilePath();
+            // **
+            // set up Shaw instance
 
             ShawInstance = new ShawDamm.ShawDamm();
-            //if (!ShawDamm.ShawDamm.HasGlobalSetup)
-            //{
-            //    if (!ShawDamm.ShawDamm.GlobalInitialization(shawInputFilePath, out errorMessage))
-            //        throw new ApplicationException($"Error with Shaw Global Initialization: '{errorMessage}'");
-            //}
-
-            // temporary code
-            //if (!ShawDamm.ShawDamm.HasGlobalSetup)
-            //    ShawInstance.GlobalInitialization(@"C:\Users\mslucash\Documents\John\DammLandis\DGS_SingleCell_Vogel\UP1A_Birch\UP1A.inp");
 
             // use the midrange of thu latitude (in degrees and minutes), slope, aspect, and elev to pass to the Shaw instance
             var aveLat = (MinLatitude + MaxLatitude) / 2.0;
@@ -156,8 +150,18 @@ namespace Landis.Extension.Succession.DGS
 
             var shawSlope = (MinSlope + MaxSlope) / 2.0;
 
-            // subtract 360 from MinAspect if it is > MaxAspect, i.e. if the range brackets 0 (due north)
-            var shawAspect = MinAspect > MaxAspect ? (MinAspect - 360.0 + MaxAspect) / 2.0 : (MinAspect + MaxAspect) / 2.0;
+            // 90 and 270 are equivalent aspects for Shaw, so arbitrarily set the shawAspect to 90 for ThuAspect.Other.
+            // if Aspect is All, use 180.
+            double shawAspect;
+            if (Aspect == ThuAspect.North)
+                shawAspect = 0.0;
+            else if (Aspect == ThuAspect.Other)
+                shawAspect = 90.0;
+            else
+                shawAspect = 180.0;
+
+            //// subtract 360 from MinAspect if it is > MaxAspect, i.e. if the range brackets 0 (due north)
+            //var shawAspect = MinAspect > MaxAspect ? (MinAspect - 360.0 + MaxAspect) / 2.0 : (MinAspect + MaxAspect) / 2.0;
 
             var shawElevation = (MinElevation + MaxElevation) / 2.0;
 
@@ -168,35 +172,13 @@ namespace Landis.Extension.Succession.DGS
             // get Shaw depths
             ShawDepths = ShawInstance.GetDepths();
 
-            //// read and
-            //// set the initial soil moisture from the first line of the soil moisture file
-            //var soilMoistureData = File.ReadAllLines(@"C:\Users\mslucash\Documents\John\DammLandis\DGS_SingleCell_Vogel\UP1A_Birch\UP1A.moi").Where(x => !string.IsNullOrEmpty(x)).ToArray();
-            //var t = ParseLine(soilMoistureData.First());
-            //t = t.GetRange(3, t.Count - 3);    // remove day-hr-time
-
-            //if (t.Count != ShawDepths.Count)
-            //    throw new ApplicationException($"The number of initial Shaw moisture points {t.Count} for THU {Name} does not equal the number of Shaw depth points {ShawDepths.Count}");
-
-            //var soilMoistureInit = t.Select(x => double.Parse(x)).ToArray();
-
-            //ShawInstance.SetInitialSoilMoisture(soilMoistureInit);
-
-
-            //// **
-            //// set up Gipl instance
-            //var giplInputFilePath = GetGiplInputPath();
-
-            //// setup global properties inputs
-            //if (!GiplDamm.GiplDamm.HasGlobalSetup)
-            //    GiplDamm.GiplDamm.GlobalInitialization(giplInputFilePath);
+            // **
+            // set up Gipl instance
 
             GiplInstance = new GiplDamm.GiplDamm();
 
-            if (!GiplInstance.Initialize(name, thuFileData, out errorMessage))
+            if (!GiplInstance.Initialize(name, thuFileData, ShawInstance.GetSoilThetaSat(), out errorMessage))
                 throw new ApplicationException($"Error with THU '{name}' Gipl initialization: {errorMessage}");
-
-            //if (!GiplInstance.Initialize(giplInputFilePath, "THU1", ShawDepths))
-            //    return;
 
             // get Gipl depths
             GiplDepths = GiplInstance.GetGiplDepths();
@@ -240,8 +222,7 @@ namespace Landis.Extension.Succession.DGS
         public double MaxAge { get; set; }
         public double MinSlope { get; set; }
         public double MaxSlope { get; set; }
-        public double MinAspect { get; set; }
-        public double MaxAspect { get; set; }
+        public ThuAspect Aspect { get; set; }
         public double MinSand { get; set; }
         public double MaxSand { get; set; }
         public double MinSilt { get; set; }
@@ -280,7 +261,7 @@ namespace Landis.Extension.Succession.DGS
 
         public override string ToString()
         {
-            return $"{Name} -> {SiteCount}";
+            return $"{Name} -> {SiteCount} sites";
         }
 
         public void RunForYear(int year)//, AnnualClimate_Daily dailyWeather)
@@ -365,10 +346,10 @@ namespace Landis.Extension.Succession.DGS
             MonthlyGiplFinalSnowDensity[month] = finalSnowDensity;
 
             // call Gipl
-            //  pass the daily air temperature, estimates of daily snow depth, snow thermal conductivity, and snow volumetric heat capacity, and Shaw's soil moisture profile at the end
+            //  pass the daily air temperature, estimates of daily snow depth, snow thermal conductivity, and snow volumetric heat capacity, and Shaw's soil TOTAL moisture profile at the end
             //  of the previous month.
             //  if this is the first month, there will be no Shaw results, so this will be passed as null, in which case Gipl will use the default profile from its properties file. 
-            var giplResults = MonthlyGiplDammResults[month] = GiplInstance.CalculateSoilTemperature(year, month, tavg.ToArray(), dailySnowDepthEstimate, dailySnowThermalConductivities, dailySnowVolumetricHeatCapacities, MonthlyShawDammResults[lastMonth]?.DailySoilMoistureProfiles.Last());
+            var giplResults = MonthlyGiplDammResults[month] = GiplInstance.CalculateSoilTemperature(year, month, tavg.ToArray(), dailySnowDepthEstimate, dailySnowThermalConductivities, dailySnowVolumetricHeatCapacities, MonthlyShawDammResults[lastMonth]?.DailySoilTotalWaterProfiles.Last());
 
 
             // **
@@ -416,7 +397,7 @@ namespace Landis.Extension.Succession.DGS
                 //  or at the bottom of the adventitious layer (if the species does not have adventitious roots).
                 //  end the average at the rooting depth for the species.
 
-                var availableWater = IntegrateOverProfile(shawResults.MonthSoilMoistureProfile, startingDepth, rootingdepth);
+                var availableWater = IntegrateOverProfile(shawResults.MonthSoilLiquidWaterProfile, startingDepth, rootingdepth);
                 var waterLimit = CohortBiomass.WaterLimitEquation(availableWater, species);
 
                 MonthlySpeciesRecords[month][species] = new ThuSpeciesRecord { SoilTemperature = soilTemperature, TemperatureLimit = temperatureLimit, AvailableWater = availableWater, WaterLimit = waterLimit };
@@ -424,141 +405,11 @@ namespace Landis.Extension.Succession.DGS
 
             // calculate soil moisture and temperature for decomposition
             MonthlySoilTemperatureDecomp[month] = AverageOverProfile(giplResults.AverageSoilTemperatureProfileAtShawDepths, 0.0, DecompositionDepth);
-            MonthlySoilMoistureDecomp[month] = IntegrateOverProfile(shawResults.MonthSoilMoistureProfile, 0.0, DecompositionDepth);
+            MonthlySoilMoistureDecomp[month] = IntegrateOverProfile(shawResults.MonthSoilLiquidWaterProfile, 0.0, DecompositionDepth);
 
             // stop for debugging
             //if (month == 1)
             //    break;
-        }
-
-        public void RunForYearOld(int year)//, AnnualClimate_Daily dailyWeather)
-        {
-            var dailyWeather = ClimateRegionData.AnnualDailyWeather[ClimateRegion];
-
-            // convert weather data to lists so each month can be grabbed
-            var precips = dailyWeather.DailyPrecip.ToList();
-            var tmaxs = dailyWeather.DailyMaxTemp.ToList();
-            var tavgs = dailyWeather.DailyTemp.ToList();
-            var tmins = dailyWeather.DailyMinTemp.ToList();
-            var winds = dailyWeather.DailyWindSpeed.ToList();
-            var solars = dailyWeather.DailyShortWaveRadiation.ToList();
-            var tdews = dailyWeather.DailyTemp.ToList();        // todo: change this when Tdew is available
-
-            for (var month = 0; month < 12; ++month)
-            {
-                // get Landis weather data for the month
-                int startingDay, dayCount;
-                GetDailyWeatherRangeForMonth(month, year, out startingDay, out dayCount);
-
-                var precip = precips.GetRange(startingDay, dayCount);
-                var tmax = tmaxs.GetRange(startingDay, dayCount);
-                var tavg = tavgs.GetRange(startingDay, dayCount);
-                var tmin = tmins.GetRange(startingDay, dayCount);
-                var wind = winds.GetRange(startingDay, dayCount);
-                var solar = solars.GetRange(startingDay, dayCount);
-                var tdew = tdews.GetRange(startingDay, dayCount);
-
-                var lastMonth = month == 0 ? 11 : month - 1;
-
-                // **
-                // Gipl
-
-                // estimate snow depth for the month based on precip, air temperature, and the snow depth and density
-                //  from Shaw results at the end of the previous month.
-                // if this is the first month of the simulation (which would be a January), Shaw results are not available, so run the process
-                //  from Sep. 1 to Dec. 31 using this year's weather data and use the final snow depth and density on Dec. 31 
-                //  as the starting conditions for the January calculation.
-
-                double[] dailySnowDepthEstimate, dailySnowThermalConductivities, dailySnowVolumetricHeatCapacities;
-                double snowThermalConductivity, snowVolumetricHeatCapacity;
-                double initialSnowDepth, initialSnowDensity;
-                double dummy;
-
-                if (_firstMonthHasRun)
-                {
-                    initialSnowDepth = MonthlyShawDammResults[lastMonth].DailySnowThickness.Last();
-                    initialSnowDensity = MonthlyShawDammResults[lastMonth].DailySnowDensity.Last();
-                }
-                else
-                {
-                    var sepStart = _firstDayOfMonth[8] + (IsLeapYear(year) ? 1 : 0);
-                    var daysToEndOfYear = 122;  // days in Sep, Oct, Nov, and Dec
-
-                    EstimateDailySnowDepth(precips.GetRange(sepStart, daysToEndOfYear), tavgs.GetRange(sepStart, daysToEndOfYear), 0.0, 0.0,
-                        out initialSnowDepth, out initialSnowDensity, out dailySnowThermalConductivities, out dailySnowVolumetricHeatCapacities);
-
-                    _firstMonthHasRun = true;
-                }
-
-                dailySnowDepthEstimate = EstimateDailySnowDepth(precip, tavg, initialSnowDepth, initialSnowDensity, out dummy, out dummy, out dailySnowThermalConductivities, out dailySnowVolumetricHeatCapacities);
-
-
-                // call Gipl
-                //  pass the daily air temperature, estimates of daily snow depth, snow thermal conductivity, and snow volumetric heat capacity, and Shaw's soil moisture profile at the end
-                //  of the previous month.
-                //  if this is the first month, there will be no Shaw results, so this will be passed as null, in which case Gipl will use the default profile from its properties file. 
-                var giplResults = MonthlyGiplDammResults[month] = GiplInstance.CalculateSoilTemperature(year, month, tavg.ToArray(), dailySnowDepthEstimate, dailySnowThermalConductivities, dailySnowVolumetricHeatCapacities, MonthlyShawDammResults[lastMonth]?.DailySoilMoistureProfiles.Last());
-
-
-                // **
-                // Shaw
-
-                var shawWeatherData = new ShawDammDailyWeatherRecord[dayCount];
-                for (var i = 0; i < dayCount; ++i)
-                {
-                    var weather = new ShawDammDailyWeatherRecord { Precip = precip[i], Tmax = tmax[i], Tmin = tmin[i], Tdew = tdew[i], Solar = solar[i], Wind = wind[i] };
-
-                    // conversions from Landis weather to Shaw weather
-                    weather.Precip *= 10.0;     // cm to mm
-                    if (weather.Wind < 0.0)
-                        weather.Wind = 0.0;     // missing wind data
-                    else
-                        weather.Wind /= 3.6;    // km/hr to m/s
-
-                    shawWeatherData[i] = weather;
-                }
-
-                // call Shaw
-                //  pass the Shaw weather data and the soil temperature profiles from this month's Gipl run.
-                //  also pass an average temperature in case Gipl is not used.  todo: this is not currently enabled in the code.
-                // Shaw will return the daily soil moisture profiles, daily snow thickness, daily snow heat capacity, and daily snow volumetric heat capacity.
-                //  currently the snow heat capacity and volumetric heat capacity are not used.
-                var shawResults = MonthlyShawDammResults[month] = ShawInstance.CalculateSoilResults(year, month, startingDay, shawWeatherData, MonthlyGiplDammResults[month].DailySoilTemperatureProfilesAtShawDepths, 0.0);
-
-                // calculate species records for this month based on gipl and shaw results
-                foreach (var species in PlugIn.ModelCore.Species)
-                {
-                    var hasAdventRoots = SpeciesData.AdventRoots[species];
-                    var rootingdepth = SpeciesData.RootingDepth[species] / 100.0;   // convert rooting depth to meters
-                    var startingDepth = hasAdventRoots ? 0.0 : SpeciesData.AdventitiousLayerDepth;
-
-                    // average Gipl's soil temperature profile (at Shaw depths) to get the soil temperature.
-                    //  start the average at either the top of the profile (if the species has adventitious roots), 
-                    //  or at the bottom of the adventitious layer (if the species does not have adventitious roots).
-                    //  end the average at the rooting depth for the species.
-
-                    var soilTemperature = AverageOverProfile(giplResults.AverageSoilTemperatureProfileAtShawDepths, startingDepth, rootingdepth);
-                    var temperatureLimit = CohortBiomass.TemperatureLimitEquation(soilTemperature, species);
-
-                    // integrate Shaw's soil moisture profile (at Shaw depths) to get the availableWater.
-                    //  start the average at either the top of the profile (if the species has adventitious roots), 
-                    //  or at the bottom of the adventitious layer (if the species does not have adventitious roots).
-                    //  end the average at the rooting depth for the species.
-
-                    var availableWater = IntegrateOverProfile(shawResults.MonthSoilMoistureProfile, startingDepth, rootingdepth);
-                    var waterLimit = CohortBiomass.WaterLimitEquation(availableWater, species);
-
-                    MonthlySpeciesRecords[month][species] = new ThuSpeciesRecord { SoilTemperature = soilTemperature, TemperatureLimit = temperatureLimit, AvailableWater = availableWater, WaterLimit = waterLimit };
-                }
-
-                // calculate soil moisture and temperature for decomposition
-                MonthlySoilTemperatureDecomp[month] = AverageOverProfile(giplResults.AverageSoilTemperatureProfileAtShawDepths, 0.0, DecompositionDepth);
-                MonthlySoilMoistureDecomp[month] = IntegrateOverProfile(shawResults.MonthSoilMoistureProfile, 0.0, DecompositionDepth);
-
-                // stop for debugging
-                //if (month == 1)
-                //    break;
-            }
         }
 
         #endregion

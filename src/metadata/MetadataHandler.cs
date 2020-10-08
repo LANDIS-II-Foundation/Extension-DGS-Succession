@@ -42,6 +42,8 @@ namespace Landis.Extension.Succession.DGS
             Outputs.primaryLog = new MetadataTable<PrimaryLog>("DGS-succession-log.csv");
             Outputs.primaryLogShort = new MetadataTable<PrimaryLogShort>("DGS-succession-log-short.csv");
             Outputs.monthlyLog = new MetadataTable<MonthlyLog>("DGS-succession-monthly-log.csv");
+            Outputs.reproductionLog = new MetadataTable<ReproductionLog>("NECN-reproduction-log.csv");
+            Outputs.establishmentLog = new MetadataTable<EstablishmentLog>("NECN-prob-establish-log.csv");
 
             OutputMetadata tblOut_monthly = new OutputMetadata()
             {
@@ -72,14 +74,34 @@ namespace Landis.Extension.Succession.DGS
             };
             tblOut_primaryShort.RetriveFields(typeof(PrimaryLogShort));
             Extension.OutputMetadatas.Add(tblOut_primaryShort);
-            
+
+            OutputMetadata tblOut_repro = new OutputMetadata()
+            {
+                Type = OutputType.Table,
+                Name = "ReproductionLog",
+                FilePath = Outputs.reproductionLog.FilePath,
+                Visualize = false,
+            };
+            tblOut_repro.RetriveFields(typeof(ReproductionLog));
+            Extension.OutputMetadatas.Add(tblOut_repro);
+
+            OutputMetadata tblOut_pest = new OutputMetadata()
+            {
+                Type = OutputType.Table,
+                Name = "EstablishmentLog",
+                FilePath = Outputs.establishmentLog.FilePath,
+                Visualize = false,
+            };
+            tblOut_repro.RetriveFields(typeof(EstablishmentLog));
+            Extension.OutputMetadatas.Add(tblOut_pest);
+
             //---------------------------------------            
             //          map outputs:         
             //---------------------------------------
             if (ANPPMapNames != null)
             {
                 PlugIn.ModelCore.UI.WriteLine("  ANPP Map Names = \"{0}\" ...", ANPPMapNames);
-                //string[] paths = { @"DGS", "AG_NPP-{timestep}.img" };
+                string[] paths = { @"DGS", "AG_NPP-{timestep}.img" };
                 OutputMetadata mapOut_ANPP = new OutputMetadata()
                 {
                     Type = OutputType.Map,
@@ -95,6 +117,7 @@ namespace Landis.Extension.Succession.DGS
 
             if (ANEEMapNames != null)
             {
+                string[] paths = { @"DGS", "NEE-{timestep}.img" };
                 OutputMetadata mapOut_Nee = new OutputMetadata()
                 {
                     Type = OutputType.Map,
@@ -108,6 +131,7 @@ namespace Landis.Extension.Succession.DGS
             }
             if (SoilCarbonMapNames != null)
             {
+                string[] paths = { @"DGS", "SOC-{timestep}.img" };
                 OutputMetadata mapOut_SOC = new OutputMetadata()
                 {
                     Type = OutputType.Map,
@@ -121,6 +145,7 @@ namespace Landis.Extension.Succession.DGS
             }
             if (SoilNitrogenMapNames != null)
             {
+                string[] paths = { @"DGS", "SON-{timestep}.img" };
                 OutputMetadata mapOut_SON = new OutputMetadata()
                 {
                     Type = OutputType.Map,
@@ -134,6 +159,7 @@ namespace Landis.Extension.Succession.DGS
             }
             if (TotalCMapNames != null)
             {
+                string[] paths = { @"DGS", "TotalC-{timestep}.img" };
                 OutputMetadata mapOut_TotalC = new OutputMetadata()
                 {
                     Type = OutputType.Map,

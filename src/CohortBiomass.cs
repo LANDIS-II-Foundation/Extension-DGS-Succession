@@ -210,10 +210,8 @@ namespace Landis.Extension.Succession.DGS
 
             double competition_limit = calculateCompetition_Limit(cohort, site);
 
-            //double potentialNPP_NoN = maxNPP * limitLAI * limitH20 * limitT; // * limitCapacity;
             double potentialNPP = maxNPP * limitLAI * limitH20 * limitT * competition_limit;
-            //double potentialNPP = maxNPP * limitLAI * limitH20 * limitT * limitCapacity;
-
+            
             double limitN = calculateN_Limit(site, cohort, potentialNPP, leafFractionNPP);
 
             potentialNPP *= limitN;
@@ -319,24 +317,25 @@ namespace Landis.Extension.Succession.DGS
         /// <summary>
         /// Monthly mortality as a function of standing leaf and wood biomass.
         /// </summary>
-        //private double[] ComputeGrowthMortality(ICohort cohort, ActiveSite site)
         private double[] ComputeGrowthMortality(ICohort cohort, ActiveSite site, double siteBiomass, double[] AGNPP)
         {
 
             double maxBiomass = SpeciesData.Max_Biomass[cohort.Species];
             double NPPwood = (double)AGNPP[0];
             
-            double M_wood = cohort.WoodBiomass * FunctionalType.Table[SpeciesData.FuncType[cohort.Species]].MonthlyWoodMortality;
+            double M_wood_fixed = cohort.WoodBiomass * FunctionalType.Table[SpeciesData.FuncType[cohort.Species]].MonthlyWoodMortality;
             double M_leaf = 0.0;
 
             double relativeBiomass = siteBiomass / maxBiomass;
             double M_constant = 5.0;  //This constant controls the rate of change of mortality with NPP
 
-            //Functon which calculates an adjustment factor for mortality that ranges from 0 to 1 and exponentially increases with relative biomass.
-            double M_wood_relative = Math.Max(0.0, (Math.Exp(M_constant * relativeBiomass) - 1) / (Math.Exp(M_constant) - 1));
+            //Function which calculates an adjustment factor for mortality that ranges from 0 to 1 and exponentially increases with relative biomass.
+            double M_wood_NPP = Math.Max(0.0, (Math.Exp(M_constant * relativeBiomass) - 1.0) / (Math.Exp(M_constant) - 1.0));
+            M_wood_NPP = Math.Min(M_wood_NPP, 1.0);
 
             //This function calculates mortality as a function of NPP 
-             M_wood = NPPwood * M_wood_relative;
+            //M_wood = NPPwood * M_wood_relative;
+            double M_wood = (NPPwood * M_wood_NPP) + M_wood_fixed;
 
             // Leaves and Needles dropped.
             if (SpeciesData.LeafLongevity[cohort.Species] > 1.0) 
@@ -486,7 +485,7 @@ namespace Landis.Extension.Succession.DGS
         {
 
             //Get Cohort Mineral and Resorbed N allocation.
-            double mineralNallocation = AvailableN.GetMineralNallocation(cohort, site);
+            double mineralNallocation = AvailableN.GetMineralNallocation(cohort, site);  // NECN only does it for a cohort, not site.
             double resorbedNallocation = AvailableN.GetResorbedNallocation(cohort, site);
 
             //double LeafNPP = Math.Max(NPP * leafFractionNPP, 0.002 * cohort.WoodBiomass);  This allowed for Ndemand in winter when there was no leaf NPP
@@ -592,8 +591,8 @@ namespace Landis.Extension.Succession.DGS
             // The minimum LAI to calculate effect is 0.1.
             if (lai < 0.1) lai = 0.1;
 
-            if(Main.Month == 6)
-                SiteVars.LAI[site] += lai; //Tracking LAI.
+            //if(Main.Month == 6)
+            //    SiteVars.LAI[site] += lai; //Tracking LAI.
 
             SiteVars.MonthlyLAI[site][Main.Month] += lai;
 
@@ -673,7 +672,7 @@ namespace Landis.Extension.Succession.DGS
 
                 var startingDepth = hasAdventRoots ? 0.0 : SpeciesData.AdventitiousLayerDepth;
 
-                availableWater = AverageOrIntegrateOverProfile(false, thu.MonthlyShawDammResults[Main.Month].MonthSoilMoistureProfile, thu.ShawDepths, thu.ShawDepthIncrements, startingDepth, rootingdepth);
+                availableWater = AverageOrIntegrateOverProfile(false, thu.MonthlyShawDammResults[Main.Month].MonthSoilLiquidWaterProfile, thu.ShawDepths, thu.ShawDepthIncrements, startingDepth, rootingdepth);
             }
             else
             {

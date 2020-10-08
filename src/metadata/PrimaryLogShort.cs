@@ -25,8 +25,7 @@ namespace Landis.Extension.Succession.DGS
         public double AG_NPPC { get; set; }
         
         [DataFieldAttribute(Unit = FieldUnits.g_N_m2, Desc = "Mineral N", Format = "0.00")]
-        public double MineralN { get; set; }
-        
+        public double MineralN { get; set; }        
 
         [DataFieldAttribute(Unit = FieldUnits.g_C_m2, Desc = "Dead Wood C", Format = "0.0")]
         public double C_DeadWood { get; set; }

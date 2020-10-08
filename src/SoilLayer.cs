@@ -5,17 +5,19 @@ using Landis.SpatialModeling;
 using Landis.Utilities;
 using System;
 using Landis.Library.Climate;
+using Landis.Library.LeafBiomassCohorts;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace Landis.Extension.Succession.DGS
 {
-    public enum SoilName { Primary, AvailableSoilC};
+    public enum SoilName { Primary, Available};
     /// <summary>
     /// </summary>
     public class SoilLayer
     {
 
-        private SoilName name;
-        //private LayerType type;
+        private SoilName name;        
         private double o_carbon;
         private double o_nitrogen;
         private double do_carbon;
@@ -23,18 +25,12 @@ namespace Landis.Extension.Succession.DGS
         private double microbial_carbon;
         private double microbial_nitrogen;
         private double enzymatic_concentration;
-        private double monthlyCinputs;
-        //private double decayValue;
-        //private double fractionLignin;
-        //private double netMineralization;
-        //private double grossMineralization;
-
-
+        private double monthlyCinputs;       
+        
         //---------------------------------------------------------------------
         public SoilLayer(SoilName name)//, LayerType type)
         {
-            this.name = name;
-            //this.type = type;
+            this.name = name;            
             this.o_carbon = 0.0;
             this.o_nitrogen = 0.0;
             this.do_carbon = 0.0;
@@ -153,10 +149,11 @@ namespace Landis.Extension.Succession.DGS
                 microbial_nitrogen = value;
             }
         }
+
         //---------------------------------------------------------------------
 
         /// <summary>
-        /// Enzymatic Concentration
+        /// Microbial Nitrogen
         /// </summary>
         public double EnzymaticConcentration
         {
@@ -170,6 +167,7 @@ namespace Landis.Extension.Succession.DGS
             }
         }
 
+        //---------------------------------------------------------------------
         /// Inputs to litter pool= roots, wood, litterfall.
         /// </summary>
         public double MonthlyCarbonInputs
@@ -184,43 +182,41 @@ namespace Landis.Extension.Succession.DGS
             }
         }
 
-
-        // used fitted values from Abramoff et al. or values from Vogel when applicable. NOTE:  p[n] indicates the field from the prior csv input file.
-        private static double ea_dep = 66.2675487981142;        //p[1]  #activation energy of SOM depolymerization
-        private static double ea_upt = 67.8225452963818;        //p[2]  #activation energy of DOC uptake
-        private static double a_dep = 116986794418;         //p[3]   #pre-exponential constant for SOM depolymerization
-        private static double a_upt = 115130563903;         //p[4]  #pre-exponential constant for uptake
-        //private static double frac = 0.000378981;          //p[5]  #fraction of unprotected SOM, Magill et al. 2000
-        private static double frac = 0.0004048;          //p[5]  # Vogel fraction of unprotected SOM
-                                                           // p[6] 0.000466501;  NOT USED
-                                                           // p[7] 0.000486085;  NOT USED
-                                                           //private static double cn_litter = 50.56466;     //p[8] #C:N of litter (was: cnl) Used in line 324
-        private static double cn_litter = 24.59;     //p[8] #C:N of litter (was: cnl) Used in line 324
-        //public static double CN_DOCN = 29.60162;         //p[9] #C:N of soil (was: cns)  // Rob: only used for initializing DON
-        //private static double cn_microbial = 9.803885526;  //p[10] #C:N of microbial biomass (was: cnm)
-        private static double cn_microbial = 17.783;  //p[10] #C:N of microbial biomass, Vogel
-        private static double cn_enzymes = 2.86940;    //p[11] #C:N of enzymes (was: cne)
-        private static double km_dep = 0.00249;        //p[12] #half-saturation constant for SOM depolymerization
-        private static double km_upt = 0.33217;
-                    //p[13] #half-saturation constant for DOC uptake
-        private static double r_ecloss = 0.00095780;       //p[14] #enzyme turnover rate
-        private static double r_death = 0.0001437;       //p[15] #microbial turnover rate
-        private static double c_use_efficiency = 0.357329;           //p[16] #carbon use efficiency (was: cue)
-        private static double p_enz_SOC = 0.522748;      //p[17] #proportion of enzyme pool acting on SOC (was: a)
-        private static double pconst = 0.551334;
-                    //p[18] #proportion of assimilated C allocated to enzyme production
-        private static double qconst = 0.50446;
-                    //p[19] #proportion of assimilated N allocated to enzyme production
-        private static double mic_to_som = 0.551334;    //p[20] #fraction of dead microbial biomass allocated to SOM
-        private static double km_o2 = 0.128;         //p[21] #Michaelis constant for O2
-        private static double dgas = 1.676;          //p[22] #diffusion coefficient for O2 in air
-        private static double dliq = 3.3386;          //p[23] #diffusion coefficient for unprotected SOM and DOM in liquid
-        private static double o2airfrac = 0.205165;     //p[24] #volume fraction of O2 in air
-        //private double bulk_density = 0.75743956;         //p[25] #bulk density (was: bd)
-        //private double particle_density = 2.50156948;     //p[26] #particle density (was: pd)
-        private static double soilMoistureA = 1.95;  //p[27]
-        //private static double soilMoistureA = 0.0001;  //p[27]
-        private static double soilMoistureB = 10.0;  //p[28]                     
+        // Beginning of DAMM code      
+        // used fitted values from Abramoff et al. or added to input file when applicable. NOTE:  p[n] indicates the field from the prior csv input file.
+        //private static double ea_dep = 66.2675487981142;        //p[1]  #activation energy of SOM depolymerization, ea_dep
+        //private static double ea_upt = 67.8225452963818;        //p[2]  #activation energy of DOC uptake
+        //private static double a_dep = 116986794418;         //p[3]   #pre-exponential constant for SOM depolymerization
+        //private static double a_upt = 115130563903;         //p[4]  #pre-exponential constant for DOC uptake
+        ////private static double frac = 0.000378981;          //p[5]  #fraction of unprotected SOM, Magill et al. 2000
+        //private static double frac = 0.0004048;          //p[5]  # Vogel fraction of unprotected SOM
+        //                                                   // p[6] 0.000466501;  NOT USED
+        //                                                   // p[7] 0.000486085;  NOT USED                                                          
+        //private static double cn_litter = 24.59;     //p[8] #C:N of litter (was: cnl), cn_litter = 50.56466, Used in line 324  
+        ////public static double CN_DOCN = 29.60162;         //p[9] #C:N of soil (was: cns)  // Rob: only used for initializing DON
+        ////private static double cn_microbial = 9.803885526;  //p[10] #C:N of microbial biomass (was: cnm)
+        //private static double microbial_C = 1.9703;  //double microbial_C = 1.9703 (Rose);               
+        //private static double microbial_N = 0.197;  //double microbial_N = 0.197 (Rose);
+        //private static double cn_microbial = 17.783;  //p[10] #C:N of microbial biomass, Vogel
+        //private static double enzymatic_concentration = 0.0339; // (Rose)  
+        //private static double cn_enzymes = 2.86940;    //p[11] #C:N of enzymes (was: cne) Rose = 3.00 
+        //private static double km_dep = 0.00249;        //p[12] #half-saturation constant for SOM depolymerization, Rose= 
+        //private static double km_upt = 0.33217;        //p[13] #half-saturation constant for DOC uptake
+        //private static double r_ecloss = 0.00095780;       //p[14] #enzyme turnover rate
+        //private static double r_death = 0.0001437;       //p[15] #microbial turnover rate
+        //private static double c_use_efficiency = 0.357329;           //p[16] #carbon use efficiency (was: cue)
+        //private static double p_enz_SOC = 0.522748;      //p[17] #proportion of enzyme pool acting on SOC (was: a)
+        //private static double pconst = 0.551334;   //p[18] #proportion of assimilated C allocated to enzyme production
+        //private static double qconst = 0.50446;       //p[19] #proportion of assimilated N allocated to enzyme production
+        //private static double mic_to_som = 0.551334;    //p[20] #fraction of dead microbial biomass allocated to SOM
+        //private static double km_o2 = 0.128;         //p[21] #Michaelis constant for O2
+        //private static double dgas = 1.676;          //p[22] #diffusion coefficient for O2 in air
+        //private static double dliq = 3.3386;          //p[23] #diffusion coefficient for unprotected SOM and DOM in liquid
+        //private static double o2airfrac = 0.205165;     //p[24] #volume fraction of O2 in air
+        ////private double bulk_density = 0.75743956;         //p[25] #bulk density (was: bd)
+        ////private double particle_density = 2.50156948;     //p[26] #particle density (was: pd)
+        //private static double soilMoistureA = 1.95;  //p[27]  //was soilMoistureA = 0.0001; 
+        //private static double soilMoistureB = 10.0;  //p[28]                     
         private static double saturation = 0.492526227563312;     //p[29] #saturation level (was: sat)
         public static double r = 0.008314;                 // gas constant
 
@@ -233,8 +229,23 @@ namespace Landis.Extension.Succession.DGS
             var soilTemperature = 0.0;
             var availableWater = 0.0;
 
+            // average the LeafCn across the species on the site
+            var leafCNs = new List<double>();
+            foreach (ISpeciesCohorts speciesCohorts in SiteVars.Cohorts[site])
+            {
+                foreach (ICohort cohort in speciesCohorts)
+                {
+                    leafCNs.Add(SpeciesData.LeafCN[cohort.Species]);
+                }
+            }
+
+            if (!leafCNs.Any())
+                throw new ApplicationException($"Error: SoilLayer.Decompose(): no species in site '{site}'.  Cannot average LeafCN across species.");
+
+            var cn_litter = leafCNs.Average();
+            
             double soc_available = SocAvailableForRespiration(site, month);
-            SiteVars.AvailableSoilC[site].Carbon = soc_available;
+            SiteVars.SoilAvailable[site].Carbon = soc_available;
 
             if (soc_available < 0.0000001)
             {
@@ -274,41 +285,60 @@ namespace Landis.Extension.Succession.DGS
             //}           
 
             // convert Landis units to Rose's units, * g_to_mg) / (m2_to_cm2)   
-
-
-            //double SOC = (soc_available * g_to_mg) / (m2_to_cm2 * depth_to_volume);
+         
             SOC *= g_to_mg / (m2_to_cm2 * depth_to_volume);
-            double soc_available_DAMM = (soc_available * g_to_mg) / (m2_to_cm2 * depth_to_volume);
-            //SOC = 65.25; //(Rose);
+            double soc_available_DAMM = (soc_available * g_to_mg) / (m2_to_cm2 * depth_to_volume);  //SOC = 65.25; //(Rose);
             double son_available_DAMM = (soc_available_DAMM * SiteVars.SoilPrimary[site].Nitrogen)/ SiteVars.SoilPrimary[site].Carbon;
-            double SON = (SiteVars.SoilPrimary[site].Nitrogen * g_to_mg) / (m2_to_cm2 * depth_to_volume);
-            //double SON = 2.1917; //(Rose);
-            //double bulk_density = SiteVars.SoilBulkDensity[site];   //double bulk_density = 0.0377 (Jason);
-            //double bulk_density = 0.156152207886358;   //original testing
-            double bulk_density = 0.0377; //Jason
-                //double particle_density = 1.11176644135636; //original testing.
-                double particle_density = SiteVars.SoilParticleDensity[site]; //double particle_density = 0.8877 (Jason);               
-                double DOC = (SiteVars.SoilPrimary[site].DOC * g_to_mg) / (m2_to_cm2 * depth_to_volume);
-                //double DOC = 0.0020000000;
-                double DON = (SiteVars.SoilPrimary[site].DON * g_to_mg) / (m2_to_cm2 * depth_to_volume);
-                //double DON = 0.0011;
-                double microbial_C = SiteVars.SoilPrimary[site].MicrobialCarbon;  //double microbial_C = 1.9703 (Rose);               
-                double microbial_N = SiteVars.SoilPrimary[site].MicrobialNitrogen;  //double microbial_N = 0.197 (Rose);
-                double enzymatic_concentration = SiteVars.SoilPrimary[site].EnzymaticConcentration;  //double enzymatic_concentration = 0.0339 (Rose);   
+            double SON = (SiteVars.SoilPrimary[site].Nitrogen * g_to_mg) / (m2_to_cm2 * depth_to_volume);  //double SON = 2.1917; //(Rose);
+            double bulk_density = SiteVars.SoilBulkDensity[site];   //double bulk_density = 0.0377 (Jason), bulk_density = 0.156152207886358 for original testing        
+            double particle_density = SiteVars.SoilParticleDensity[site]; //double particle_density = 0.8877 (Jason); particle_density = 1.11176644135636; in original testing.            
+            double DOC = (SiteVars.SoilPrimary[site].DOC * g_to_mg) / (m2_to_cm2 * depth_to_volume);  //double DOC = 0.0020000000;
+            double DON = (SiteVars.SoilPrimary[site].DON * g_to_mg) / (m2_to_cm2 * depth_to_volume);  //double DON = 0.0011;
+                                                                                                      //double microbial_C = SiteVars.SoilPrimary[site].MicrobialCarbon;  //double microbial_C = 1.9703 (Rose);               
+                                                                                                      //double microbial_N = SiteVars.SoilPrimary[site].MicrobialNitrogen;  //double microbial_N = 0.197 (Rose);            
+                                                                                                      //double enzymatic_concentration = SiteVars.SoilPrimary[site].EnzymaticConcentration;  //double enzymatic_concentration = 0.0339 (Rose);   
+
             double gross_mineralizaton = SiteVars.GrossMineralization[site] * g_to_mg / (m2_to_cm2 * depth_to_volume);
             double mineralN = SiteVars.MineralN[site] * g_to_mg / (m2_to_cm2 * depth_to_volume);
+            double microbial_C = SiteVars.SoilPrimary[site].MicrobialCarbon;
+            double microbial_N = SiteVars.SoilPrimary[site].MicrobialNitrogen;
+            double cn_microbial = SiteVars.SoilPrimary[site].MicrobialCarbon/SiteVars.SoilPrimary[site].MicrobialNitrogen;
+            double enzymatic_concentration = SiteVars.SoilPrimary[site].EnzymaticConcentration;
+
             // Splitting C inputs into 50% litter and 50% DOC at the onset.
             double LitterCinput = (SiteVars.SoilPrimary[site].MonthlyCarbonInputs * (0.5) * g_to_mg) / (m2_to_cm2 * month_to_hr * depth_to_volume);  // Using 70/30 division.
             double DOCinput= (SiteVars.SoilPrimary[site].MonthlyCarbonInputs * (0.5) * g_to_mg) / (m2_to_cm2 * month_to_hr * depth_to_volume);
+            //double cn_litter = SpeciesData.LeafLitterCN[species];  //Using soil CN, though would be best to use Litter C/N. ML
             // Splitting C inputs into 50% litter and 50% DOC at the onset.
             //double LitterCinput = 0.00057;  //Jason's value at an hourly rate.
             //double DOCinput = 0.00057;  //Jason's value at an hourly rate.
 
-            //PlugIn.ModelCore.UI.WriteLine("Inputs in Rose's units. LitterCinput={0:0.000000000000}, DON={1:0.0000000}, microbial_C={2:0.00}, microbial_N={3:0.000000}, enzymatic_concentration={4:0.000000}, DOC={5:0.0000000},", LitterCinput, DON, microbial_C, microbial_N, enzymatic_concentration, DOC);
+            var ea_dep = PlugIn.Parameters.ActEnergySOMDepoly;
+            var ea_upt = PlugIn.Parameters.ActEnergyDOCUptake;
+            var a_dep = PlugIn.Parameters.ExpConstSOMDepoly;
+            var a_upt = PlugIn.Parameters.ExpConstDOCUptake;
+            var frac = PlugIn.Parameters.FractionSOMUnprotect;
+            var cn_enzymes = PlugIn.Parameters.CNEnzymes;
+            var km_dep = PlugIn.Parameters.KmSOMDepoly;
+            var km_upt = PlugIn.Parameters.KmDOCUptake;
+            var r_death = PlugIn.Parameters.EnzTurnRate;
+            var r_ecloss = PlugIn.Parameters.MicrobialTurnRate;
+            var c_use_efficiency = PlugIn.Parameters.CarbonUseEfficiency;
+            var p_enz_SOC = PlugIn.Parameters.PropEnzymeSOM;
+            var pconst = PlugIn.Parameters.PropEnzymeSOM;
+            var qconst = PlugIn.Parameters.PropNEnzymeProduction;
+            var mic_to_som = PlugIn.Parameters.FractDeadMicrobialBiomassSOM;
+            var km_o2 = PlugIn.Parameters.MMConstantO2;
+            var dgas = PlugIn.Parameters.DiffConstantO2;
+            var dliq = PlugIn.Parameters.DiffConstantSOMLiquid;
+            var o2airfrac = PlugIn.Parameters.FractionVolumeO2;
+            var soilMoistureA = PlugIn.Parameters.DiffConstantSOMLiquid;
+            var soilMoistureB = PlugIn.Parameters.FractionVolumeO2;
 
+            //calculate porosity 
             double porosity = 1 - bulk_density / particle_density;
             double co2loss= SiteVars.MonthlyResp[site][Main.Month];
-            //calculate porosity                
+            
             var cout_old = 0.0;
 
             for (int hours = 0; hours < month_to_hr; hours++)

@@ -23,10 +23,10 @@ namespace Landis.Extension.Succession.DGS
         [DataFieldAttribute(Unit = FieldUnits.Count, Desc = "Number of Sites")]
         public int NumSites { set; get; }
 
-        [DataFieldAttribute(Unit = FieldUnits.cm, Desc = "Precipitation", Format = "0.0")]
+        [DataFieldAttribute(Unit = FieldUnits.cm, Desc = "Precipitation", Format = "0.00")]
         public double ppt {get; set;}
 
-        [DataFieldAttribute(Unit = FieldUnits.DegreeC, Desc = "Air Temperature", Format = "0.0")]
+        [DataFieldAttribute(Unit = FieldUnits.DegreeC, Desc = "Air Temperature", Format = "0.00")]
         public double airtemp { get; set; }
 
         //[DataFieldAttribute(Unit = FieldUnits.DegreeC, Desc = "Soil Temperature", Format = "0.0")]
@@ -35,13 +35,13 @@ namespace Landis.Extension.Succession.DGS
         [DataFieldAttribute(Unit = FieldUnits.g_C_m2, Desc = "Aboveground NPP C", Format = "0.00")]
         public double avgNPPtc { get; set; }
 
-        [DataFieldAttribute(Unit = FieldUnits.g_C_m2, Desc = "Aboveground Heterotrophic Respiration", Format = "0.00")]
+        [DataFieldAttribute(Unit = FieldUnits.g_C_m2, Desc = "Heterotrophic Respiration", Format = "0.00")]
         public double avgResp { get; set; }
 
         [DataFieldAttribute(Unit = FieldUnits.g_C_m2, Desc = "Net Ecosystem Exchange", Format = "0.00")]
         public double avgNEE { get; set; }
 
-        [DataFieldAttribute(Unit = FieldUnits.g_N_m2, Desc = "N Deposition and Fixation", Format = "0.00")]
+        [DataFieldAttribute(Unit = FieldUnits.g_N_m2, Desc = "N Deposition", Format = "0.00")]
         public double Ndep { get; set; }
 
         [DataFieldAttribute(Unit = FieldUnits.g_N_m2, Desc = "N Leaching", Format = "0.00")]

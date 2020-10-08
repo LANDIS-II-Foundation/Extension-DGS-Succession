@@ -225,14 +225,14 @@ namespace Landis.Extension.Succession.DGS
 
             // Soil Organic Matter (Duff)
 
-            //carbonLoss = Math.Round(SiteVars.SOM1surface[site].Carbon * som_Multiplier, 2);
-            //nitrogenLoss = Math.Round(SiteVars.SOM1surface[site].Nitrogen * som_Multiplier, 2);
+            carbonLoss = Math.Round(SiteVars.SoilAvailable[site].Carbon * som_Multiplier, 2);
+            nitrogenLoss = Math.Round(SiteVars.SoilPrimary[site].Nitrogen * som_Multiplier, 2);
 
-            //SiteVars.SOM1surface[site].Carbon -= carbonLoss;
-            //SiteVars.SourceSink[site].Carbon += carbonLoss;
+            SiteVars.SoilAvailable[site].Carbon -= carbonLoss;
+            SiteVars.SoilPrimary[site].Carbon += carbonLoss;
 
-            //SiteVars.SOM1surface[site].Nitrogen -= nitrogenLoss;
-            //SiteVars.SourceSink[site].Nitrogen += nitrogenLoss;
+            SiteVars.SoilAvailable[site].Nitrogen -= nitrogenLoss;
+            SiteVars.SoilPrimary[site].Nitrogen += nitrogenLoss;
 
         }
 

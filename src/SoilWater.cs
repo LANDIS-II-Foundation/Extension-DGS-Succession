@@ -7,6 +7,7 @@ using System.Globalization;
 using Landis.Core;
 using Landis.SpatialModeling;
 using Landis.Library.Climate;
+using System.Linq;
 
 namespace Landis.Extension.Succession.DGS
 {
@@ -26,44 +27,24 @@ namespace Landis.Extension.Succession.DGS
         private static int beginGrowing;
         private static int endGrowing;
 
-        public static void Run(int year, int month, double liveBiomass, Site site, out double baseFlow, out double stormFlow, out double AET)
+        //public static void Run(int year, int month, double liveBiomass, Site site, out double baseFlow, out double stormFlow, out double AET)
+        public static void Run(int year, int month, double liveBiomass, Site site, out double baseFlow, out double stormFlow)
         {
 
-            //Originally from h2olos.f of CENTURY model
-            //Water Submodel for Century - written by Bill Parton
-            //     Updated from Fortran 4 - rm 2/92
-            //     Rewritten by Bill Pulliam - 9/94
-            //     Rewritten by Melissa Lucash- 11/2014
-
-            //PlugIn.ModelCore.UI.WriteLine("month={0}.", Main.Month);
-
-            //...Initialize Local Variables
-            double addToSoil = 0.0;
-            double bareSoilEvap = 0.0;
+            
             baseFlow = 0.0;
-            double relativeWaterContent = 0.0;
-            double snow = 0.0;
             stormFlow = 0.0;
-            double actualET = 0.0;
-            double remainingPET = 0.0;
-            double availableWaterMax = 0.0;  //amount of water available after precipitation and snowmelt (over-estimate of available water)
-            double availableWaterMin = 0.0;   //amount of water available after stormflow (runoff) evaporation and transpiration, but before baseflow/leaching (under-estimate of available water)
-            double availableWater = 0.0;     //amount of water deemed available to the trees, which will be the average between the max and min
-            double priorWaterAvail = SiteVars.AvailableWater[site];
+            double availableWater = 0.0;
+            double priorWaterAvail = 0.0;
 
-            //...Calculate external inputs
+            ////...Calculate external inputs
             IEcoregion ecoregion = PlugIn.ModelCore.Ecoregion[site];
-
-            double litterBiomass = (SiteVars.SurfaceStructural[site].Carbon + SiteVars.SurfaceMetabolic[site].Carbon) * 2.0;
-            double deadBiomass = SiteVars.SurfaceDeadWood[site].Carbon / 0.47;
-            double soilWaterContent = SiteVars.SoilWaterContent[site];
-            double liquidSnowpack = SiteVars.LiquidSnowPack[site];
 
             H2Oinputs = ClimateRegionData.AnnualWeather[ecoregion].MonthlyPrecip[month]; //rain + irract in cm;
             Precipitation = ClimateRegionData.AnnualWeather[ecoregion].MonthlyPrecip[month]; //rain + irract in cm;
-            //PlugIn.ModelCore.UI.WriteLine("SoilWater. WaterInputs={0:0.00}, .", H2Oinputs);
+            
             tave = ClimateRegionData.AnnualWeather[ecoregion].MonthlyTemp[month];
-            //PlugIn.ModelCore.UI.WriteLine("SoilWater. AvgTemp={0:0.00}, .", tave);
+            
             tmax = ClimateRegionData.AnnualWeather[ecoregion].MonthlyMaxTemp[month];
             tmin = ClimateRegionData.AnnualWeather[ecoregion].MonthlyMinTemp[month];
             pet = ClimateRegionData.AnnualWeather[ecoregion].MonthlyPET[month];
@@ -71,170 +52,24 @@ namespace Landis.Extension.Succession.DGS
             beginGrowing = ClimateRegionData.AnnualWeather[ecoregion].BeginGrowing;
             endGrowing = ClimateRegionData.AnnualWeather[ecoregion].EndGrowing;
 
-            double wiltingPoint = SiteVars.SoilWiltingPoint[site];
-            double soilDepth = SiteVars.SoilDepth[site];
-            double fieldCapacity = SiteVars.SoilFieldCapacity[site];
+            double wiltingPoint = SiteVars.SoilWiltingPoint[site];            
+            availableWater = SiteVars.AvailableWater[site];
             double stormFlowFraction = SiteVars.SoilStormFlowFraction[site];
             double baseFlowFraction = SiteVars.SoilBaseFlowFraction[site];
             double drain = SiteVars.SoilDrain[site];
 
 
-            //...Calculating snow pack first. Occurs when mean monthly air temperature is equal to or below freezing,
-            //     precipitation is in the form of snow.
-
-            if (tmin <= 0.0) // Use tmin to dictate whether it snows or rains. 
-            {
-                snow = H2Oinputs;
-                H2Oinputs = 0.0;
-                liquidSnowpack += snow;  //only tracking liquidsnowpack (water equivalent) and not the actual amount of snow on the ground (i.e. not snowpack).
-                //PlugIn.ModelCore.UI.WriteLine("Let it snow!! snow={0}, liquidsnowpack={1}.", snow, liquidSnowpack);
-            }
-            else
-            {
-                soilWaterContent += H2Oinputs;
-                //PlugIn.ModelCore.UI.WriteLine("Let it rain and add it to soil! rain={0}, soilWaterContent={1}.", H2Oinputs, soilWaterContent);
-            }
-
-
-            //...Then melt snow if there is snow on the ground and air temperature (tmax) is above minimum.            
-            if (liquidSnowpack > 0.0 && tmax > 0.0)
-            {
-                //...Calculate the amount of snow to melt:
-                //This relationship ultimately derives from http://www.nps.gov/yose/planyourvisit/climate.htm which described the relationship between snow melting and air temp.
-                //Documentation for the regression equation is in spreadsheet called WaterCalcs.xls by M. Lucash
-                double snowMeltFraction = Math.Max((tmax * 0.05) + 0.024, 0.0);//This equation assumes a linear increase in the fraction of snow that melts as a function of air temp.  
-
-                if (snowMeltFraction > 1.0)
-                    snowMeltFraction = 1.0;
-
-                addToSoil = liquidSnowpack * snowMeltFraction;  //Amount of liquidsnowpack that melts = liquidsnowpack multiplied by the fraction that melts.
-
-                //Subtracted melted snow from snowpack and add it to the soil
-                liquidSnowpack = liquidSnowpack - addToSoil;
-                soilWaterContent += addToSoil;
-            }
-
-            //Calculate the max amout of water available to trees, an over-estimate of the water available to trees.  It only reflects precip and melting of precip.
-            availableWaterMax = soilWaterContent;
-
-            //...Evaporate water from the snow pack (rewritten by Pulliam 9/94)
-            //...Coefficient 0.87 relates to heat of fusion for ice vs. liquid water
-            if (liquidSnowpack > 0.0)
-            {
-                //...Calculate cm of snow that remaining pet energy can evaporate:
-                double evaporatedSnow = pet * 0.87;
-
-                //...Don't evaporate more snow than actually exists:
-                if (evaporatedSnow > liquidSnowpack)
-                    evaporatedSnow = liquidSnowpack;
-
-                liquidSnowpack = liquidSnowpack - evaporatedSnow;
-
-                //...Decrement remaining pet by energy used to evaporate snow:
-                remainingPET = pet - evaporatedSnow;
-
-                if (remainingPET < 0.0)
-                    remainingPET = 0.0;
-
-                //Subtract evaporated snowfrom the soil water content
-                soilWaterContent -= evaporatedSnow;
-            }
-
-            //Allow excess water to run off during storm events (stormflow)
-            double waterFull = soilDepth * fieldCapacity;  //units of cm
-
-            double waterMovement = 0.0;
-
-            if (soilWaterContent > waterFull)
-            {
-
-                waterMovement = Math.Max((soilWaterContent - waterFull), 0.0); // How much water should move during a storm event, which is based on how much water the soil can hold.
-                soilWaterContent = waterFull;
-
-                //...Compute storm flow.
-                stormFlow = waterMovement * stormFlowFraction;
-
-                //Subtract stormflow from soil water
-                soilWaterContent -= stormFlow;
-                //PlugIn.ModelCore.UI.WriteLine("Water Runs Off. stormflow={0}.", stormFlow);
-            }
-
-            //...Calculate bare soil water loss and interception  when air temperature is above freezing and no snow cover.
-            //...Mofified 9/94 to allow interception when t < 0 but no snow cover, Pulliam
-            if (liquidSnowpack <= 0.0)
-            {
-                //...Calculate total canopy cover and litter, put cap on effects:
-                double standingBiomass = liveBiomass + deadBiomass;
-
-                if (standingBiomass > 800.0) standingBiomass = 800.0;
-                if (litterBiomass > 400.0) litterBiomass = 400.0;
-
-                //...canopy interception, fraction of  precip (canopyIntercept):
-                double canopyIntercept = ((0.0003 * litterBiomass) + (0.0006 * standingBiomass)) * OtherData.WaterLossFactor1;
-
-                //...Bare soil evaporation, fraction of precip (bareSoilEvap):
-                bareSoilEvap = 0.5 * System.Math.Exp((-0.002 * litterBiomass) - (0.004 * standingBiomass)) * OtherData.WaterLossFactor2;
-
-                //...Calculate total surface evaporation losses, maximum allowable is 0.4 * pet. -rm 6/94
-                remainingPET = pet;
-                double soilEvaporation = System.Math.Min(((bareSoilEvap + canopyIntercept) * H2Oinputs), (0.4 * remainingPET));
-
-                //Subtract soil evaporation from soil water content
-                soilWaterContent -= soilEvaporation;
-            }
-
-            // Calculate actual evapotranspiration.  This equation is derived from the stand equation for calculating AET from PET
-            //  Bergström, 1992
-
-            double waterEmpty = wiltingPoint * soilDepth;
-
-            if (soilWaterContent > waterFull)
-                actualET = remainingPET;
-            else
-            {
-                actualET = Math.Max(remainingPET * ((soilWaterContent - waterEmpty) / (waterFull - waterEmpty)), 0.0);
-            }
-
-            if (actualET < 0.0)
-                actualET = 0.0;
-            AET = actualET;
-
-            //PlugIn.ModelCore.UI.WriteLine("AET {0} = ", AET);
-
-            //Subtract transpiration from soil water content
-            soilWaterContent -= actualET;
-
-            //Leaching occurs. Drain baseflow fraction from holding tank.
-            baseFlow = soilWaterContent * baseFlowFraction;
-
-            //Subtract baseflow from soil water
-            soilWaterContent -= baseFlow;
-
-            //Calculate the amount of available water after all the evapotranspiration and leaching has taken place (minimum available water)           
-            availableWaterMin = Math.Max(soilWaterContent - waterEmpty, 0.0);
-
-            //Calculate the final amount of available water to the trees, which is the average of the max and min          
-            availableWater = (availableWaterMax + availableWaterMin) / 2.0;
-
+            
             // Compute the ratio of precipitation to PET
             double ratioPrecipPET = 0.0;
             if (pet > 0.0) ratioPrecipPET = availableWater / pet;  //assumes that the ratio is the amount of incoming precip divided by PET.
 
-            SiteVars.AnnualPPT_AET[site] += Precipitation - actualET;
-            SiteVars.AnnualClimaticWaterDeficit[site] += (pet - actualET) * 10.0;  // Convert to mm, the standard definition
-            //PlugIn.ModelCore.UI.WriteLine("Month={0}, PET={1}, AET={2}.", month, pet, actualET);
-
-            SiteVars.LiquidSnowPack[site] = liquidSnowpack;
-            SiteVars.WaterMovement[site] = waterMovement;
-            SiteVars.AvailableWater[site] = availableWater;  //available to plants for growth     
-            SiteVars.SoilWaterContent[site] = soilWaterContent;
-            SiteVars.SoilTemperature[site] = CalculateSoilTemp(tmin, tmax, liveBiomass, litterBiomass, month);
-            SiteVars.DecayFactor[site] = CalculateDecayFactor((int)OtherData.WType, SiteVars.SoilTemperature[site], relativeWaterContent, ratioPrecipPET);
+            SiteVars.DecayFactor[site] = CalculateDecayFactor((int)OtherData.WType, SiteVars.SoilTemperature[site], availableWater, ratioPrecipPET);
             SiteVars.AnaerobicEffect[site] = CalculateAnaerobicEffect(drain, ratioPrecipPET, pet, tave);            
             if (month == 0)
                 SiteVars.DryDays[site] = 0;
             else
-                SiteVars.DryDays[site] += CalculateDryDays(month, beginGrowing, endGrowing, waterEmpty, availableWater, priorWaterAvail);
+                SiteVars.DryDays[site] += CalculateDryDays(month, beginGrowing, endGrowing, wiltingPoint, availableWater, priorWaterAvail);
 
             return;
         }
@@ -424,30 +259,32 @@ namespace Landis.Extension.Succession.DGS
             return anerob;
         }
         //---------------------------------------------------------------------------
-        private static double CalculateSoilTemp(double tmin, double tmax, double liveBiomass, double litterBiomass, int month)
-        {
-            // ----------- Calculate Soil Temperature -----------
-            double bio = liveBiomass + (OtherData.EffectLitterSoilT * litterBiomass);
-            bio = Math.Min(bio, 600.0);
+        // ML: No longer used with GIPL and SHAW
+        //private static double CalculateSoilTemp(double tmin, double tmax, double liveBiomass, double litterBiomass, int month)
+        //{
+        //    // ----------- Calculate Soil Temperature -----------
+        //    double bio = liveBiomass + (OtherData.EffectLitterSoilT * litterBiomass);
+        //    bio = Math.Min(bio, 600.0);
 
-            //...Maximum temperature
-            double maxSoilTemp = tmax + (25.4 / (1.0 + 18.0 * Math.Exp(-0.20 * tmax))) * (Math.Exp(OtherData.EffectBiomassMaxSurfT * bio) - 0.13);
+        //    //...Maximum temperature
+        //    double maxSoilTemp = tmax + (25.4 / (1.0 + 18.0 * Math.Exp(-0.20 * tmax))) * (Math.Exp(OtherData.EffectBiomassMaxSurfT * bio) - 0.13);
 
-            //...Minimum temperature
-            double minSoilTemp = tmin + OtherData.EffectBiomassMinSurfT * bio - 1.78;
+        //    //...Minimum temperature
+        //    double minSoilTemp = tmin + OtherData.EffectBiomassMinSurfT * bio - 1.78;
 
-            //...Average surface temperature
-            //...Note: soil temperature used to calculate potential production does not
-            //         take into account the effect of snow (AKM)
-            //double soilTemp = (maxSoilTemp + minSoilTemp) / 2.0;  // original code.  This generates very high soil temps >= to air temp.
+        //    //...Average surface temperature
+        //    //...Note: soil temperature used to calculate potential production does not
+        //    //         take into account the effect of snow (AKM)
+        //    //double soilTemp = (maxSoilTemp + minSoilTemp) / 2.0;  // original code.  This generates very high soil temps >= to air temp.
 
 
-            double soilTemp = (tmax + tmin) / 4.0;  //ML added for testing purposes. Remove later
-            PlugIn.ModelCore.UI.WriteLine("Month={0}, Soil Temperature = {1}, Tmax = {2}, Tmin = {3}.", month + 1, soilTemp, tmax, tmin);
+        //    double soilTemp = (tmax + tmin) / 4.0;  //ML added for testing purposes. Remove later
+        //    PlugIn.ModelCore.UI.WriteLine("Month={0}, Soil Temperature = {1}, Tmax = {2}, Tmin = {3}.", month + 1, soilTemp, tmax, tmin);
 
-            return soilTemp;
-        }
+        //    return soilTemp;
+        //}
         //--------------------------------------------------------------------------
+        // This waterMove section was modified here to use the available water computed by SHAW. -JM/ML
         public static void Leach(Site site, double baseFlow, double stormFlow)
         {
 
@@ -468,14 +305,20 @@ namespace Landis.Extension.Succession.DGS
             //Outputs:
             //minerl and stream are recomputed
             IEcoregion ecoregion = PlugIn.ModelCore.Ecoregion[site];
-            double waterMove = SiteVars.WaterMovement[site];
+            double fieldCapacity = SiteVars.SoilFieldCapacity[site];
+
+            var thu = SiteVars.TempHydroUnit[site];
+            double availableWater = thu.MonthlySpeciesRecords[Main.Month].Values.Max(x => x.AvailableWater);
+            
+            //double waterMove = SiteVars.WaterMovement[site];
+            double waterMove = availableWater / fieldCapacity;
 
             double amtNLeached = 0.0;
 
             //PlugIn.ModelCore.UI.WriteLine("WaterMove={0:0}, ", waterMove);         
 
             //...waterMove > 0. indicates a saturated water flow out of layer lyr
-            if (waterMove > 0.0 && SiteVars.MineralN[site] > 0.0)
+            if (waterMove > 1.0 && SiteVars.MineralN[site] > 0.0)
             {
                 double textureEffect = OtherData.MineralLeachIntercept + OtherData.MineralLeachSlope * SiteVars.SoilPercentSand[site];//ClimateRegionData.PercentSand[ecoregion];
                 //double leachIntensity = (1.0 - (OtherData.OMLeachWater - waterMove) / OtherData.OMLeachWater);

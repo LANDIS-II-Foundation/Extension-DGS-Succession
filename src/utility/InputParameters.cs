@@ -52,28 +52,49 @@ namespace Landis.Extension.Succession.DGS
         private double atmosNintercept;
         private double latitude;
         private double denitrif;
-        private double[] maximumShadeLAI;        
+        private double[] maximumShadeLAI;
         private double initFineFuels;
         private double initMineralN;
         private double initMicrobialC;
         private double initMicrobialN;
         private double initEnzymeConc;
+        private double aes_som_depoly;
+        private double ae_doc_uptake;
+        private double ec_som_depoly;
+        private double ec_uptake;
+        private double frac_som_unprotect;
+        private double cn_enzymes;
+        private double km_dep;
+        private double km_upt;
+        private double r_ecloss;
+        private double r_death;
+        private double c_use_efficiency;
+        private double p_enz_SOC;
+        private double pconst;
+        private double qconst;
+        private double mic_to_som;
+        private double km_o2;
+        private double dgas;
+        private double dliq;
+        private double o2airfrac;
         private double initDOCFraction;
-        private double initDONFraction;
+        private double initDONFraction;        
         //private double initDOC;
-        
+
         private double fractionLitterDecayToDOC;
+        private double soilmoistA;
+        private double soilmoistB;
         //private double decayRateSurf;
         //private double decayRateSOM1;
         //private double decayRateSOM2;
         //private double decayRateSOM3;
 
         private ISpeciesDataset speciesDataset;
-        
+
         private FunctionalTypeTable functionalTypes;
         private FireReductions[] fireReductionsTable;
         private List<HarvestReductions> harvestReductionsTable;
-        
+
         private Landis.Library.Parameters.Species.AuxParm<int> sppFunctionalType;
         private Landis.Library.Parameters.Species.AuxParm<bool> nFixer;
         private Landis.Library.Parameters.Species.AuxParm<bool> adventRoots;
@@ -95,7 +116,7 @@ namespace Landis.Extension.Succession.DGS
         private Landis.Library.Parameters.Species.AuxParm<int> rootingDepth;
         private Landis.Library.Parameters.Species.AuxParm<int> maxANPP;
         private Landis.Library.Parameters.Species.AuxParm<int> maxBiomass;
-        
+
         private List<ISufficientLight> sufficientLight;
 
 
@@ -105,10 +126,12 @@ namespace Landis.Extension.Succession.DGS
         /// </summary>
         public int Timestep
         {
-            get {
+            get
+            {
                 return timestep;
             }
-            set {
+            set
+            {
                 if (value < 0)
                     throw new InputValueException(value.ToString(), "Timestep must be > or = 0");
                 timestep = value;
@@ -121,10 +144,12 @@ namespace Landis.Extension.Succession.DGS
         /// </summary>
         public SeedingAlgorithms SeedAlgorithm
         {
-            get {
+            get
+            {
                 return seedAlg;
             }
-            set {
+            set
+            {
                 seedAlg = value;
             }
         }
@@ -186,9 +211,9 @@ namespace Landis.Extension.Succession.DGS
                 climateConfigFile = value;
             }
         }
-        
+
         public string ShawGiplConfigFile { get => shawGiplConfigFile; set => shawGiplConfigFile = value; }
-        
+
         //---------------------------------------------------------------------
         /// <summary>
         /// Determines whether months are simulated 0 - 12 (calibration mode) or
@@ -196,10 +221,12 @@ namespace Landis.Extension.Succession.DGS
         /// </summary>
         public bool CalibrateMode
         {
-            get {
+            get
+            {
                 return calibrateMode;
             }
-            set {
+            set
+            {
                 calibrateMode = value;
             }
         }
@@ -225,10 +252,12 @@ namespace Landis.Extension.Succession.DGS
         /// </summary>
         public WaterType WType
         {
-            get {
+            get
+            {
                 return wtype;
             }
-            set {
+            set
+            {
                 wtype = value;
             }
         }
@@ -272,10 +301,12 @@ namespace Landis.Extension.Succession.DGS
         /// </summary>
         public FunctionalTypeTable FunctionalTypes
         {
-            get {
+            get
+            {
                 return functionalTypes;
             }
-            set {
+            set
+            {
                 functionalTypes = value;
             }
         }
@@ -285,10 +316,12 @@ namespace Landis.Extension.Succession.DGS
         /// </summary>
         public FireReductions[] FireReductionsTable
         {
-            get {
+            get
+            {
                 return fireReductionsTable;
             }
-            set {
+            set
+            {
                 fireReductionsTable = value;
             }
         }
@@ -316,27 +349,29 @@ namespace Landis.Extension.Succession.DGS
             }
         }
 
- 
+
         //---------------------------------------------------------------------
 
-        public Landis.Library.Parameters.Species.AuxParm<int>     SppFunctionalType {get {return sppFunctionalType;}}
-        public Landis.Library.Parameters.Species.AuxParm<bool>     NFixer { get {return nFixer;}}
-        public Landis.Library.Parameters.Species.AuxParm<bool>    AdventRoots { get { return adventRoots; } }
-        public Landis.Library.Parameters.Species.AuxParm<int>     GDDmin     { get { return gddMin; }}
-        public Landis.Library.Parameters.Species.AuxParm<int>     GDDmax     { get { return gddMax; }}
-        public Landis.Library.Parameters.Species.AuxParm<int>     MinJanTemp { get { return minJanTemp; }}
-        public Landis.Library.Parameters.Species.AuxParm<double>  MaxDrought { get { return maxDrought; }}
-        public Landis.Library.Parameters.Species.AuxParm<double>  LeafLongevity {get {return leafLongevity;}}
+        public Landis.Library.Parameters.Species.AuxParm<int> SppFunctionalType { get { return sppFunctionalType; } }
+        public Landis.Library.Parameters.Species.AuxParm<bool> NFixer { get { return nFixer; } }
+        public Landis.Library.Parameters.Species.AuxParm<bool> AdventRoots { get { return adventRoots; } }
+        public Landis.Library.Parameters.Species.AuxParm<int> GDDmin { get { return gddMin; } }
+        public Landis.Library.Parameters.Species.AuxParm<int> GDDmax { get { return gddMax; } }
+        public Landis.Library.Parameters.Species.AuxParm<int> MinJanTemp { get { return minJanTemp; } }
+        public Landis.Library.Parameters.Species.AuxParm<double> MaxDrought { get { return maxDrought; } }
+        public Landis.Library.Parameters.Species.AuxParm<double> LeafLongevity { get { return leafLongevity; } }
         //---------------------------------------------------------------------
         /// <summary>
         /// Can the species resprout epicormically following a fire?
         /// </summary>
-        public Landis.Library.Parameters.Species.AuxParm<bool>    Epicormic 
+        public Landis.Library.Parameters.Species.AuxParm<bool> Epicormic
         {
-            get {
+            get
+            {
                 return epicormic;
             }
-            set {
+            set
+            {
                 epicormic = value;
             }
         }
@@ -344,28 +379,32 @@ namespace Landis.Extension.Succession.DGS
         //---------------------------------------------------------------------
         public Landis.Library.Parameters.Species.AuxParm<double> LeafLignin
         {
-            get {
+            get
+            {
                 return leafLignin;
             }
         }
         //---------------------------------------------------------------------
         public Landis.Library.Parameters.Species.AuxParm<double> WoodLignin
         {
-            get {
+            get
+            {
                 return woodLignin;
             }
         }
         //---------------------------------------------------------------------
         public Landis.Library.Parameters.Species.AuxParm<double> CoarseRootLignin
         {
-            get {
+            get
+            {
                 return coarseRootLignin;
             }
         }
         //---------------------------------------------------------------------
         public Landis.Library.Parameters.Species.AuxParm<double> FineRootLignin
         {
-            get {
+            get
+            {
                 return fineRootLignin;
             }
         }
@@ -373,7 +412,8 @@ namespace Landis.Extension.Succession.DGS
 
         public Landis.Library.Parameters.Species.AuxParm<double> LeafCN
         {
-            get {
+            get
+            {
                 return leafCN;
             }
         }
@@ -381,7 +421,8 @@ namespace Landis.Extension.Succession.DGS
 
         public Landis.Library.Parameters.Species.AuxParm<double> WoodCN
         {
-            get {
+            get
+            {
                 return woodCN;
             }
         }
@@ -389,7 +430,8 @@ namespace Landis.Extension.Succession.DGS
 
         public Landis.Library.Parameters.Species.AuxParm<double> CoarseRootCN
         {
-            get {
+            get
+            {
                 return coarseRootCN;
             }
         }
@@ -397,7 +439,8 @@ namespace Landis.Extension.Succession.DGS
 
         public Landis.Library.Parameters.Species.AuxParm<double> FoliageLitterCN
         {
-            get {
+            get
+            {
                 return foliageLitterCN;
             }
         }
@@ -405,7 +448,8 @@ namespace Landis.Extension.Succession.DGS
 
         public Landis.Library.Parameters.Species.AuxParm<double> FineRootCN
         {
-            get {
+            get
+            {
                 return fineRootCN;
             }
         }
@@ -442,10 +486,11 @@ namespace Landis.Extension.Succession.DGS
         /// </summary>
         public List<ISufficientLight> LightClassProbabilities
         {
-            get {
+            get
+            {
                 return sufficientLight;
             }
-            set 
+            set
             {
                 Debug.Assert(sufficientLight.Count != 0);
                 sufficientLight = value;
@@ -454,52 +499,42 @@ namespace Landis.Extension.Succession.DGS
         //---------------------------------------------------------------------
         public double Latitude
         {
-            get {
+            get
+            {
                 return latitude;
             }
         }
-        ////-----------------------------------------------
-        //public double DecayRateSurf
-        //{
-        //    get
-        //    {
-        //        return decayRateSurf;
-        //    }
-        //}
-        //-----------------------------------------------
-        //public double DecayRateSOM1
-        //{
-        //    get
-        //    {
-        //        return decayRateSOM1;
-        //    }
-        //}//---------------------------------------------------------------------
-        //public double DecayRateSOM2
-        //{
-        //    get
-        //    {
-        //        return decayRateSOM2;
-        //    }
-        //}
-        ////---------------------------------------------------------------------
-        //public double DecayRateSOM3
-        //{
-        //    get
-        //    {
-        //        return decayRateSOM3;
-        //    }
-        //}
-        //-----------------------------------------------
-        
+
         public double InitialFineFuels { get { return initFineFuels; } }
         public double InitialMineralN { get { return initMineralN; } }
         public double InitialMicrobialC { get { return initMicrobialC; } }
         public double InitialMicrobialN { get { return initMicrobialN; } }
         public double InitialEnzymeConc { get { return initEnzymeConc; } }
+        public double ActEnergySOMDepoly { get { return aes_som_depoly; } }
+        public double ActEnergyDOCUptake { get { return ae_doc_uptake; } }
+        public double ExpConstSOMDepoly { get { return ec_som_depoly; } }
+        public double ExpConstDOCUptake { get { return ec_uptake; } }
+        public double FractionSOMUnprotect { get { return frac_som_unprotect; } }
+        public double CNEnzymes { get { return cn_enzymes; } }
+        public double KmSOMDepoly { get { return km_dep; } }
+        public double KmDOCUptake { get { return km_upt; } }
+        public double EnzTurnRate { get { return r_death; } }
+        public double MicrobialTurnRate { get { return r_ecloss; } }
+        public double CarbonUseEfficiency { get { return c_use_efficiency; } }
+        public double PropEnzymeSOM { get { return p_enz_SOC; } }
+        public double PropCEnzymeProduction { get { return pconst; } }
+        public double PropNEnzymeProduction { get { return qconst; } }
+        public double FractDeadMicrobialBiomassSOM { get { return mic_to_som; } }
+        public double MMConstantO2 { get { return km_o2; } }
+        public double DiffConstantO2 { get { return dgas; } }
+        public double DiffConstantSOMLiquid { get { return dliq; } }
+        public double FractionVolumeO2 { get { return o2airfrac; } }
         public double InitialDOCFraction { get { return initDOCFraction; } }
         public double InitialDONFraction { get { return initDONFraction; } }
-        public double DenitrificationRate { get  {return denitrif; }      }
         public double FractionLitterDecayToDOC { get { return fractionLitterDecayToDOC; } }
+        public double SoilMoistureA { get { return soilmoistA; } }
+        public double SoilMoistureB { get { return soilmoistB; } }
+        public double DenitrificationRate { get { return denitrif; } }
 
         //---------------------------------------------------------------------
 
@@ -689,7 +724,7 @@ namespace Landis.Extension.Succession.DGS
                 if (path.Trim(null).Length == 0)
                     throw new InputValueException(path, "\"{0}\" is not a valid path.", path);
                 initialSOC_PrimaryMapName = value;
-                
+
             }
         }
 
@@ -709,105 +744,7 @@ namespace Landis.Extension.Succession.DGS
                 initialSON_PrimaryMapName = value;
             }
         }
-        //---------------------------------------------------------------------
 
-        //public string InitialSOM1CSoilMapName
-        //{
-        //    get
-        //    {
-        //        return initialSOM1CSoilMapName;
-        //    }
-        //    set
-        //    {
-        //        string path = value;
-        //        if (path.Trim(null).Length == 0)
-        //            throw new InputValueException(path, "\"{0}\" is not a valid path.", path);
-        //        initialSOM1CSoilMapName = value;
-        //    }
-        //}
-
-        ////---------------------------------------------------------------------
-
-        //public string InitialSOM1NSoilMapName
-        //{
-        //    get
-        //    {
-        //        return initialSOM1NSoilMapName;
-        //    }
-        //    set
-        //    {
-        //        string path = value;
-        //        if (path.Trim(null).Length == 0)
-        //            throw new InputValueException(path, "\"{0}\" is not a valid path.", path);
-        //        initialSOM1NSoilMapName = value;
-        //    }
-        //}
-        //---------------------------------------------------------------------
-
-        //public string InitialSOM2CMapName
-        //{
-        //    get
-        //    {
-        //        return initialSOM2CMapName;
-        //    }
-        //    set
-        //    {
-        //        string path = value;
-        //        if (path.Trim(null).Length == 0)
-        //            throw new InputValueException(path, "\"{0}\" is not a valid path.", path);
-        //        initialSOM2CMapName = value;
-        //    }
-        //}
-
-        ////---------------------------------------------------------------------
-
-        //public string InitialSOM2NMapName
-        //{
-        //    get
-        //    {
-        //        return initialSOM2NMapName;
-        //    }
-        //    set
-        //    {
-        //        string path = value;
-        //        if (path.Trim(null).Length == 0)
-        //            throw new InputValueException(path, "\"{0}\" is not a valid path.", path);
-        //        initialSOM2NMapName = value;
-        //    }
-        //}
-        ////---------------------------------------------------------------------
-
-        //public string InitialSOM3CMapName
-        //{
-        //    get
-        //    {
-        //        return initialSOM3CMapName;
-        //    }
-        //    set
-        //    {
-        //        string path = value;
-        //        if (path.Trim(null).Length == 0)
-        //            throw new InputValueException(path, "\"{0}\" is not a valid path.", path);
-        //        initialSOM3CMapName = value;
-        //    }
-        //}
-
-        ////---------------------------------------------------------------------
-
-        //public string InitialSOM3NMapName
-        //{
-        //    get
-        //    {
-        //        return initialSOM3NMapName;
-        //    }
-        //    set
-        //    {
-        //        string path = value;
-        //        if (path.Trim(null).Length == 0)
-        //            throw new InputValueException(path, "\"{0}\" is not a valid path.", path);
-        //        initialSOM3NMapName = value;
-        //    }
-        //}
         //---------------------------------------------------------------------
 
         public string InitialDeadSurfaceMapName
@@ -842,13 +779,14 @@ namespace Landis.Extension.Succession.DGS
         }
         //---------------------------------------------------------------------
 
-        public void SetMaximumShadeLAI(byte                   shadeClass,
+        public void SetMaximumShadeLAI(byte shadeClass,
                                           //IEcoregion             ecoregion,
                                           InputValue<double> newValue)
         {
             Debug.Assert(1 <= shadeClass && shadeClass <= 5);
             //Debug.Assert(ecoregion != null);
-            if (newValue != null) {
+            if (newValue != null)
+            {
                 if (newValue.Actual < 0.0 || newValue.Actual > 20)
                     throw new InputValueException(newValue.String,
                                                   "{0} is not between 0 and 20", newValue.String);
@@ -858,7 +796,7 @@ namespace Landis.Extension.Succession.DGS
         }
         //---------------------------------------------------------------------
 
-        public void SetFunctionalType(ISpecies           species,
+        public void SetFunctionalType(ISpecies species,
                                      InputValue<int> newValue)
         {
             Debug.Assert(species != null);
@@ -875,7 +813,7 @@ namespace Landis.Extension.Succession.DGS
 
         //---------------------------------------------------------------------
 
-        public void SetGDDmin(ISpecies           species,
+        public void SetGDDmin(ISpecies species,
                                      InputValue<int> newValue)
         {
             Debug.Assert(species != null);
@@ -883,7 +821,7 @@ namespace Landis.Extension.Succession.DGS
         }
         //---------------------------------------------------------------------
 
-        public void SetGDDmax(ISpecies           species,
+        public void SetGDDmax(ISpecies species,
                                      InputValue<int> newValue)
         {
             Debug.Assert(species != null);
@@ -891,7 +829,7 @@ namespace Landis.Extension.Succession.DGS
         }
         //---------------------------------------------------------------------
 
-        public void SetMinJanTemp(ISpecies           species,
+        public void SetMinJanTemp(ISpecies species,
                                      InputValue<int> newValue)
         {
             Debug.Assert(species != null);
@@ -899,7 +837,7 @@ namespace Landis.Extension.Succession.DGS
         }
         //---------------------------------------------------------------------
 
-        public void SetMaxDrought(ISpecies           species,
+        public void SetMaxDrought(ISpecies species,
                                      InputValue<double> newValue)
         {
             Debug.Assert(species != null);
@@ -907,7 +845,7 @@ namespace Landis.Extension.Succession.DGS
         }
         //---------------------------------------------------------------------
 
-        public void SetLeafLongevity(ISpecies           species,
+        public void SetLeafLongevity(ISpecies species,
                                      InputValue<double> newValue)
         {
             Debug.Assert(species != null);
@@ -916,7 +854,7 @@ namespace Landis.Extension.Succession.DGS
 
         //---------------------------------------------------------------------
 
-        public void SetLeafLignin(ISpecies           species,
+        public void SetLeafLignin(ISpecies species,
                                           InputValue<double> newValue)
         {
             Debug.Assert(species != null);
@@ -924,7 +862,7 @@ namespace Landis.Extension.Succession.DGS
         }
         //---------------------------------------------------------------------
 
-        public void SetWoodLignin(ISpecies           species,
+        public void SetWoodLignin(ISpecies species,
                                           InputValue<double> newValue)
         {
             Debug.Assert(species != null);
@@ -932,7 +870,7 @@ namespace Landis.Extension.Succession.DGS
         }
         //---------------------------------------------------------------------
 
-        public void SetCoarseRootLignin(ISpecies           species,
+        public void SetCoarseRootLignin(ISpecies species,
                                           InputValue<double> newValue)
         {
             Debug.Assert(species != null);
@@ -940,7 +878,7 @@ namespace Landis.Extension.Succession.DGS
         }
         //---------------------------------------------------------------------
 
-        public void SetFineRootLignin(ISpecies           species,
+        public void SetFineRootLignin(ISpecies species,
                                           InputValue<double> newValue)
         {
             Debug.Assert(species != null);
@@ -948,7 +886,7 @@ namespace Landis.Extension.Succession.DGS
         }
         //---------------------------------------------------------------------
 
-        public void SetLeafCN(ISpecies           species,
+        public void SetLeafCN(ISpecies species,
                                           InputValue<double> newValue)
         {
             Debug.Assert(species != null);
@@ -956,7 +894,7 @@ namespace Landis.Extension.Succession.DGS
         }
         //---------------------------------------------------------------------
 
-        public void SetWoodCN(ISpecies           species,
+        public void SetWoodCN(ISpecies species,
                                           InputValue<double> newValue)
         {
             Debug.Assert(species != null);
@@ -965,7 +903,7 @@ namespace Landis.Extension.Succession.DGS
         }
         //---------------------------------------------------------------------
 
-        public void SetCoarseRootCN(ISpecies           species,
+        public void SetCoarseRootCN(ISpecies species,
                                           InputValue<double> newValue)
         {
             Debug.Assert(species != null);
@@ -973,7 +911,7 @@ namespace Landis.Extension.Succession.DGS
         }
         //---------------------------------------------------------------------
 
-        public void SetFoliageLitterCN(ISpecies           species,
+        public void SetFoliageLitterCN(ISpecies species,
                                           InputValue<double> newValue)
         {
             Debug.Assert(species != null);
@@ -981,7 +919,7 @@ namespace Landis.Extension.Succession.DGS
         }
         //---------------------------------------------------------------------
 
-        public void SetFineRootCN(ISpecies           species,
+        public void SetFineRootCN(ISpecies species,
                                           InputValue<double> newValue)
         {
             Debug.Assert(species != null);
@@ -1026,33 +964,12 @@ namespace Landis.Extension.Succession.DGS
             //Debug.Assert(ecoregion != null);
             latitude = CheckBiomassParm(newValue, 0.0, 80.0);
         }
-        //---------------------------------------------------------------------
        
-        //public void SetDecayRateSurf(InputValue<double> newValue)
-        //{
-        //    decayRateSurf = CheckBiomassParm(newValue, 0.0, 10.0);
-        //}
         //---------------------------------------------------------------------
-        //public void SetDecayRateSOM1(InputValue<double> newValue)
-        //{
-        //    decayRateSOM1 = CheckBiomassParm(newValue, 0.0, 10.0);
-        //}
-        //---------------------------------------------------------------------
-        //public void SetDecayRateSOM2(InputValue<double> newValue)
-        //{
-        //    decayRateSOM2 = CheckBiomassParm(newValue, 0.0, 1.0);
-        //}
-        ////---------------------------------------------------------------------
-        //public void SetDecayRateSOM3(InputValue<double> newValue)
-        //{
-        //    decayRateSOM3 = CheckBiomassParm(newValue, 0.0, 1.0);
-        //}
-        //---------------------------------------------------------------------
-        public void SetDenitrif(InputValue<double> newValue)
+        public void SetInitFineFuels(InputValue<double> newValue)
         {
-            denitrif = CheckBiomassParm(newValue, 0.0, 1.0);
+            initFineFuels = CheckBiomassParm(newValue, 0.0, 1.0);
         }
-
         //---------------------------------------------------------------------
         public void SetInitMineralN(InputValue<double> newValue)
         {
@@ -1076,6 +993,114 @@ namespace Landis.Extension.Succession.DGS
         {
             initEnzymeConc = CheckBiomassParm(newValue, 0.0, 5.0);
         }
+
+        //---------------------------------------------------------------------
+        public void SetActEnergySOMDepoly(InputValue<double> newValue)
+        {
+            aes_som_depoly = CheckBiomassParm(newValue, 0.0, 200.0);
+        }
+        //---------------------------------------------------------------------
+        public void SetActEnergyDOCUptake(InputValue<double> newValue)
+        {
+            ae_doc_uptake = CheckBiomassParm(newValue, 0.0, 200.0);
+        }
+        //---------------------------------------------------------------------
+        public void SetECSOMDepoly(InputValue<double> newValue)
+        {
+            ec_som_depoly = CheckBiomassParm(newValue, 0.0, 200000000000);
+        }
+        //---------------------------------------------------------------------
+        public void SetExpConstDOCUptake(InputValue<double> newValue)
+        {
+            ec_uptake = CheckBiomassParm(newValue, 0.0, 200000000000.0);
+        }
+        //---------------------------------------------------------------------
+        public void SetFractionSOMUnprotect(InputValue<double> newValue)
+        {
+            frac_som_unprotect = CheckBiomassParm(newValue, 0.0, 1.0);
+        }
+
+        public void SetCNEnzymes(InputValue<double> newValue)
+        {
+            cn_enzymes = CheckBiomassParm(newValue, 0.0, 5.0);
+        }
+        //---------------------------------------------------------------------
+        public void SetKmSOMDepoly(InputValue<double> newValue)
+        {
+            km_dep = CheckBiomassParm(newValue, 0.0, 1.0);
+        }
+        //---------------------------------------------------------------------
+
+        public void SetKmDOCUptake(InputValue<double> newValue)
+        {
+            km_upt = CheckBiomassParm(newValue, 0.0, 1.0);
+        }
+
+        //---------------------------------------------------------------------
+
+        public void SetEnzymeTurnRate(InputValue<double> newValue)
+        {
+            r_ecloss = CheckBiomassParm(newValue, 0.0, 0.1);
+        }
+        //---------------------------------------------------------------------
+
+        public void SetMicrobialTurnRate(InputValue<double> newValue)
+        {
+            r_death = CheckBiomassParm(newValue, 0.0, 0.1);
+        }
+        //---------------------------------------------------------------------
+
+        public void SetCarbonUseEfficiency(InputValue<double> newValue)
+        {
+            c_use_efficiency = CheckBiomassParm(newValue, 0.0, 0.9);
+        }
+        //---------------------------------------------------------------------
+
+        public void SetPropEnzymeSOM(InputValue<double> newValue)
+        {
+            p_enz_SOC = CheckBiomassParm(newValue, 0.0, 1.0);
+        }
+        //---------------------------------------------------------------------
+
+        public void SetPropCEnzymeProduction(InputValue<double> newValue)
+        {
+            pconst = CheckBiomassParm(newValue, 0.0, 1.0);
+        }
+        //---------------------------------------------------------------------
+
+        public void SetPropNEnzymeProduction(InputValue<double> newValue)
+        {
+            qconst = CheckBiomassParm(newValue, 0.0, 1.0);
+        }
+        //---------------------------------------------------------------------
+        public void SetFractDeadMicrobialBiomassSOM(InputValue<double> newValue)
+        {
+            mic_to_som = CheckBiomassParm(newValue, 0.0, 1.0);
+        }
+        //---------------------------------------------------------------------
+        public void SetMMConstantO2(InputValue<double> newValue)
+        {
+            km_o2 = CheckBiomassParm(newValue, 0.0, 1.0);
+        }
+        //---------------------------------------------------------------------
+        public void SetDiffConstantO2(InputValue<double> newValue)
+        {
+            dgas = CheckBiomassParm(newValue, 0.0, 5.0);
+        }
+        //---------------------------------------------------------------------
+
+        public void SetDiffConstantSOMLiquid(InputValue<double> newValue)
+        {
+            dliq = CheckBiomassParm(newValue, 0.0, 5.0);
+        }
+
+        //---------------------------------------------------------------------
+        public void SetFractionVolumeO2(InputValue<double> newValue)
+        {
+            o2airfrac = CheckBiomassParm(newValue, 0.0, 1.0);
+        }
+
+
         //---------------------------------------------------------------------
         public void SetInitDOCFraction(InputValue<double> newValue)
         {
@@ -1087,15 +1112,29 @@ namespace Landis.Extension.Succession.DGS
         {
             initDONFraction = CheckBiomassParm(newValue, 0.0, 1.0);
         }
-        //---------------------------------------------------------------------
-        public void SetInitFineFuels(InputValue<double> newValue)
-        {
-            initFineFuels = CheckBiomassParm(newValue, 0.0, 1.0);
-        }
+
         //---------------------------------------------------------------------
         public void SetFractionDOC(InputValue<double> newValue)
         {
             fractionLitterDecayToDOC = CheckBiomassParm(newValue, 0.0, 1.0);
+        }
+
+        //---------------------------------------------------------------------
+        public void SetSoilMoistureA (InputValue<double> newValue)
+        {
+            soilmoistA = CheckBiomassParm(newValue, 0.0, 50.0);
+        }
+
+        //---------------------------------------------------------------------
+        public void SetSoilMoistureB (InputValue<double> newValue)
+        {
+            soilmoistA = CheckBiomassParm(newValue, 0.0, 50.0);
+        }
+
+        //----------------------------------
+        public void SetDenitrif(InputValue<double> newValue)
+        {
+            denitrif = CheckBiomassParm(newValue, 0.0, 1.0);
         }
         //---------------------------------------------------------------------
 
@@ -1107,27 +1146,27 @@ namespace Landis.Extension.Succession.DGS
             fireReductionsTable = new FireReductions[6];
             harvestReductionsTable = new List<HarvestReductions>();
 
-            sppFunctionalType       = new Landis.Library.Parameters.Species.AuxParm<int>(speciesDataset);
-            nFixer                  = new Landis.Library.Parameters.Species.AuxParm<bool>(speciesDataset);
-            adventRoots             = new Landis.Library.Parameters.Species.AuxParm<bool>(speciesDataset);
-            gddMin                  = new Landis.Library.Parameters.Species.AuxParm<int>(speciesDataset);
-            gddMax                  = new Landis.Library.Parameters.Species.AuxParm<int>(speciesDataset);
-            minJanTemp              = new Landis.Library.Parameters.Species.AuxParm<int>(speciesDataset);
-            maxDrought              = new Landis.Library.Parameters.Species.AuxParm<double>(speciesDataset);
-            leafLongevity           = new Landis.Library.Parameters.Species.AuxParm<double>(speciesDataset);
-            epicormic               = new Landis.Library.Parameters.Species.AuxParm<bool>(speciesDataset);
-            leafLignin              = new Landis.Library.Parameters.Species.AuxParm<double>(speciesDataset);
-            woodLignin              = new Landis.Library.Parameters.Species.AuxParm<double>(speciesDataset);
-            coarseRootLignin        = new Landis.Library.Parameters.Species.AuxParm<double>(speciesDataset);
-            fineRootLignin          = new Landis.Library.Parameters.Species.AuxParm<double>(speciesDataset);
-            leafCN                  = new Landis.Library.Parameters.Species.AuxParm<double>(speciesDataset);
-            woodCN                  = new Landis.Library.Parameters.Species.AuxParm<double>(speciesDataset);
-            coarseRootCN            = new Landis.Library.Parameters.Species.AuxParm<double>(speciesDataset);
-            foliageLitterCN         = new Landis.Library.Parameters.Species.AuxParm<double>(speciesDataset);
-            fineRootCN              = new Landis.Library.Parameters.Species.AuxParm<double>(speciesDataset);
-            rootingDepth            = new Landis.Library.Parameters.Species.AuxParm<int>(speciesDataset);
-            maxANPP                 = new Landis.Library.Parameters.Species.AuxParm<int>(speciesDataset);
-            maxBiomass              = new Landis.Library.Parameters.Species.AuxParm<int>(speciesDataset);
+            sppFunctionalType = new Landis.Library.Parameters.Species.AuxParm<int>(speciesDataset);
+            nFixer = new Landis.Library.Parameters.Species.AuxParm<bool>(speciesDataset);
+            adventRoots = new Landis.Library.Parameters.Species.AuxParm<bool>(speciesDataset);
+            gddMin = new Landis.Library.Parameters.Species.AuxParm<int>(speciesDataset);
+            gddMax = new Landis.Library.Parameters.Species.AuxParm<int>(speciesDataset);
+            minJanTemp = new Landis.Library.Parameters.Species.AuxParm<int>(speciesDataset);
+            maxDrought = new Landis.Library.Parameters.Species.AuxParm<double>(speciesDataset);
+            leafLongevity = new Landis.Library.Parameters.Species.AuxParm<double>(speciesDataset);
+            epicormic = new Landis.Library.Parameters.Species.AuxParm<bool>(speciesDataset);
+            leafLignin = new Landis.Library.Parameters.Species.AuxParm<double>(speciesDataset);
+            woodLignin = new Landis.Library.Parameters.Species.AuxParm<double>(speciesDataset);
+            coarseRootLignin = new Landis.Library.Parameters.Species.AuxParm<double>(speciesDataset);
+            fineRootLignin = new Landis.Library.Parameters.Species.AuxParm<double>(speciesDataset);
+            leafCN = new Landis.Library.Parameters.Species.AuxParm<double>(speciesDataset);
+            woodCN = new Landis.Library.Parameters.Species.AuxParm<double>(speciesDataset);
+            coarseRootCN = new Landis.Library.Parameters.Species.AuxParm<double>(speciesDataset);
+            foliageLitterCN = new Landis.Library.Parameters.Species.AuxParm<double>(speciesDataset);
+            fineRootCN = new Landis.Library.Parameters.Species.AuxParm<double>(speciesDataset);
+            rootingDepth = new Landis.Library.Parameters.Species.AuxParm<int>(speciesDataset);
+            maxANPP = new Landis.Library.Parameters.Species.AuxParm<int>(speciesDataset);
+            maxBiomass = new Landis.Library.Parameters.Species.AuxParm<int>(speciesDataset);
 
             maximumShadeLAI = new double[6];
 
@@ -1135,17 +1174,18 @@ namespace Landis.Extension.Succession.DGS
             //for (byte shadeClass = 1; shadeClass <= 5; shadeClass++) {
             //    minRelativeBiomass[shadeClass] = new Ecoregions.AuxParm<Percentage>(ecoregionDataset);
             //}
-            sufficientLight         = new List<ISufficientLight>();
+            sufficientLight = new List<ISufficientLight>();
 
         }
 
         //---------------------------------------------------------------------
 
         private double CheckBiomassParm(InputValue<double> newValue,
-                                                    double             minValue,
-                                                    double             maxValue)
+                                                    double minValue,
+                                                    double maxValue)
         {
-            if (newValue != null) {
+            if (newValue != null)
+            {
                 if (newValue.Actual < minValue || newValue.Actual > maxValue)
                     throw new InputValueException(newValue.String,
                                                   "{0} is not between {1:0.0} and {2:0.0}",
@@ -1156,10 +1196,11 @@ namespace Landis.Extension.Succession.DGS
         //---------------------------------------------------------------------
 
         private int CheckBiomassParm(InputValue<int> newValue,
-                                                    int             minValue,
-                                                    int             maxValue)
+                                                    int minValue,
+                                                    int maxValue)
         {
-            if (newValue != null) {
+            if (newValue != null)
+            {
                 if (newValue.Actual < minValue || newValue.Actual > maxValue)
                     throw new InputValueException(newValue.String,
                                                   "{0} is not between {1:0.0} and {2:0.0}",
@@ -1167,28 +1208,7 @@ namespace Landis.Extension.Succession.DGS
             }
             return newValue.Actual;
         }
-        //---------------------------------------------------------------------
-
-        //private Ecoregions.AuxParm<T> ConvertToActualValues<T>(Ecoregions.AuxParm<InputValue<T>> inputValues)
-        //{
-        //    Ecoregions.AuxParm<T> actualValues = new Ecoregions.AuxParm<T>(PlugIn.ModelCore.Ecoregions); //ecoregionDataset);
-        //    foreach (IEcoregion ecoregion in PlugIn.ModelCore.Ecoregions)//ecoregionDataset)
-        //        if (inputValues[ecoregion] != null)
-        //            actualValues[ecoregion] = inputValues[ecoregion].Actual;
-        //    return actualValues;
-        //}
-
-        //---------------------------------------------------------------------
-
-        //private Landis.Library.Parameters.Species.AuxParm<T> ConvertToActualValues<T>(Species.AuxParm<InputValue<T>> inputValues)
-        //{
-        //    Species.AuxParm<T> actualValues = new Species.AuxParm<T>(PlugIn.ModelCore.Species);//speciesDataset);
-        //    foreach (ISpecies species in PlugIn.ModelCore.Species)//speciesDataset)
-        //        if (inputValues[species] != null)
-        //            actualValues[species] = inputValues[species].Actual;
-        //    return actualValues;
-        //}
-
+        
         //---------------------------------------------------------------------
 
         private void ValidatePath(string path)
@@ -1200,6 +1220,7 @@ namespace Landis.Extension.Succession.DGS
                                               "\"{0}\" is not a valid path.",
                                               path);
         }
-
     }
 }
+
+

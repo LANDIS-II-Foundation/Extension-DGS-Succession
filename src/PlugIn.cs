@@ -42,11 +42,19 @@ namespace Landis.Extension.Succession.DGS
         public static int ANEEMapFrequency;
         public static string TotalCMapNames = null;
         public static int TotalCMapFrequency;
+        public static string InputCommunityMapNames = null;
+        public static int InputCommunityMapFrequency;
         public static int SuccessionTimeStep;
         public static double ProbEstablishAdjust;
 
         public static int FutureClimateBaseYear;
+        public static int B_MAX;
         private ICommunity initialCommunity;
+
+        public static int[] SpeciesByPlant;
+        public static int[] SpeciesBySerotiny;
+        public static int[] SpeciesByResprout;
+        public static int[] SpeciesBySeed;
 
         //public static Dictionary<IEcoregion, TempHydroUnit> TempHydroUnits { get; set; }
 
@@ -109,27 +117,27 @@ namespace Landis.Extension.Succession.DGS
             
             FunctionalType.Initialize(Parameters);
             SpeciesData.Initialize(Parameters);
-            Util.ReadSoilDepthMap(Parameters.SoilDepthMapName);
-            Util.ReadSoilDrainMap(Parameters.SoilDrainMapName);
-            Util.ReadSoilBaseFlowMap(Parameters.SoilBaseFlowMapName);
-            Util.ReadSoilStormFlowMap(Parameters.SoilStormFlowMapName);
-            Util.ReadFieldCapacityMap(Parameters.SoilFieldCapacityMapName);
-            Util.ReadWiltingPointMap(Parameters.SoilWiltingPointMapName);
-            Util.ReadPercentSandMap(Parameters.SoilPercentSandMapName);
-            Util.ReadPercentClayMap(Parameters.SoilPercentClayMapName);
-            Util.ReadSoilBulkDensityMap(Parameters.SoilBulkDensityMapName);
-            Util.ReadSoilParticleDensityMap(Parameters.SoilParticleDensityMapName);
+            ReadMaps.ReadSoilDepthMap(Parameters.SoilDepthMapName);
+            ReadMaps.ReadSoilDrainMap(Parameters.SoilDrainMapName);
+            ReadMaps.ReadSoilBaseFlowMap(Parameters.SoilBaseFlowMapName);
+            ReadMaps.ReadSoilStormFlowMap(Parameters.SoilStormFlowMapName);
+            ReadMaps.ReadFieldCapacityMap(Parameters.SoilFieldCapacityMapName);
+            ReadMaps.ReadWiltingPointMap(Parameters.SoilWiltingPointMapName);
+            ReadMaps.ReadPercentSandMap(Parameters.SoilPercentSandMapName);
+            ReadMaps.ReadPercentClayMap(Parameters.SoilPercentClayMapName);
+            ReadMaps.ReadSoilBulkDensityMap(Parameters.SoilBulkDensityMapName);
+            ReadMaps.ReadSoilParticleDensityMap(Parameters.SoilParticleDensityMapName);
             //Util.ReadDoubleMap(Parameters.SoilParticleDensityMapName);
-            Util.ReadSoilCMap(Parameters.InitialSOC_PrimaryMapName);
-            Util.ReadSoilNMap(Parameters.InitialSON_PrimaryMapName);
-            Util.ReadDeadWoodMaps(Parameters.InitialDeadSurfaceMapName, Parameters.InitialDeadSoilMapName);
+            //ReadMaps.ReadSoilCMap(Parameters.InitialSOC_PrimaryMapName);
+            //ReadMaps.ReadSoilNMap(Parameters.InitialSON_PrimaryMapName);
+            ReadMaps.ReadSoilCNMaps(Parameters.InitialSOC_PrimaryMapName, Parameters.InitialSON_PrimaryMapName);
+            ReadMaps.ReadDeadWoodMaps(Parameters.InitialDeadSurfaceMapName, Parameters.InitialDeadSoilMapName);
 
             //Initialize climate.
             Climate.Initialize(Parameters.ClimateConfigFile, false, modelCore);
             FutureClimateBaseYear = Climate.Future_MonthlyData.Keys.Min();
             ClimateRegionData.Initialize(Parameters);
-
-
+            
             ShadeLAI = Parameters.MaximumShadeLAI; 
             OtherData.Initialize(Parameters);
             FireEffects.Initialize(Parameters);
@@ -159,14 +167,21 @@ namespace Landis.Extension.Succession.DGS
 
             if (Parameters.CalibrateMode)
                 Outputs.CreateCalibrateLogFile();
-            Establishment.InitializeLogFile();
+            //Establishment.InitializeLogFile();
+
+            B_MAX = 0;
+            foreach (ISpecies species in ModelCore.Species)
+            {
+                if (SpeciesData.Max_Biomass[species] > B_MAX)
+                    B_MAX = SpeciesData.Max_Biomass[species];
+            }
 
             foreach (ActiveSite site in ModelCore.Landscape)
                 Main.ComputeTotalCohortCN(site, SiteVars.Cohorts[site]);
 
             Outputs.WritePrimaryLogFile(0);
             Outputs.WriteShortPrimaryLogFile(0);
-
+            
             //Main.timer1 = new System.Diagnostics.Stopwatch();
             //Main.soilLayerTimer = new System.Diagnostics.Stopwatch();
 
@@ -183,6 +198,10 @@ namespace Landis.Extension.Succession.DGS
                     SiteVars.InitializeDisturbances();
 
             ClimateRegionData.AnnualNDeposition = new Landis.Library.Parameters.Ecoregions.AuxParm<double>(ModelCore.Ecoregions);
+            SpeciesByPlant = new int[ModelCore.Species.Count];
+            SpeciesByResprout = new int[ModelCore.Species.Count];
+            SpeciesBySerotiny = new int[ModelCore.Species.Count];
+            SpeciesBySeed = new int[ModelCore.Species.Count];
 
             if (ShawGiplEnabled)
             {
@@ -223,7 +242,10 @@ namespace Landis.Extension.Succession.DGS
                 Outputs.WritePrimaryLogFile(ModelCore.CurrentTime);
                 Outputs.WriteShortPrimaryLogFile(ModelCore.CurrentTime);
                 Outputs.WriteMaps();
+                Outputs.WriteReproductionLog(PlugIn.ModelCore.CurrentTime);
                 Establishment.LogEstablishment();
+                if (PlugIn.InputCommunityMapNames != null && ModelCore.CurrentTime % PlugIn.InputCommunityMapFrequency == 0)
+                    Outputs.WriteCommunityMaps();
             }
 
         }
@@ -359,6 +381,8 @@ namespace Landis.Extension.Succession.DGS
 
             SiteVars.ForestTypeName = ModelCore.GetSiteVar<string>("Output.ForestType");
             SiteVars.TimeOfLastBurn = ModelCore.GetSiteVar<int>("Fire.TimeOfLastEvent");
+            SiteVars.Slope = ModelCore.GetSiteVar<ushort>("Fire.Slope");
+            SiteVars.Aspect = ModelCore.GetSiteVar<ushort>("Fire.Aspect");
 
             foreach (var site in ModelCore.Landscape.ActiveSites)
             {
@@ -372,9 +396,9 @@ namespace Landis.Extension.Succession.DGS
                 }
 
                 var age = 0;
-                if (SiteVars.TimeOfLastBurn != null)
+                if (SiteVars.TimeOfLastBurn != null && SiteVars.TimeOfLastBurn[site] > 0)
                 {
-                    age = ModelCore.CurrentTime - SiteVars.TimeOfLastBurn[site] - 1;
+                    age = ModelCore.CurrentTime - SiteVars.TimeOfLastBurn[site];
                     if (age < 0) age = 0;
                 }
                 else
@@ -393,6 +417,8 @@ namespace Landis.Extension.Succession.DGS
 
                 ++timeSinceLastBurn[age];
 
+                TempHydroUnit thu;
+
                 var thuClimateRegionMatches = TempHydroUnits.Where(x => x.ClimateRegionName.Equals(climateRegion.Name, StringComparison.OrdinalIgnoreCase)).ToList();
                 if (!thuClimateRegionMatches.Any())
                     throw new ApplicationException($"No THUs match the ClimateRegion Name '{climateRegion.Name}' for site {site}");
@@ -403,19 +429,41 @@ namespace Landis.Extension.Succession.DGS
 
                 var thuAgeMatches = thuReclassVegetationMatches.Where(x => age >= x.MinAge && age <= x.MaxAge).ToList();
                 if (!thuAgeMatches.Any())
-                    throw new ApplicationException($"No THUs for the ClimateRegion Name '{climateRegion.Name}' and Reclass Vegetation '{reclassVegetation}' match the Age '{age}' for site {site}");
+                    throw new ApplicationException($"No THUs for the ClimateRegion Name '{climateRegion.Name}' and Reclass Vegetation '{reclassVegetation}' match the Age {age} for site {site}");
 
-                if (thuAgeMatches.Count != 1)
-                    throw new ApplicationException($"More than one THU matches the ClimateRegion Name '{climateRegion.Name}', Reclass Vegetation '{reclassVegetation}', and Age '{age}' for site {site}");
+                if (SiteVars.Slope == null || SiteVars.Aspect == null)
+                {
+                    if (thuAgeMatches.Count != 1)
+                        throw new ApplicationException($"More than one THU matches the ClimateRegion Name '{climateRegion.Name}', Reclass Vegetation '{reclassVegetation}', and Age {age} for site {site}");
 
-                var thu = thuAgeMatches[0];
+                    thu = thuAgeMatches[0];
+                }
+                else
+                {
+                    var slope = (int)SiteVars.Slope[site];
 
-                //var thu = TempHydroUnits.FirstOrDefault(x => x.ClimateRegionName.Equals(climateRegion.Name, StringComparison.OrdinalIgnoreCase) 
-                //        && x.ReclassVegetation.Equals(reclassVegetation, StringComparison.OrdinalIgnoreCase)
-                //        &&  age >= x.MinAge && age <= x.MaxAge);
+                    var aspect = (int)SiteVars.Aspect[site];
+                    ThuAspect thuAspect;
+                    if (aspect <= 45 || aspect >= 315)
+                        thuAspect = ThuAspect.North;
+                    else if (aspect <= 135 || aspect >= 225)
+                        thuAspect = ThuAspect.Other;
+                    else
+                        thuAspect = ThuAspect.South;
 
-                //if (thu == null)
-                //    throw new ApplicationException($"Unable to find a THU to assign to site {site}");
+                    var thuSlopeMatches = thuAgeMatches.Where(x => slope >= x.MinSlope && slope <= x.MaxSlope).ToList();
+                    if (!thuSlopeMatches.Any())
+                        throw new ApplicationException($"No THUs for the ClimateRegion Name '{climateRegion.Name}', Reclass Vegetation '{reclassVegetation}' and Age {age} match the Slope {slope} for site {site}");
+
+                    var thuAspectMatches = thuSlopeMatches.Where(x => x.Aspect == ThuAspect.All || x.Aspect == thuAspect).ToList();
+                    if (!thuAspectMatches.Any())
+                        throw new ApplicationException($"No THUs for the ClimateRegion Name '{climateRegion.Name}', Reclass Vegetation '{reclassVegetation}', Age {age}, and Slope {slope} match for the Aspect {aspect} ({thuAspect}) for site {site}");
+
+                    if (thuAspectMatches.Count != 1)
+                        throw new ApplicationException($"More than one THU matches the ClimateRegion Name '{climateRegion.Name}', Reclass Vegetation '{reclassVegetation}', Age {age}, Slope {slope}, and Aspect {aspect} ({thuAspect} or All) for site {site}");
+
+                    thu = thuAspectMatches[0];
+                }
 
                 ++thu.SiteCount;
 
@@ -425,7 +473,12 @@ namespace Landis.Extension.Succession.DGS
                 SiteVars.TempHydroUnit[site] = thu;
             }
 
-            ModelCore.UI.WriteLine($"AssignTempHydroUnits: {TempHydroUnits.Count(x => x.InUseForYear)} THUs in use");
+            var thusInUse = TempHydroUnits.Where(x => x.InUseForYear).ToList();
+            ModelCore.UI.WriteLine($"AssignTempHydroUnits: {thusInUse.Count} THUs in use:");
+            foreach (var thu in thusInUse)
+            {
+                ModelCore.UI.WriteLine(thu.ToString());
+            }
 
             ModelCore.UI.WriteLine("AssignTempHydroUnits: End");
         }
@@ -490,9 +543,7 @@ namespace Landis.Extension.Succession.DGS
         }
         //---------------------------------------------------------------------
 
-        //protected override void InitializeSite(ActiveSite site,
-                                               //ICommunity initialCommunity)
-            protected override void InitializeSite (ActiveSite site)
+        protected override void InitializeSite (ActiveSite site)
         {
 
             InitialBiomass initialBiomass = InitialBiomass.Compute(site, initialCommunity);
@@ -574,13 +625,13 @@ namespace Landis.Extension.Succession.DGS
 
                 }
 
-                double woodFireConsumption = woodInput * (float)FireEffects.ReductionsTable[(int)SiteVars.FireSeverity[site]].CoarseLitterReduction;
-                double foliarFireConsumption = foliarInput * (float)FireEffects.ReductionsTable[(int)SiteVars.FireSeverity[site]].FineLitterReduction;
+                double live_woodFireConsumption = woodInput * (float)FireEffects.ReductionsTable[(int)SiteVars.FireSeverity[site]].CohortWoodReduction;
+                double live_foliarFireConsumption = foliarInput * (float)FireEffects.ReductionsTable[(int)SiteVars.FireSeverity[site]].CohortLeafReduction;
 
-                SiteVars.SmolderConsumption[site] += woodFireConsumption;
-                SiteVars.FlamingConsumption[site] += foliarFireConsumption;
-                woodInput -= (float) woodFireConsumption;
-                foliarInput -= (float) foliarFireConsumption;
+                SiteVars.SmolderConsumption[site] += live_woodFireConsumption;
+                SiteVars.FlamingConsumption[site] += live_foliarFireConsumption;
+                woodInput -= (float)live_woodFireConsumption;
+                foliarInput -= (float)live_foliarFireConsumption;
             }
 
             ForestFloor.AddWoodLitter(woodInput, cohort.Species, site);
@@ -618,7 +669,7 @@ namespace Landis.Extension.Succession.DGS
                 if (disturbanceType.IsMemberOf("disturbance:fire"))
                 {
                     SiteVars.FireSeverity = ModelCore.GetSiteVar<byte>("Fire.Severity");
-                    Reproduction.CheckForPostFireRegen(eventArgs.Cohort, site);
+                    Landis.Library.Succession.Reproduction.CheckForPostFireRegen(eventArgs.Cohort, site);
 
                     if (!Disturbed[site])  // the first cohort killed/damaged
                     {
@@ -631,7 +682,9 @@ namespace Landis.Extension.Succession.DGS
 
                     double woodFireConsumption = woodInput * (float)FireEffects.ReductionsTable[(int)SiteVars.FireSeverity[site]].CoarseLitterReduction;
                     double foliarFireConsumption = foliarInput * (float)FireEffects.ReductionsTable[(int)SiteVars.FireSeverity[site]].FineLitterReduction;
-
+                    SiteVars.SourceSink[site].Carbon += woodFireConsumption * 0.47;
+                    SiteVars.SourceSink[site].Carbon += foliarFireConsumption * 0.47;
+                    
                     SiteVars.SmolderConsumption[site] += woodFireConsumption;
                     SiteVars.FlamingConsumption[site] += foliarFireConsumption;
                     woodInput -= (float)woodFireConsumption;
@@ -646,16 +699,19 @@ namespace Landis.Extension.Succession.DGS
                         {
                             HarvestEffects.ReduceLayers(SiteVars.HarvestPrescriptionName[site], site);
                         }
-                        woodInput -= woodInput * (float)HarvestEffects.GetCohortWoodRemoval(site);
-                        foliarInput -= foliarInput * (float)HarvestEffects.GetCohortLeafRemoval(site);
+                        double woodLoss = woodInput * (float)HarvestEffects.GetCohortWoodRemoval(site);
+                        double foliarLoss = foliarInput * (float)HarvestEffects.GetCohortLeafRemoval(site);
+                        SiteVars.SourceSink[site].Carbon += woodLoss * 0.47;
+                        SiteVars.SourceSink[site].Carbon += foliarLoss * 0.47;
+                        woodInput -= woodLoss;
+                        foliarInput -= foliarLoss;
                     }
 
                     // If not fire, check for resprouting:
-                    Reproduction.CheckForResprouting(eventArgs.Cohort, site);
+                    Landis.Library.Succession.Reproduction.CheckForResprouting(eventArgs.Cohort, site);
                 }
             }
 
-            //PlugIn.ModelCore.UI.WriteLine("Cohort Died: species={0}, age={1}, wood={2:0.00}, foliage={3:0.00}.", cohort.Species.Name, cohort.Age, wood, foliar);
             ForestFloor.AddWoodLitter(woodInput, cohort.Species, eventArgs.Site);
             ForestFloor.AddFoliageLitter(foliarInput, cohort.Species, eventArgs.Site);
 
@@ -672,8 +728,8 @@ namespace Landis.Extension.Succession.DGS
         //---------------------------------------------------------------------
         //Grows the cohorts for future climate
         protected override void AgeCohorts(ActiveSite site,
-                                           ushort     years,
-                                           int?       successionTimestep)
+                                           ushort years,
+                                           int?  successionTimestep)
         {
             Main.Run(site, years, successionTimestep.HasValue);
 
@@ -716,29 +772,36 @@ namespace Landis.Extension.Succession.DGS
 
         }
         //---------------------------------------------------------------------
+        
         /// <summary>
         /// Add a new cohort to a site following reproduction or planting.  Does not include initial communities.
         /// This is a Delegate method to base succession.
         /// </summary>
 
-       // public void AddNewCohort(ISpecies species, ActiveSite site)
         public void AddNewCohort(ISpecies species, ActiveSite site, string reproductionType)
         {
             float[] initialBiomass = CohortBiomass.InitialBiomass(species, SiteVars.Cohorts[site], site);
             SiteVars.Cohorts[site].AddNewCohort(species, 1, initialBiomass[0], initialBiomass[1]);
-        }
-        //---------------------------------------------------------------------
 
+            if (reproductionType == "plant")
+                SpeciesByPlant[species.Index]++;
+            else if (reproductionType == "serotiny")
+                SpeciesBySerotiny[species.Index]++;
+            else if (reproductionType == "resprout")
+                SpeciesByResprout[species.Index]++;
+            else if (reproductionType == "seed")
+                SpeciesBySeed[species.Index]++;
+
+        }
+
+        //---------------------------------------------------------------------
         /// <summary>
         /// Determines if a species can establish on a site.
         /// This is a Delegate method to base succession.
         /// </summary>
         public bool Establish(ISpecies species, ActiveSite site)
         {
-            //IEcoregion ecoregion = modelCore.Ecoregion[site];
-            //double establishProbability = SpeciesData.EstablishProbability[species][ecoregion];
-            double establishProbability = Establishment.Calculate(species, site);// SpeciesData.EstablishProbability[species][ecoregion];
-
+            double establishProbability = Establishment.Calculate(species, site);
             return modelCore.GenerateUniform() < establishProbability;
         }
 
@@ -770,25 +833,25 @@ namespace Landis.Extension.Succession.DGS
         //---------------------------------------------------------------------
         // Outmoded but required?
 
-        public static void SiteDisturbed(object sender,
-                                         Landis.Library.BiomassCohorts.DisturbanceEventArgs eventArgs)
-        {
-            ModelCore.UI.WriteLine("  Calculating Fire or Harvest Effects.");
+        //public static void SiteDisturbed(object sender,
+        //                                 Landis.Library.BiomassCohorts.DisturbanceEventArgs eventArgs)
+        //{
+        //    ModelCore.UI.WriteLine("  Calculating Fire or Harvest Effects.");
 
-            ExtensionType disturbanceType = eventArgs.DisturbanceType;
-            ActiveSite site = eventArgs.Site;
+        //    ExtensionType disturbanceType = eventArgs.DisturbanceType;
+        //    ActiveSite site = eventArgs.Site;
 
-            if (disturbanceType.IsMemberOf("disturbance:fire"))
-            {
-                SiteVars.FireSeverity = ModelCore.GetSiteVar<byte>("Fire.Severity");
-                if (SiteVars.FireSeverity != null && SiteVars.FireSeverity[site] > 0)
-                    FireEffects.ReduceLayers(SiteVars.FireSeverity[site], site);
-            }
-            if (disturbanceType.IsMemberOf("disturbance:harvest"))
-            {
-                HarvestEffects.ReduceLayers(SiteVars.HarvestPrescriptionName[site], site);
-            }
-        }
+        //    if (disturbanceType.IsMemberOf("disturbance:fire"))
+        //    {
+        //        SiteVars.FireSeverity = ModelCore.GetSiteVar<byte>("Fire.Severity");
+        //        if (SiteVars.FireSeverity != null && SiteVars.FireSeverity[site] > 0)
+        //            FireEffects.ReduceLayers(SiteVars.FireSeverity[site], site);
+        //    }
+        //    if (disturbanceType.IsMemberOf("disturbance:harvest"))
+        //    {
+        //        HarvestEffects.ReduceLayers(SiteVars.HarvestPrescriptionName[site], site);
+        //    }
+        //}
 
         //---------------------------------------------------------------------
 

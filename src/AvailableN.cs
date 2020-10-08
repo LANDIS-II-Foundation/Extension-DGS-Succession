@@ -17,9 +17,6 @@ namespace Landis.Extension.Succession.DGS
         public static Dictionary<int, Dictionary<int, double>> CohortMineralNfraction;  //calculated once per year
         public static Dictionary<int, Dictionary<int, double>> CohortMineralNallocation;  //calculated monthly
 
-        //private static object _cohortMineralNfractionLock = new object();
-        //private static object _cohortMineralNallocationLock = new object();
-
         //---------------------------------------------------------------------
         // Method for retrieving the available resorbed N for each cohort.
         // Return amount of resorbed N in g N m-2.
@@ -110,8 +107,8 @@ namespace Landis.Extension.Succession.DGS
 
         public static void CalculateMineralNfraction(ActiveSite site)
         {
-            //lock (_cohortMineralNfractionLock)
-                CohortMineralNfraction = new Dictionary<int, Dictionary<int, double>>();
+           
+            AvailableN.CohortMineralNfraction = new Dictionary<int, Dictionary<int, double>>();
 
             double NAllocTotal = 0.0;
             
@@ -174,8 +171,8 @@ namespace Landis.Extension.Succession.DGS
 
         public static void SetMineralNallocation(ActiveSite site)
         {
-            //lock (_cohortMineralNallocationLock)
-                CohortMineralNallocation = new Dictionary<int, Dictionary<int, double>>();
+            
+           AvailableN.CohortMineralNallocation = new Dictionary<int, Dictionary<int, double>>();
             
            double availableN = SiteVars.MineralN[site];  // g/m2
            Math.Max(availableN, 0.01);
@@ -348,8 +345,8 @@ namespace Landis.Extension.Succession.DGS
         private static int GetAddYear(ICohort cohort)
         {
             int currentYear = PlugIn.ModelCore.CurrentTime;
-            int cohortAddYear = currentYear - (cohort.Age - Main.Year);
-            //int cohortAddYear = currentYear - (cohort.Age - 2);
+            //int cohortAddYear = currentYear - (cohort.Age - Main.Year);
+            int cohortAddYear = currentYear - cohort.Age - Main.Year;
             if (Main.MonthCnt == 11)
                 cohortAddYear++; 
             return cohortAddYear;

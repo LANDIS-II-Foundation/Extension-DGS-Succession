@@ -11,7 +11,8 @@ namespace Landis.Extension.Succession.DGS
 {
 
     public enum LayerName { Leaf, FineRoot, Wood, CoarseRoot, Metabolic, Structural, Other }; //, SOM1, DO, Other};
-    public enum LayerType {Surface, Soil, Other} 
+    public enum LayerType {Surface, Soil, Other}
+      
 
     /// <summary>
     /// A Century soil model carbon and nitrogen pool.
@@ -24,8 +25,8 @@ namespace Landis.Extension.Succession.DGS
         private double nitrogen;
         private double decayValue;
         private double fractionLignin;
-        //private double netMineralization;
-        //private double grossMineralization;
+        private double netMineralization;
+        private double grossMineralization;
 
 
         //---------------------------------------------------------------------
@@ -39,8 +40,8 @@ namespace Landis.Extension.Succession.DGS
             this.decayValue = 0.0;
             this.fractionLignin = 0.0;
 
-            //this.netMineralization = 0.0;
-            //this.grossMineralization = 0.0;
+            this.netMineralization = 0.0;
+            this.grossMineralization = 0.0;
 
         }
         //---------------------------------------------------------------------
@@ -86,7 +87,7 @@ namespace Landis.Extension.Succession.DGS
             }
             set
             {
-                carbon = value;
+                carbon = Math.Max(0.0, value);
             }
         }
         //---------------------------------------------------------------------
@@ -102,7 +103,7 @@ namespace Landis.Extension.Succession.DGS
             }
             set
             {
-                nitrogen = value;
+                nitrogen = Math.Max(0.0, value);
             }
         }
         //---------------------------------------------------------------------
@@ -139,37 +140,37 @@ namespace Landis.Extension.Succession.DGS
         }
         //---------------------------------------------------------------------
         /// <summary>
-        /// Net Mineralization
+        // Net Mineralization
+        // </summary>
+        public double NetMineralization
+        {
+            get
+            {
+                return netMineralization;
+            }
+            set
+            {
+                netMineralization = value;
+            }
+        }
+        //---------------------------------------------------------------------
+        /// <summary>
+        /// Gross Mineralization
         /// </summary>
-        //public double NetMineralization
-        //{
-        //    get
-        //    {
-        //        return netMineralization;
-        //    }
-        //    set
-        //    {
-        //        netMineralization = value;
-        //    }
-        //}
-        ////---------------------------------------------------------------------
-        ///// <summary>
-        ///// Gross Mineralization
-        ///// </summary>
-        //public double GrossMineralization
-        //{
-        //    get
-        //    {
-        //        return grossMineralization;
-        //    }
-        //    set
-        //    {
-        //        grossMineralization = value;
-        //    }
-        //}
+        public double GrossMineralization
+        {
+            get
+            {
+                return grossMineralization;
+            }
+            set
+            {
+                grossMineralization = value;
+            }
+        }
 
         // --------------------------------------------------
-        //public Layer Clone()
+        //public Layer Clone()  /// This method is enabled in NECN
         //{
         //    Layer newLayer = new Layer(this.Name, this.Type);
 
@@ -211,7 +212,7 @@ namespace Landis.Extension.Succession.DGS
         // Decomposition of compartment lignin
         public void DecomposeLignin(double totalCFlow, ActiveSite site)
         {
-            double carbonToSOM1;    //Net C flow to SOM1
+            double carbonToSOM;    //Net C flow to SOM1
             //double carbonToSOM2;    //Net C flow to SOM2
             double litterC = this.Carbon; 
             double ratioCN = litterC / this.Nitrogen;
@@ -246,19 +247,19 @@ namespace Landis.Extension.Succession.DGS
                 // Decompose Wood Object to SOM1
                 // Gross C flow to som1
 
-                carbonToSOM1 = totalCFlow; // - carbonToSOM2 - co2loss;
+                carbonToSOM = totalCFlow; // - carbonToSOM2 - co2loss;
                 double co2loss = 0.0;
 
                 //MicrobialRespiration associated with decomposition to som1
                 if(this.Type == LayerType.Surface)
-                    co2loss = carbonToSOM1 * OtherData.StructuralToCO2Surface; 
+                    co2loss = carbonToSOM * OtherData.StructuralToCO2Surface; 
                 else
-                    co2loss = carbonToSOM1 * OtherData.StructuralToCO2Soil; 
+                    co2loss = carbonToSOM * OtherData.StructuralToCO2Soil; 
 
                 this.Respiration(co2loss, site);
 
                 //Net C flow to SOM1////
-                carbonToSOM1 -= co2loss;
+                carbonToSOM -= co2loss;
 
                 //if(this.Type == LayerType.Surface)
                 //{
@@ -267,8 +268,8 @@ namespace Landis.Extension.Succession.DGS
                 //}
                 //else
                 //{
-                    this.TransferCarbon(SiteVars.SoilPrimary[site], carbonToSOM1);
-                    this.TransferNitrogen(SiteVars.SoilPrimary[site], carbonToSOM1, litterC, ratioCN, site);
+                    this.TransferCarbon(SiteVars.SoilPrimary[site], carbonToSOM);
+                    this.TransferNitrogen(SiteVars.SoilPrimary[site], carbonToSOM, litterC, ratioCN, site);
                 //}
             }
             //PlugIn.ModelCore.UI.WriteLine("Decompose2.  MineralN={0:0.00}.", SiteVars.MineralN[site]);
@@ -283,17 +284,17 @@ namespace Landis.Extension.Succession.DGS
 
             if (litterC > 0.0000001)
             {
-              // Determine C/N ratios for flows to SOM1
-                double ratioCNtoSOM1 = 0.0;
+              // Determine C/N ratios for flows to SOM
+                double ratioCNtoSOM = 0.0;
                 double co2loss = 0.0;
 
                 // Compute ratios for surface  metabolic residue
                 if (this.Type == LayerType.Surface)
-                    ratioCNtoSOM1 = Layer.AbovegroundDecompositionRatio(this.Nitrogen, litterC);
+                    ratioCNtoSOM = Layer.AbovegroundDecompositionRatio(this.Nitrogen, litterC);
 
                 //Compute ratios for soil metabolic residue
                 else
-                    ratioCNtoSOM1 = Layer.BelowgroundDecompositionRatio(site,
+                    ratioCNtoSOM = Layer.BelowgroundDecompositionRatio(site,
                                         OtherData.MinCNenterSOM1,
                                         OtherData.MaxCNenterSOM1,
                                         OtherData.MinContentN_SOM1);
@@ -309,7 +310,7 @@ namespace Landis.Extension.Succession.DGS
 
                 // Rob, Melissa, Jason: Need to add some DOC from litter to soils.
                 double flowToDOC = totalCFlow * PlugIn.Parameters.FractionLitterDecayToDOC;
-                double flowToDON = flowToDOC / ratioCNtoSOM1;
+                double flowToDON = flowToDOC / ratioCNtoSOM;
                 this.Carbon -= Math.Min(flowToDOC, this.Carbon);
                 SiteVars.SoilPrimary[site].DOC += flowToDOC;
                 this.Nitrogen -= Math.Min(flowToDON, this.Nitrogen);
@@ -321,7 +322,7 @@ namespace Landis.Extension.Succession.DGS
                     totalCFlow = litterC;
 
                 //If decomposition can occur,
-                if(this.DecomposePossible(ratioCNtoSOM1, SiteVars.MineralN[site]))
+                if(this.DecomposePossible(ratioCNtoSOM, SiteVars.MineralN[site]))
                 {
                     //CO2 loss
                     if (this.Type == LayerType.Surface)
@@ -339,7 +340,7 @@ namespace Landis.Extension.Succession.DGS
                         PlugIn.ModelCore.UI.WriteLine("   ERROR:  Decompose Metabolic:  netCFlow={0:0.000} > layer.Carbon={0:0.000}.", netCFlow, this.Carbon);
 
                     this.TransferCarbon(SiteVars.SoilPrimary[site], netCFlow);
-                    this.TransferNitrogen(SiteVars.SoilPrimary[site], netCFlow, litterC, ratioCNtoSOM1, site);
+                    this.TransferNitrogen(SiteVars.SoilPrimary[site], netCFlow, litterC, ratioCNtoSOM, site);
 
                     // -- CARBON AND NITROGEN ---------------------------
                     // Partition and schedule C flows
@@ -378,8 +379,7 @@ namespace Landis.Extension.Succession.DGS
 
         public void TransferNitrogen(SoilLayer destination, double CFlow, double totalC, double ratioCNtoDestination, ActiveSite site)
         {
-            // this is the source.
-
+            // this is the source.           
             double mineralNFlow = 0.0;
 
             //...N flow is proportional to C flow.

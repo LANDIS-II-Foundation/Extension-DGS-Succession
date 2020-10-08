@@ -163,34 +163,6 @@ namespace Landis.Extension.Succession.DGS
             ReadVar(sonMapName);
             parameters.InitialSON_PrimaryMapName = sonMapName.Value;
 
-            //InputVar<string> som1NsurfMapName = new InputVar<string>("InitialSOM1NsurfMapName");
-            //ReadVar(som1NsurfMapName);
-            //parameters.InitialSOM1NSurfaceMapName = som1NsurfMapName.Value;
-
-            //InputVar<string> som1CsoilMapName = new InputVar<string>("InitialSOM1CsoilMapName");
-            //ReadVar(som1CsoilMapName);
-            //parameters.InitialSOM1CSoilMapName = som1CsoilMapName.Value;
-
-            //InputVar<string> som1NsoilMapName = new InputVar<string>("InitialSOM1NsoilMapName");
-            //ReadVar(som1NsoilMapName);
-            //parameters.InitialSOM1NSoilMapName = som1NsoilMapName.Value;
-
-            //InputVar<string> som2CMapName = new InputVar<string>("InitialSOM2CMapName");
-            //ReadVar(som2CMapName);
-            //parameters.InitialSOM2CMapName = som2CMapName.Value;
-
-            //InputVar<string> som2NMapName = new InputVar<string>("InitialSOM2NMapName");
-            //ReadVar(som2NMapName);
-            //parameters.InitialSOM2NMapName = som2NMapName.Value;
-
-            //InputVar<string> som3CMapName = new InputVar<string>("InitialSOM3CMapName");
-            //ReadVar(som3CMapName);
-            //parameters.InitialSOM3CMapName = som3CMapName.Value;
-
-            //InputVar<string> som3NMapName = new InputVar<string>("InitialSOM3NMapName");
-            //ReadVar(som3NMapName);
-            //parameters.InitialSOM3NMapName = som3NMapName.Value;
-
             InputVar<string> deadSurfMapName = new InputVar<string>("InitialDeadWoodSurfaceMapName");
             ReadVar(deadSurfMapName);
             parameters.InitialDeadSurfaceMapName = deadSurfMapName.Value;
@@ -209,6 +181,14 @@ namespace Landis.Extension.Succession.DGS
             ReadVar(iMN);
             parameters.SetInitMineralN(iMN.Value);
 
+            InputVar<double> denits = new InputVar<double>("DenitrificationRate");
+            ReadVar(denits);
+            parameters.SetDenitrif(denits.Value);
+
+            InputVar<string> wt = new InputVar<string>("WaterDecayFunction");
+            ReadVar(wt);
+            parameters.WType = WParse(wt.Value);
+
             InputVar<double> iMicC = new InputVar<double>("InitialMicrobialC");
             ReadVar(iMicC);
             parameters.SetInitMicrobialC(iMicC.Value);
@@ -217,29 +197,107 @@ namespace Landis.Extension.Succession.DGS
             ReadVar(iMicN);
             parameters.SetInitMicrobialN(iMicN.Value);
 
-            InputVar<double> iEnzConc = new InputVar<double>("InitialEnzymeConcentration");
+            InputVar<double> iEnzConc = new InputVar<double>("InitialEnzymeConc");
             ReadVar(iEnzConc);
             parameters.SetInitEnzymeConc(iEnzConc.Value);
 
-            InputVar<double> iDOCf = new InputVar<double>("InitialDOCFraction");
+            InputVar<double> aeSOMD = new InputVar<double>("ActEnergySOMDepoly");
+            ReadVar(aeSOMD);
+            parameters.SetActEnergySOMDepoly(aeSOMD.Value);
+
+            InputVar<double> aeDOCU = new InputVar<double>("ActEnergyDOCUptake");
+            ReadVar(aeDOCU);
+            parameters.SetActEnergyDOCUptake(aeDOCU.Value);
+
+            InputVar<double> econstSOMD = new InputVar<double>("ExpConstSOMDepoly");
+            ReadVar(econstSOMD);
+            parameters.SetECSOMDepoly(econstSOMD.Value);
+
+            InputVar<double> econstDOCU = new InputVar<double>("ExpConstDOCUptake");
+            ReadVar(econstDOCU);
+            parameters.SetExpConstDOCUptake(econstDOCU.Value);
+
+            InputVar<double> fracUSOM = new InputVar<double>("FractionSOMUnprotect");
+            ReadVar(fracUSOM);
+            parameters.SetFractionSOMUnprotect(fracUSOM.Value);
+
+            InputVar<double> CNEnz = new InputVar<double>("CNEnzymes");
+            ReadVar(CNEnz);
+            parameters.SetCNEnzymes(CNEnz.Value);
+
+            InputVar<double> kmSOMD = new InputVar<double>("KmSOMDepoly");
+            ReadVar(kmSOMD);
+            parameters.SetKmSOMDepoly(kmSOMD.Value);
+
+            InputVar<double> KmDOCU = new InputVar<double>("KmDOCUptake");
+            ReadVar(KmDOCU);
+            parameters.SetKmDOCUptake(KmDOCU.Value);
+
+            InputVar<double> EnvTurnR = new InputVar<double>("EnzTurnRate");
+            ReadVar(EnvTurnR);
+            parameters.SetEnzymeTurnRate(EnvTurnR.Value);
+
+            InputVar<double> MTurnR = new InputVar<double>("MicrobialTurnRate");
+            ReadVar(MTurnR);
+            parameters.SetMicrobialTurnRate(MTurnR.Value);
+
+            InputVar<double> CUE = new InputVar<double>("CarbonUseEfficiency");
+            ReadVar(CUE);
+            parameters.SetCarbonUseEfficiency(CUE.Value);
+
+            InputVar<double> PEnzSOM = new InputVar<double>("PropEnzymeSOM");
+            ReadVar(PEnzSOM);
+            parameters.SetPropEnzymeSOM(PEnzSOM.Value);
+
+            InputVar<double> PEnzCProd = new InputVar<double>("PropCEnzymeProduction");
+            ReadVar(PEnzCProd);
+            parameters.SetPropCEnzymeProduction(PEnzCProd.Value);
+
+            InputVar<double> PEnzNProd = new InputVar<double>("PropNEnzymeProduction");
+            ReadVar(PEnzNProd);
+            parameters.SetPropNEnzymeProduction(PEnzNProd.Value);
+
+            InputVar<double> fracDeadMB = new InputVar<double>("FractDeadMicrobialBiomassSOM");
+            ReadVar(fracDeadMB);
+            parameters.SetFractDeadMicrobialBiomassSOM(fracDeadMB.Value)
+                ;
+            InputVar<double> MMO2 = new InputVar<double>("MMConstantO2");
+            ReadVar(MMO2);
+            parameters.SetMMConstantO2(MMO2.Value);
+
+            InputVar<double> DiffO2 = new InputVar<double>("DiffConstantO2");
+            ReadVar(DiffO2);
+            parameters.SetDiffConstantO2(DiffO2.Value);
+
+            InputVar<double> DiffSOMLiq = new InputVar<double>("DiffConstantSOMLiquid");
+            ReadVar(DiffSOMLiq);
+            parameters.SetDiffConstantSOMLiquid(DiffSOMLiq.Value);
+
+            InputVar<double> FracVolO2 = new InputVar<double>("FractionVolumeO2");
+            ReadVar(FracVolO2);
+            parameters.SetFractionVolumeO2(FracVolO2.Value);     
+
+            InputVar<double> iDOCf = new InputVar<double>("DOCFraction");
             ReadVar(iDOCf);
             parameters.SetInitDOCFraction(iDOCf.Value);
 
-            InputVar<double> iDONf = new InputVar<double>("InitialDONFraction");
+            InputVar<double> iDONf = new InputVar<double>("DONFraction");
             ReadVar(iDONf);
             parameters.SetInitDONFraction(iDONf.Value);
-
-            InputVar<double> denits = new InputVar<double>("DenitrificationRate");
-            ReadVar(denits);
-            parameters.SetDenitrif(denits.Value);
 
             InputVar<double> fracDOC = new InputVar<double>("FractionLitterToDOC");
             ReadVar(fracDOC);
             parameters.SetFractionDOC(fracDOC.Value);
 
-            InputVar<string> wt = new InputVar<string>("WaterDecayFunction");
-            ReadVar(wt);
-            parameters.WType = WParse(wt.Value);
+            InputVar<double> sma = new InputVar<double>("SoilMoistureA");
+            ReadVar(sma);
+            parameters.SetSoilMoistureA(sma.Value);
+
+            InputVar<double> smb = new InputVar<double>("SoilMoistureB");
+            ReadVar(smb);
+            parameters.SetSoilMoistureB(smb.Value);
+
+            
 
             //-----------------Dispersal Parameters----------------------------------------------------------------
 

@@ -19,8 +19,8 @@ namespace Landis.Extension.Succession.DGS
         private double coarseLitterReduction;
         private double fineLitterReduction;
         private double somReduction;
-        //private double cohortWoodReduction;
-        //private double cohortLeafReduction;
+        private double cohortWoodReduction;
+        private double cohortLeafReduction;
         
         public double CoarseLitterReduction
         {
@@ -46,34 +46,34 @@ namespace Landis.Extension.Succession.DGS
             }
                
         }
-        //public double CohortWoodReduction
-        //{
-        //    get
-        //    {
-        //        return cohortWoodReduction;
-        //    }
-        //    set
-        //    {
-        //        if (value < 0.0 || value > 1.0)
-        //            throw new InputValueException(value.ToString(), "Cohort wood reduction due to fire must be between 0 and 1.0");
-        //        cohortWoodReduction = value;
-        //    }
+        public double CohortWoodReduction
+        {
+            get
+            {
+                return cohortWoodReduction;
+            }
+            set
+            {
+                if (value < 0.0 || value > 1.0)
+                    throw new InputValueException(value.ToString(), "Cohort wood reduction due to fire must be between 0 and 1.0");
+                cohortWoodReduction = value;
+            }
 
-        //}
-        //public double CohortLeafReduction
-        //{
-        //    get
-        //    {
-        //        return cohortLeafReduction;
-        //    }
-        //    set
-        //    {
-        //        if (value < 0.0 || value > 1.0)
-        //            throw new InputValueException(value.ToString(), "Cohort wood reduction due to fire must be between 0 and 1.0");
-        //        cohortLeafReduction = value;
-        //    }
+        }
+        public double CohortLeafReduction
+        {
+            get
+            {
+                return cohortLeafReduction;
+            }
+            set
+            {
+                if (value < 0.0 || value > 1.0)
+                    throw new InputValueException(value.ToString(), "Cohort wood reduction due to fire must be between 0 and 1.0");
+                cohortLeafReduction = value;
+            }
 
-        //}
+        }
         public double SOMReduction
         {
             get
@@ -93,8 +93,8 @@ namespace Landis.Extension.Succession.DGS
         {
             this.CoarseLitterReduction = 0.0; 
             this.FineLitterReduction = 0.0;
-            //this.CohortLeafReduction = 0.0;
-            //this.CohortWoodReduction = 0.0;
+            this.CohortLeafReduction = 0.0;
+            this.CohortWoodReduction = 0.0;
             this.SOMReduction = 0.0;
         }
     }
@@ -186,18 +186,18 @@ namespace Landis.Extension.Succession.DGS
 
             double SOM_Multiplier = ReductionsTable[severity].SOMReduction;
 
-            //carbonLoss = SiteVars.SOM1surface[site].Carbon * SOM_Multiplier;
-            //nitrogenLoss = SiteVars.SOM1surface[site].Nitrogen * SOM_Multiplier;
-            //summaryNLoss += nitrogenLoss;
+            carbonLoss = SiteVars.SoilAvailable[site].Carbon * SOM_Multiplier;
+            nitrogenLoss = SiteVars.SoilAvailable[site].Nitrogen * SOM_Multiplier;
+            summaryNLoss += nitrogenLoss;
 
-            //SiteVars.SOM1surface[site].Carbon -= carbonLoss;
-            //SiteVars.SourceSink[site].Carbon += carbonLoss;
-            //SiteVars.FireCEfflux[site] += carbonLoss;
+            SiteVars.SoilAvailable[site].Carbon -= carbonLoss;
+            SiteVars.SourceSink[site].Carbon += carbonLoss;
+            SiteVars.FireCEfflux[site] += carbonLoss;
 
-            //SiteVars.SOM1surface[site].Nitrogen -= nitrogenLoss;
-            //SiteVars.SourceSink[site].Nitrogen += nitrogenLoss;
-            //SiteVars.FireNEfflux[site] += nitrogenLoss;
-            //SiteVars.SmolderConsumption[site] += carbonLoss * 2.0;  
+            SiteVars.SoilAvailable[site].Nitrogen -= nitrogenLoss;
+            SiteVars.SourceSink[site].Nitrogen += nitrogenLoss;
+            SiteVars.FireNEfflux[site] += nitrogenLoss;
+            SiteVars.SmolderConsumption[site] += carbonLoss * 2.0;
 
             // Transfer 1% to mineral N.
             SiteVars.MineralN[site] += summaryNLoss * 0.01;

@@ -29,7 +29,7 @@ namespace Landis.Extension.Succession.DGS
         string SoilBulkDensityMapName { get; set; }
         string SoilParticleDensityMapName { get; set; }
         string InitialSOC_PrimaryMapName { get; set; }
-        string InitialSON_PrimaryMapName { get; set; }
+        string InitialSON_PrimaryMapName { get; set; }        
         string InitialDeadSurfaceMapName { get; set; }
         string InitialDeadSoilMapName { get; set; }       
         //string InitialSOM1CSurfaceMapName { get; set; }
@@ -108,21 +108,40 @@ namespace Landis.Extension.Succession.DGS
 
         double AtmosNslope {get;}
         double AtmosNintercept {get;}
-        double Latitude {get;}
-        double DenitrificationRate { get; }
+        double Latitude { get; }
+        double InitialFineFuels { get; }    
         double InitialMineralN { get; }
         double InitialMicrobialC { get; }
         double InitialMicrobialN { get; }
         double InitialEnzymeConc { get; }
+        double ActEnergySOMDepoly { get; }
+        double ActEnergyDOCUptake { get; }
+        double ExpConstSOMDepoly { get; }
+        double ExpConstDOCUptake { get; } 
+        double FractionSOMUnprotect { get; }
+        double CNEnzymes { get; }
+        double KmSOMDepoly { get; }
+        double KmDOCUptake { get; }
+        double EnzTurnRate { get; }
+        double MicrobialTurnRate { get; }
+        double CarbonUseEfficiency { get; }
+        double PropEnzymeSOM { get; }
+        double PropCEnzymeProduction { get; }
+        double PropNEnzymeProduction { get; }
+        double FractDeadMicrobialBiomassSOM { get; }
+        double MMConstantO2 { get; }
+        double DiffConstantO2 { get; }
+        double DiffConstantSOMLiquid { get; }
+        double FractionVolumeO2 { get; }
         double InitialDOCFraction { get; }
-        double InitialDONFraction { get; }        
-        double InitialFineFuels { get; }
+        double InitialDONFraction { get; }
         double FractionLitterDecayToDOC { get; }
+        double SoilMoistureA { get; }
+        double SoilMoistureB { get; }
+        double DenitrificationRate { get; }
         //double DecayRateSurf { get; }
         //double DecayRateSOM1 { get; }
         //double DecayRateSOM2 { get; }
         //double DecayRateSOM3 { get; }
-
-
     }
 }

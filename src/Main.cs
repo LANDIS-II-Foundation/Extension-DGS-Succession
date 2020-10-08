@@ -146,11 +146,12 @@ namespace Landis.Extension.Succession.DGS
                     else
                     {
                         var liveBiomass = (double)ComputeLivingBiomass(siteCohorts);
-                        SoilWater.Run(y, Month, liveBiomass, site, out baseFlow, out stormFlow, out AET);
+                        //SoilWater.Run(y, Month, liveBiomass, site, out baseFlow, out stormFlow, out AET);
+                        SoilWater.Run(y, Month, liveBiomass, site, out baseFlow, out stormFlow);
                     }
 
                     //lock (_locker)
-                        PlugIn.AnnualWaterBalance += ppt - AET;
+                        //PlugIn.AnnualWaterBalance += ppt - AET;
 
                     //
                     // **

@@ -34,7 +34,7 @@ namespace Landis.Extension.Succession.DGS
         // Soil layers
         //private static ISiteVar<Layer> som1surface;
         private static ISiteVar<SoilLayer> soilPrimary;
-        private static ISiteVar<SoilLayer> availableSoilC;
+        private static ISiteVar<SoilLayer> soilAvailable;
         //private static ISiteVar<Layer> dissolved_organic;
         //private static ISiteVar<Layer> som2;
         //private static ISiteVar<Layer> som3;
@@ -97,7 +97,7 @@ namespace Landis.Extension.Succession.DGS
         private static ISiteVar<double> annualClimaticWaterDeficit; //Annual soil moisture calculation, defined as pet - aet
         private static ISiteVar<int> dryDays;
         private static ISiteVar<double> fineFuels;
-
+        
         public static ISiteVar<double> TotalWoodBiomass;
         public static ISiteVar<int> PrevYearMortality;
         public static ISiteVar<byte> FireSeverity;
@@ -107,10 +107,13 @@ namespace Landis.Extension.Succession.DGS
         public static ISiteVar<Dictionary<int, Dictionary<int, double>>> CohortResorbedNallocation;
         public static ISiteVar<double> SmolderConsumption;
         public static ISiteVar<double> FlamingConsumption;
+        public static ISiteVar<double> AnnualClimaticWaterDeficit; //Annual soil moisture calculation, defined as pet - aet
 
         public static ISiteVar<TempHydroUnit> TempHydroUnit;
         public static ISiteVar<string> ForestTypeName;
         public static ISiteVar<int> TimeOfLastBurn;
+        public static ISiteVar<ushort> Slope;
+        public static ISiteVar<ushort> Aspect;
 
         //---------------------------------------------------------------------
 
@@ -140,7 +143,7 @@ namespace Landis.Extension.Succession.DGS
             //som2                = PlugIn.ModelCore.Landscape.NewSiteVar<Layer>();
             //som3                = PlugIn.ModelCore.Landscape.NewSiteVar<Layer>();
             soilPrimary = PlugIn.ModelCore.Landscape.NewSiteVar<SoilLayer>();
-            availableSoilC = PlugIn.ModelCore.Landscape.NewSiteVar<SoilLayer>();
+            soilAvailable = PlugIn.ModelCore.Landscape.NewSiteVar<SoilLayer>();
             soilDepth = PlugIn.ModelCore.Landscape.NewSiteVar<int>();
             soilDrain           = PlugIn.ModelCore.Landscape.NewSiteVar<double>();
             soilBaseFlowFraction = PlugIn.ModelCore.Landscape.NewSiteVar<double>();
@@ -202,7 +205,7 @@ namespace Landis.Extension.Succession.DGS
             frassC              = PlugIn.ModelCore.Landscape.NewSiteVar<double>();
             lai                 = PlugIn.ModelCore.Landscape.NewSiteVar<double>();
             annualPPT_AET       = PlugIn.ModelCore.Landscape.NewSiteVar<double>();
-            annualClimaticWaterDeficit  = PlugIn.ModelCore.Landscape.NewSiteVar<double>();
+            AnnualClimaticWaterDeficit  = PlugIn.ModelCore.Landscape.NewSiteVar<double>();
             SmolderConsumption = PlugIn.ModelCore.Landscape.NewSiteVar<double>();
             FlamingConsumption = PlugIn.ModelCore.Landscape.NewSiteVar<double>(); 
             HarvestPrescriptionName = PlugIn.ModelCore.GetSiteVar<string>("Harvest.PrescriptionName");
@@ -217,6 +220,7 @@ namespace Landis.Extension.Succession.DGS
             PlugIn.ModelCore.RegisterSiteVar(SiteVars.FineFuels, "Succession.FineFuels");
             PlugIn.ModelCore.RegisterSiteVar(SiteVars.SmolderConsumption, "Succession.SmolderConsumption");
             PlugIn.ModelCore.RegisterSiteVar(SiteVars.FlamingConsumption, "Succession.FlamingConsumption");
+            PlugIn.ModelCore.RegisterSiteVar(SiteVars.AnnualClimaticWaterDeficit, "Succession.CWD");
 
             TempHydroUnit = PlugIn.ModelCore.Landscape.NewSiteVar<TempHydroUnit>();
             //ForestTypeName = PlugIn.ModelCore.GetSiteVar<string>("Output.ForestType");
@@ -232,7 +236,7 @@ namespace Landis.Extension.Succession.DGS
                 soilStructural[site]        = new Layer(LayerName.Structural, LayerType.Soil);
                 soilMetabolic[site]         = new Layer(LayerName.Metabolic, LayerType.Soil);
                 soilPrimary[site]           = new SoilLayer(SoilName.Primary); //, LayerType.Soil);  
-                availableSoilC[site]        = new SoilLayer(SoilName.Primary); //, LayerType.Soil);  
+                soilAvailable[site]        = new SoilLayer(SoilName.Available); //, LayerType.Soil);  
                 //LayerType.Soil)[site] = new SoilLayer(SoilName.Primary); //, LayerType.Soil);
                 //som1surface[site]           = new Layer(LayerName.SOM1, LayerType.Surface);
                 //som2[site]                  = new Layer(LayerName.SOM2, LayerType.Soil);
@@ -315,8 +319,9 @@ namespace Landis.Extension.Succession.DGS
         //---------------------------------------------------------------------
         public static void ResetAnnualValues(Site site)
         {
-            
+
             // Reset these accumulators to zero:
+            SiteVars.DryDays[site] = 0;
             SiteVars.CohortLeafN[site] = 0.0;
             SiteVars.CohortFRootN[site] = 0.0;
             SiteVars.CohortLeafC[site] = 0.0;
@@ -466,11 +471,11 @@ namespace Landis.Extension.Succession.DGS
         /// <summary>
         /// The soil C available for decomposition.
         /// </summary>
-        public static ISiteVar<SoilLayer> AvailableSoilC
+        public static ISiteVar<SoilLayer> SoilAvailable
         {
             get
             {
-                return availableSoilC;
+                return soilAvailable;
             }
         }
         //---------------------------------------------------------------------
@@ -1033,21 +1038,21 @@ namespace Landis.Extension.Succession.DGS
 
         }
         /// <summary>
-        /// A summary of Soil Moisture (PET - AET)
+        /// A summary of Annual CWD (PET - AET)
         /// </summary>
-        public static ISiteVar<double> AnnualClimaticWaterDeficit
-        {
-            get
-            {
-                return annualClimaticWaterDeficit;
-            }
-            set
-            {
-                annualClimaticWaterDeficit = value;
-            }
+        //public static ISiteVar<double> AnnualClimaticWaterDeficit
+        //{
+        //    get
+        //    {
+        //        return annualClimaticWaterDeficit;
+        //    }
+        //    set
+        //    {
+        //        annualClimaticWaterDeficit = value;
+        //    }
 
 
-        }
+        //}
     }
 
 }

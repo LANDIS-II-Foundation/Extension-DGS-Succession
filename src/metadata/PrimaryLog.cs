@@ -87,11 +87,14 @@ namespace Landis.Extension.Succession.DGS
         [DataFieldAttribute(Unit = FieldUnits.g_C_m2, Desc = "Dead Fine RootMetabolic C", Format = "0.0")]
         public double C_DeadFRoot_Meta { get; set; }
 
+        [DataFieldAttribute(Unit = FieldUnits.g_C_m2, Desc = "Available SOC", Format = "0.0")]
+        public double C_SoilAvailable { get; set; }
+
         //[DataFieldAttribute(Unit = FieldUnits.g_C_m2, Desc = "SOM1 Surface C", Format = "0.0")]
         //public double C_SOM1surf { get; set; }
 
-        [DataFieldAttribute(Unit = FieldUnits.g_C_m2, Desc = "Primary SOC", Format = "0.0")]
-        public double C_SoilPrimary { get; set; }
+        //[DataFieldAttribute(Unit = FieldUnits.g_C_m2, Desc = "Primary SOC", Format = "0.0")]
+        //public double C_SoilPrimary { get; set; }
 
         //[DataFieldAttribute(Unit = FieldUnits.g_C_m2, Desc = "SOM2 C", Format = "0.0")]
         //public double C_SOM2 { get; set; }
@@ -133,8 +136,8 @@ namespace Landis.Extension.Succession.DGS
         //[DataFieldAttribute(Unit = FieldUnits.g_N_m2, Desc = "SOM1 Surface N", Format = "0.0")]
         //public double N_SOM1surf { get; set; }
 
-        [DataFieldAttribute(Unit = FieldUnits.g_N_m2, Desc = "Primary SON", Format = "0.0")]
-        public double N_SoilPrimary { get; set; }
+        //[DataFieldAttribute(Unit = FieldUnits.g_N_m2, Desc = "Primary SON", Format = "0.0")]
+        //public double N_SoilPrimary { get; set; }
 
         //[DataFieldAttribute(Unit = FieldUnits.g_N_m2, Desc = "SOM2 N", Format = "0.0")]
         //public double N_SOM2 { get; set; }
@@ -167,8 +170,8 @@ namespace Landis.Extension.Succession.DGS
         //[DataFieldAttribute(Unit = FieldUnits.g_N_m2, Desc = "SOM3 Net Mineralization", Format = "0.0")]
         //public double SOM3NetMin { get; set; }
 
-        [DataFieldAttribute(Unit = FieldUnits.g_N_m2, Desc = "Total Nitrogen Deposition per Timestep", Format = "0.00")]
-        public double TotalNdep { get; set; }
+        //[DataFieldAttribute(Unit = FieldUnits.g_N_m2, Desc = "Total Nitrogen Deposition per Timestep", Format = "0.00")]
+        //public double TotalNdep { get; set; }
 
         //log.Write("StreamC, StreamN, FireCEfflux, FireNEfflux, ");
         [DataFieldAttribute(Unit = FieldUnits.g_C_m2, Desc = "Stream C", Format = "0.00")]
