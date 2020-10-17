@@ -239,10 +239,10 @@ namespace Landis.Extension.Succession.DGS
                 }
             }
 
-            if (!leafCNs.Any())
-                throw new ApplicationException($"Error: SoilLayer.Decompose(): no species in site '{site}'.  Cannot average LeafCN across species.");
+            //if (!leafCNs.Any())
+            //    throw new ApplicationException($"Error: SoilLayer.Decompose(): no species in site '{site}'.  Cannot average LeafCN across species.");
 
-            var cn_litter = leafCNs.Average();
+            var cn_litter = leafCNs.Any() ? leafCNs.Average() : 25.0;
             
             double soc_available = SocAvailableForRespiration(site, month);
             SiteVars.SoilAvailable[site].Carbon = soc_available;

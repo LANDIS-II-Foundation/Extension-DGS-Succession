@@ -212,7 +212,8 @@ namespace Landis.Extension.Succession.DGS
 
             double potentialNPP = maxNPP * limitLAI * limitH20 * limitT * competition_limit;
             
-            double limitN = calculateN_Limit(site, cohort, potentialNPP, leafFractionNPP);
+            //double limitN = calculateN_Limit(site, cohort, potentialNPP, leafFractionNPP);
+            double limitN = 1.0;
 
             potentialNPP *= limitN;
 

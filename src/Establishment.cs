@@ -72,6 +72,10 @@ namespace Landis.Extension.Succession.DGS
             avgJanuaryTlimit[species.Index, climateRegion.Index] += minJanTempMultiplier;
             avgPest[species.Index, climateRegion.Index] += establishProbability;
 
+            avgDryDays[species.Index, climateRegion.Index] += ecoDryDays;
+            avgBeginGDD[species.Index, climateRegion.Index] += ecoClimate.BeginGrowing;
+            avgEndGDD[species.Index, climateRegion.Index] += ecoClimate.EndGrowing;
+
             numberCalculations[species.Index, climateRegion.Index]++;
 
             return establishProbability;
@@ -113,13 +117,13 @@ namespace Landis.Extension.Succession.DGS
                     if (!ecoregion.Active)
                         continue;
 
-                    foreach (ISpecies spp in PlugIn.ModelCore.Species)
-                    {
+                    //foreach (ISpecies spp in PlugIn.ModelCore.Species)
+                    //{
                         Outputs.establishmentLog.Clear();
                         EstablishmentLog elog = new EstablishmentLog();
 
                         elog.Time = PlugIn.ModelCore.CurrentTime;
-                        elog.SpeciesName = spp.Name;
+                        elog.SpeciesName = species.Name;
                         elog.ClimateRegion = ecoregion.Name;
                         elog.NumberAttempts = numberCalculations[species.Index, ecoregion.Index];
                         elog.AvgTempMult = (avgMATlimit[species.Index, ecoregion.Index] / (double)numberCalculations[species.Index, ecoregion.Index]);
@@ -132,7 +136,7 @@ namespace Landis.Extension.Succession.DGS
 
                         Outputs.establishmentLog.AddObject(elog);
                         Outputs.establishmentLog.WriteToFile();
-                    }
+                    //}
                     //log.Write("{0},{1},{2},{3},", PlugIn.ModelCore.CurrentTime, species.Name, ecoregion.Name, numberCalculations[species.Index, ecoregion.Index] );
                     //    log.Write("{0:0.000},", (avgMATlimit[species.Index, ecoregion.Index] / (double) numberCalculations[species.Index, ecoregion.Index]));
                     //    log.Write("{0:0.000},", (avgJanuaryTlimit[species.Index, ecoregion.Index] / (double)numberCalculations[species.Index, ecoregion.Index]));

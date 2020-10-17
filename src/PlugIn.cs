@@ -506,7 +506,10 @@ namespace Landis.Extension.Succession.DGS
             {
                 //TempHydroUnits = TempHydroUnits.Where(x => x.Name == "BurnedConifer_1_all_all").ToList();
                 foreach (var thu in TempHydroUnits.Where(x => x.InUseForYear))
+                {
+                    ModelCore.UI.WriteLine($"Run THU '{thu}' for year {year}");
                     thu.RunForYear(year);
+                }
             }
 
             ModelCore.UI.WriteLine("RunTempHydroUnits: End");
