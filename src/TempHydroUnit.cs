@@ -275,7 +275,7 @@ namespace Landis.Extension.Succession.DGS
             var tmins = dailyWeather.DailyMinTemp.ToList();
             var winds = dailyWeather.DailyWindSpeed.ToList();
             var solars = dailyWeather.DailyShortWaveRadiation.ToList();
-            var tdews = dailyWeather.DailyTemp.ToList();        // todo: change this when Tdew is available
+            var tdews = dailyWeather.DailyTdew.ToList();        // todo: change this when Tdew is available
 
             // if this is the first year, run the last 6 months of the year as startup
             if (!_firstMonthHasRun)
