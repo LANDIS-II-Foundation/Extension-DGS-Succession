@@ -101,7 +101,8 @@ namespace Landis.Extension.Succession.DGS
         public static ISiteVar<double> TotalWoodBiomass;
         public static ISiteVar<int> PrevYearMortality;
         public static ISiteVar<byte> FireSeverity;
-        public static ISiteVar<double> WoodMortality;
+        public static ISiteVar<double> WoodGrowthMortality;
+        public static ISiteVar<double> WoodAgeMortality;
         public static ISiteVar<string> HarvestPrescriptionName;
         public static ISiteVar<int> HarvestTime;
         public static ISiteVar<Dictionary<int, Dictionary<int, double>>> CohortResorbedNallocation;
@@ -197,7 +198,8 @@ namespace Landis.Extension.Succession.DGS
             cohortCRootC = PlugIn.ModelCore.Landscape.NewSiteVar<double>();
                         
             TotalWoodBiomass    = PlugIn.ModelCore.Landscape.NewSiteVar<double>();
-            WoodMortality        = PlugIn.ModelCore.Landscape.NewSiteVar<double>();
+            WoodGrowthMortality        = PlugIn.ModelCore.Landscape.NewSiteVar<double>();
+            WoodAgeMortality = PlugIn.ModelCore.Landscape.NewSiteVar<double>();
             Nvol                = PlugIn.ModelCore.Landscape.NewSiteVar<double>();
             PrevYearMortality   = PlugIn.ModelCore.Landscape.NewSiteVar<int>();
             totalNuptake        = PlugIn.ModelCore.Landscape.NewSiteVar<double>();
@@ -359,11 +361,12 @@ namespace Landis.Extension.Succession.DGS
             SiteVars.LAI[site] = 0.0;
             SiteVars.AnnualPPT_AET[site] = 0.0;
             SiteVars.AnnualClimaticWaterDeficit[site] = 0.0;
-            SiteVars.WoodMortality[site] = 0.0;
+            SiteVars.WoodGrowthMortality[site] = 0.0;
+            SiteVars.WoodAgeMortality[site] = 0.0;
             //SiteVars.DryDays[site] = 0;
 
             //SiteVars.FireEfflux[site] = 0.0;
-                        
+
 
         }
 

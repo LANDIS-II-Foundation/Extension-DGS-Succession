@@ -46,7 +46,10 @@ namespace Landis.Extension.Succession.DGS
 
         [DataFieldAttribute(Unit = FieldUnits.g_B_m2_yr1, Desc = "Age Mortality Biomass", Format = "0.0")]
         public double AgeMortality { get; set; }
-        
+
+        [DataFieldAttribute(Unit = FieldUnits.g_B_m2_yr1, Desc = "Growth Mortality Biomass", Format = "0.0")]
+        public double GrowthMortality { get; set; }
+
         [DataFieldAttribute(Unit = FieldUnits.g_N_m2, Desc = "Mineral N", Format = "0.00")]
         public double MineralN { get; set; }
         

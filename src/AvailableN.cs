@@ -121,7 +121,8 @@ namespace Landis.Extension.Succession.DGS
                     
                     //Nallocation is a measure of how much N a cohort can gather relative to other cohorts
                     //double Nallocation = Roots.CalculateFineRoot(cohort.LeafBiomass); 
-                    double Nallocation = 1- Math.Exp((-Roots.CalculateCoarseRoot(cohort, cohort.WoodBiomass)*0.02));
+                    //double Nallocation = 1- Math.Exp((-Roots.CalculateCoarseRoot(cohort, cohort.WoodBiomass)*0.02));
+                    double Nallocation = 1 - Math.Exp((-Roots.CalculateCoarseRoot(cohort, cohort.WoodBiomass) * 0.2));
 
                     if (Nallocation <= 0.0) 
                         Nallocation = Math.Max(Nallocation, cohort.WoodBiomass * 0.01);
@@ -333,7 +334,7 @@ namespace Landis.Extension.Succession.DGS
             if (OtherData.CalibrateMode && PlugIn.ModelCore.CurrentTime > 0)
             {
                 //Outputs.CalibrateLog.Write("{0:0.00}, {1:0.00}, {2:0.00}, {3:0.00},", deltaWood, deltaLeaf, totalMortality[0], totalMortality[1]);
-                Outputs.CalibrateLog.Write("{0:0.00},{1:0.00},{2:0.00},", resorbedNused, Nuptake, totalNdemand);
+                //Outputs.CalibrateLog.Write("{0:0.00},{1:0.00},{2:0.00000},", resorbedNused, Nuptake, totalNdemand);
             }
 
         }

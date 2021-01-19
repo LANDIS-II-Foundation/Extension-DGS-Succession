@@ -97,7 +97,8 @@ namespace Landis.Extension.Succession.DGS
             double[] avgAGNPPtc = new double[PlugIn.ModelCore.Ecoregions.Count];
             double[] avgBGNPPtc = new double[PlugIn.ModelCore.Ecoregions.Count];
             double[] avgLittertc = new double[PlugIn.ModelCore.Ecoregions.Count];
-            double[] avgWoodMortality = new double[PlugIn.ModelCore.Ecoregions.Count];
+            double[] avgWoodAgeMortality = new double[PlugIn.ModelCore.Ecoregions.Count];
+            double[] avgWoodGrowthMortality = new double[PlugIn.ModelCore.Ecoregions.Count];
 
             double[] avgMineralN = new double[PlugIn.ModelCore.Ecoregions.Count];
             double[] avgGrossMin = new double[PlugIn.ModelCore.Ecoregions.Count];
@@ -173,8 +174,8 @@ namespace Landis.Extension.Succession.DGS
                     avgAGNPPtc[ecoregion.Index] = 0.0;
                     avgBGNPPtc[ecoregion.Index] = 0.0;
                     avgLittertc[ecoregion.Index] = 0.0;
-                    avgWoodMortality[ecoregion.Index] = 0.0;
-
+                    avgWoodGrowthMortality[ecoregion.Index] = 0.0;
+                    avgWoodAgeMortality[ecoregion.Index] = 0.0;
                     avgMineralN[ecoregion.Index] = 0.0;
                     //avgGrossMin[ecoregion.Index] = 0.0;  
                     avgTotalN[ecoregion.Index] = 0.0;
@@ -249,8 +250,8 @@ namespace Landis.Extension.Succession.DGS
                 avgAGNPPtc[ecoregion.Index] += SiteVars.AGNPPcarbon[site];
                 avgBGNPPtc[ecoregion.Index] += SiteVars.BGNPPcarbon[site];
                 avgLittertc[ecoregion.Index] += SiteVars.LitterfallC[site];
-                avgWoodMortality[ecoregion.Index] += SiteVars.WoodMortality[site] * 0.47;
-
+                avgWoodGrowthMortality[ecoregion.Index] += SiteVars.WoodGrowthMortality[site] * 0.47;
+                avgWoodAgeMortality[ecoregion.Index] += SiteVars.WoodAgeMortality[site] * 0.47;
                 avgMineralN[ecoregion.Index] += SiteVars.MineralN[site];
                 avgTotalN[ecoregion.Index] += GetTotalNitrogen(site);
                 //avgGrossMin[ecoregion.Index] += SiteVars.GrossMineralization[site];
@@ -331,7 +332,8 @@ namespace Landis.Extension.Succession.DGS
                 pl.AG_NPPC = (avgAGNPPtc[ecoregion.Index] / (double)ClimateRegionData.ActiveSiteCount[ecoregion]);
                 pl.BG_NPPC = (avgBGNPPtc[ecoregion.Index] / (double)ClimateRegionData.ActiveSiteCount[ecoregion]);
                 pl.Litterfall = (avgLittertc[ecoregion.Index] / (double)ClimateRegionData.ActiveSiteCount[ecoregion]);
-                pl.AgeMortality = (avgWoodMortality[ecoregion.Index] / (double)ClimateRegionData.ActiveSiteCount[ecoregion]);
+                pl.AgeMortality = (avgWoodAgeMortality[ecoregion.Index] / (double)ClimateRegionData.ActiveSiteCount[ecoregion]);
+                pl.GrowthMortality = (avgWoodGrowthMortality[ecoregion.Index] / (double)ClimateRegionData.ActiveSiteCount[ecoregion]);
                 pl.MineralN = (avgMineralN[ecoregion.Index] / (double)ClimateRegionData.ActiveSiteCount[ecoregion]);
                 pl.TotalN = (avgTotalN[ecoregion.Index] / (double)ClimateRegionData.ActiveSiteCount[ecoregion]);
                 //pl.GrossMineralization = (avgGrossMin[ecoregion.Index] / (double)ClimateRegionData.ActiveSiteCount[ecoregion]);
@@ -488,20 +490,20 @@ namespace Landis.Extension.Succession.DGS
             CalibrateLog.Write("Year, Month, ClimateRegionIndex, SpeciesName, CohortAge, CohortWoodB, CohortLeafB, ");  // from ComputeChange
             CalibrateLog.Write("MortalityAGEwood, MortalityAGEleaf, ");  // from ComputeAgeMortality
             CalibrateLog.Write("availableWater,");  //from Water_limit
-            CalibrateLog.Write("LAI, tlai, rlai,");  // from ComputeChange
-            CalibrateLog.Write("mineralNalloc, resorbedNalloc, ");  // from calculateN_Limit
+            CalibrateLog.Write("LAI, tlai, rlai,");  // from ComputeChange            
 
             // These three together:
-            CalibrateLog.Write("limitLAI, limitH20, limitT, limitN, ");  //from ComputeActualANPP
+            CalibrateLog.Write("limitLAI, limitH20, limitT, limitN, competition_limit, ");  //from ComputeActualANPP
             CalibrateLog.Write("maxNPP, Bmax, Bsite, Bcohort, soilTemp, ");  //from ComputeActualANPP
             CalibrateLog.Write("actualWoodNPP, actualLeafNPP, ");  //from ComputeActualANPP
 
             CalibrateLog.Write("MortalityBIOwood, MortalityBIOleaf, ");  // from ComputeGrowthMortality
             CalibrateLog.Write("NPPwood_C, NPPleaf_C, ");  //from ComputeNPPcarbon
-            CalibrateLog.Write("resorbedNused, mineralNused, Ndemand,");  // from AdjustAvailableN
-            CalibrateLog.WriteLine("deltaWood, deltaLeaf, totalMortalityWood, totalMortalityLeaf");  // from ComputeChange
-                        
-            
+            //CalibrateLog.Write("mineralNalloc, resorbedNalloc, ");  // from calculateN_Limit            
+            CalibrateLog.WriteLine("deltaWood, deltaLeaf, totalMortalityWood, totalMortalityLeaf, ");  // from ComputeChange
+            //CalibrateLog.Write("resorbedNused, Nuptake, Ndemand");  // from AdjustAvailableN
+
+
 
         }
         
