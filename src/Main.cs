@@ -139,9 +139,14 @@ namespace Landis.Extension.Succession.DGS
                         var ratioPrecipPET = pet > 0.0 ? precipitation / pet : 0.0;
                         var tave = ClimateRegionData.AnnualWeather[ecoregion].MonthlyTemp[Month];   // this is air temperature when passed to CalculateAnaerobicEffect() by SoilWater, but this might need to be soil temperature instead
                         var drain = SiteVars.SoilDrain[site];
+                        var beginGrowing = ClimateRegionData.AnnualWeather[ecoregion].BeginGrowing;
+                        var endGrowing = ClimateRegionData.AnnualWeather[ecoregion].EndGrowing;
+                        var wiltingPoint = SiteVars.SoilWiltingPoint[site];                        
+                        var previousMonth = MonthCnt == 0 ? months.Last() : months[MonthCnt - 1];
 
                         SiteVars.DecayFactor[site] = SoilWater.CalculateDecayFactor((int)OtherData.WType, thu.MonthlySoilTemperatureDecomp[Month], thu.MonthlySoilMoistureDecomp[Month], ratioPrecipPET);
                         SiteVars.AnaerobicEffect[site] = SoilWater.CalculateAnaerobicEffect(drain, ratioPrecipPET, pet, tave);
+                        SiteVars.DryDays[site] = SoilWater.CalculateDryDays(Year, Month, beginGrowing, endGrowing, wiltingPoint, thu.MonthlySoilMoistureDecomp[Month], thu.MonthlySoilMoistureDecomp[previousMonth]);
                     }
                     else
                     {
@@ -185,8 +190,7 @@ namespace Landis.Extension.Succession.DGS
                     SoilWater.Leach(site, baseFlow, stormFlow);
 
                     SiteVars.MonthlyNEE[site][Month] -= SiteVars.MonthlyAGNPPcarbon[site][Month];
-                    SiteVars.MonthlyNEE[site][Month] -= SiteVars.MonthlyBGNPPcarbon[site][Month];
-                    SiteVars.MonthlySoilTemp[site][Month] -= SiteVars.MonthlyAGNPPcarbon[site][Month];
+                    SiteVars.MonthlyNEE[site][Month] -= SiteVars.MonthlyBGNPPcarbon[site][Month];                    
                     SiteVars.MonthlyNEE[site][Month] += SiteVars.SourceSink[site].Carbon;
                     SiteVars.FineFuels[site] = (SiteVars.SurfaceStructural[site].Carbon + SiteVars.SurfaceMetabolic[site].Carbon) * 2.0;
                     //SiteVars.FineFuels[site] = (System.Math.Min(1.0, (double) (PlugIn.ModelCore.CurrentTime - SiteVars.HarvestTime[site]) * 0.1));

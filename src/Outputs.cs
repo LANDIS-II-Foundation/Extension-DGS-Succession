@@ -102,7 +102,7 @@ namespace Landis.Extension.Succession.DGS
 
             double[] avgMineralN = new double[PlugIn.ModelCore.Ecoregions.Count];
             double[] avgGrossMin = new double[PlugIn.ModelCore.Ecoregions.Count];
-            double[] avgTotalN = new double[PlugIn.ModelCore.Ecoregions.Count];
+            double[] avgTotalN = new double[PlugIn.ModelCore.Ecoregions.Count];           
 
             double[] avgCohortLeafC = new double[PlugIn.ModelCore.Ecoregions.Count];
             double[] avgCohortFRootC = new double[PlugIn.ModelCore.Ecoregions.Count];
@@ -177,7 +177,7 @@ namespace Landis.Extension.Succession.DGS
                     avgWoodGrowthMortality[ecoregion.Index] = 0.0;
                     avgWoodAgeMortality[ecoregion.Index] = 0.0;
                     avgMineralN[ecoregion.Index] = 0.0;
-                    //avgGrossMin[ecoregion.Index] = 0.0;  
+                    avgGrossMin[ecoregion.Index] = 0.0;  
                     avgTotalN[ecoregion.Index] = 0.0;
 
                     avgCohortLeafC[ecoregion.Index] = 0.0;
@@ -253,8 +253,8 @@ namespace Landis.Extension.Succession.DGS
                 avgWoodGrowthMortality[ecoregion.Index] += SiteVars.WoodGrowthMortality[site] * 0.47;
                 avgWoodAgeMortality[ecoregion.Index] += SiteVars.WoodAgeMortality[site] * 0.47;
                 avgMineralN[ecoregion.Index] += SiteVars.MineralN[site];
-                avgTotalN[ecoregion.Index] += GetTotalNitrogen(site);
-                //avgGrossMin[ecoregion.Index] += SiteVars.GrossMineralization[site];
+                avgGrossMin[ecoregion.Index] += SiteVars.GrossMineralization[site];
+                avgTotalN[ecoregion.Index] += GetTotalNitrogen(site);                
 
                 avgCohortLeafC[ecoregion.Index] += SiteVars.CohortLeafC[site];
                 avgCohortFRootC[ecoregion.Index] += SiteVars.CohortFRootC[site];
@@ -335,8 +335,8 @@ namespace Landis.Extension.Succession.DGS
                 pl.AgeMortality = (avgWoodAgeMortality[ecoregion.Index] / (double)ClimateRegionData.ActiveSiteCount[ecoregion]);
                 pl.GrowthMortality = (avgWoodGrowthMortality[ecoregion.Index] / (double)ClimateRegionData.ActiveSiteCount[ecoregion]);
                 pl.MineralN = (avgMineralN[ecoregion.Index] / (double)ClimateRegionData.ActiveSiteCount[ecoregion]);
-                pl.TotalN = (avgTotalN[ecoregion.Index] / (double)ClimateRegionData.ActiveSiteCount[ecoregion]);
-                //pl.GrossMineralization = (avgGrossMin[ecoregion.Index] / (double)ClimateRegionData.ActiveSiteCount[ecoregion]);
+                pl.GrossMineralization = (avgGrossMin[ecoregion.Index] / (double)ClimateRegionData.ActiveSiteCount[ecoregion]);
+                pl.TotalN = (avgTotalN[ecoregion.Index] / (double)ClimateRegionData.ActiveSiteCount[ecoregion]);                
                 //pl.TotalNdep = (ClimateRegionData.AnnualNDeposition[ecoregion] / (double)ClimateRegionData.ActiveSiteCount[ecoregion]);
                 pl.C_LiveLeaf = (avgCohortLeafC[ecoregion.Index] / (double)ClimateRegionData.ActiveSiteCount[ecoregion]);
                 pl.C_LiveFRoot = (avgCohortFRootC[ecoregion.Index] / (double)ClimateRegionData.ActiveSiteCount[ecoregion]);

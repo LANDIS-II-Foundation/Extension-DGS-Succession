@@ -619,7 +619,7 @@ namespace Landis.Extension.Succession.DGS
 
         private static double CalculateCompetition_Limit(ICohort cohort, ActiveSite site)
         {
-            double k = -0.14;  // This is the value given for all temperature ecosystems. I started with 0.1
+            double k = -0.25;  // This is the value given for all temperature ecosystems. I started with -0.1, latest code with -0.05, -0.25 works nicely for BS and alder
             double monthly_LAI = SiteVars.MonthlyLAI[site][Main.Month];
             double competition_limit = Math.Max(0.0, Math.Exp(k * monthly_LAI));
 

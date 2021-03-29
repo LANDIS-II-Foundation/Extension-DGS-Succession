@@ -52,13 +52,13 @@ namespace Landis.Extension.Succession.DGS
 
         [DataFieldAttribute(Unit = FieldUnits.g_N_m2, Desc = "Mineral N", Format = "0.00")]
         public double MineralN { get; set; }
-        
+
+        [DataFieldAttribute(Unit = FieldUnits.g_N_m2, Desc = "Gross Mineralization", Format = "0.0")]
+        public double GrossMineralization { get; set; }
+
         [DataFieldAttribute(Unit = FieldUnits.g_N_m2, Desc = "Total N", Format = "0.0")]
         public double TotalN { get; set; }
         
-        //[DataFieldAttribute(Unit = FieldUnits.g_N_m2, Desc = "Gross Mineralization", Format = "0.0")]
-        //public double GrossMineralization { get; set; }
-
         [DataFieldAttribute(Unit = FieldUnits.g_C_m2, Desc = "Live Leaf C", Format = "0.0")]
         public double C_LiveLeaf { get; set; }
 

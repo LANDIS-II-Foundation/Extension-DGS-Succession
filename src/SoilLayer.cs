@@ -288,7 +288,7 @@ namespace Landis.Extension.Succession.DGS
          
             SOC *= g_to_mg / (m2_to_cm2 * depth_to_volume);
             double soc_available_DAMM = (soc_available * g_to_mg) / (m2_to_cm2 * depth_to_volume);  //SOC = 65.25; //(Rose);
-            double son_available_DAMM = (soc_available_DAMM * SiteVars.SoilPrimary[site].Nitrogen)/ SiteVars.SoilPrimary[site].Carbon;
+            double son_available_DAMM = (soc_available_DAMM * SiteVars.SoilPrimary[site].Nitrogen) / SiteVars.SoilPrimary[site].Carbon;
             double SON = (SiteVars.SoilPrimary[site].Nitrogen * g_to_mg) / (m2_to_cm2 * depth_to_volume);  //double SON = 2.1917; //(Rose);
             double bulk_density = SiteVars.SoilBulkDensity[site];   //double bulk_density = 0.0377 (Jason), bulk_density = 0.156152207886358 for original testing        
             double particle_density = SiteVars.SoilParticleDensity[site]; //double particle_density = 0.8877 (Jason); particle_density = 1.11176644135636; in original testing.            
@@ -341,12 +341,17 @@ namespace Landis.Extension.Succession.DGS
             
             var cout_old = 0.0;
 
+            var sitevarDONmax = 10.0;  //Limit based on 42 kg/ha or 4.2 g/m2, rounded to 5, from Fig 4 in https://www.sciencedirect.com/science/article/abs/pii/S0038071707003008?via%3Dihub
+            var DONmax = sitevarDONmax * g_to_mg / (m2_to_cm2 * depth_to_volume);
+
             for (int hours = 0; hours < month_to_hr; hours++)
             {
-                double soilm = -soilMoistureA + soilMoistureB * availableWater;                                //calculate soil moisture scalar        
-                //double soilm = availableWater;                                                                //calculate soil moisture        
+                //double soilm = -soilMoistureA + soilMoistureB * availableWater;                                //calculate soil moisture scalar        
+                double soilm = availableWater;                                                                //calculate soil moisture        
                 soilm = (soilm > saturation) ? saturation : soilm;                                          //set upper bound on soil moisture (saturation)
-                soilm = (soilm < 0.1) ? 0.1 : soilm;                                                        //set lower bound on soil moisture               
+                //soilm = (soilm < 0.1) ? 0.1 : soilm;                                                        //set lower bound on soil moisture               
+
+
                 double o2 = dgas * o2airfrac * Math.Pow((porosity - soilm), (4.0 / 3.0));                   //calculate oxygen concentration
                 double sol_soc = dliq * Math.Pow(soilm, 3.0) * frac * soc_available_DAMM;
                 double sol_son = dliq * Math.Pow(soilm, 3.0) * frac * son_available_DAMM;                                    //calculate unprotected SON
@@ -387,6 +392,7 @@ namespace Landis.Extension.Succession.DGS
                 SON += dson;
                 DOC += ddoc;
                 DON += ddon;
+                if (DON > DONmax) DON = DONmax;
                 microbial_C += dmic_c;
                 microbial_N += dmic_n;
                 enzymatic_concentration += dec;
@@ -410,7 +416,8 @@ namespace Landis.Extension.Succession.DGS
             SiteVars.MineralN[site] = mineralN * m2_to_cm2 * depth_to_volume / (g_to_mg);
 
             // adjust rates, to LANDIS units
-            SiteVars.MonthlyResp[site][Main.Month] = co2loss * m2_to_cm2 * depth_to_volume / (g_to_mg);            
+            SiteVars.MonthlyResp[site][Main.Month] = co2loss * m2_to_cm2 * depth_to_volume / (g_to_mg);
+            SiteVars.SourceSink[site].Carbon += SiteVars.MonthlyResp[site][Main.Month];
             SiteVars.GrossMineralization[site] = gross_mineralizaton * m2_to_cm2 * depth_to_volume / (g_to_mg);
 
             // make sure the pools aren't allowed to go below zero
@@ -515,7 +522,9 @@ namespace Landis.Extension.Succession.DGS
 
             //round these to avoid unexpected behavior
             // this.Carbon = Math.Round((this.Carbon - co2loss)); This is double-counting of dscoc (above)?
-            SiteVars.SourceSink[site].Carbon = Math.Round((SiteVars.SourceSink[site].Carbon + co2loss));
+            //SiteVars.SourceSink[site].Carbon = Math.Round((SiteVars.SourceSink[site].Carbon + co2loss));
+            SiteVars.SourceSink[site].Carbon += co2loss;
+
 
             //Add lost CO2 to monthly heterotrophic respiration
             SiteVars.MonthlyResp[site][Main.Month] += co2loss;

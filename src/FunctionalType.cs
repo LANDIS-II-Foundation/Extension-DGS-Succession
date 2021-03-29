@@ -69,7 +69,7 @@ namespace Landis.Extension.Succession.DGS
             set {
                     if (value  < 8.0 || value  > 40.0)
                         throw new InputValueException(value.ToString(),
-                            "PPDF1 must be between 8 and 40.0");
+                            "PPDF1 must be between 5 and 40.0");
                     tempcurve1 = value;
             }
         }
@@ -85,9 +85,9 @@ namespace Landis.Extension.Succession.DGS
                 return tempcurve2;
             }
             set {
-                    if (value  < 20.0 || value  > 100.0)
+                    if (value  < 20.0 || value  > 500.0)
                         throw new InputValueException(value.ToString(),
-                            "PPDF2 must be between 20 and 100.0");
+                            "PPDF2 must be between 20 and 500.0");
                     tempcurve2 = value;
             }
         }
@@ -103,9 +103,9 @@ namespace Landis.Extension.Succession.DGS
                 return tempcurve3;
             }
             set {
-                    if (value  < 0.0 || value  > 5.0)
+                    if (value  < 0.0 || value  > 500.0)
                         throw new InputValueException(value.ToString(),
-                            "PPDF3 must be between 0 and 5.0");
+                            "PPDF3 must be between 0 and 500.0");
                     tempcurve3 = value;
             }
         }
@@ -121,9 +121,9 @@ namespace Landis.Extension.Succession.DGS
                 return tempcurve4;
             }
             set {
-                    if (value  < 0.0 || value  > 10.0)
+                    if (value  < 0.0 || value  > 500.0)
                         throw new InputValueException(value.ToString(),
-                            "PPDF4 must be between 0 and 10.0");
+                            "PPDF4 must be between 0 and 500.0");
                     tempcurve4 = value;
             }
         }

@@ -25,11 +25,15 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="Establishment-ORIGINAL.cs" />
     <Compile Remove="SoilLayer-old.cs" />
     <Compile Remove="SoilLayer-reallyold.cs" />
+    <Compile Remove="SoilWater-original.cs" />
+    <Compile Remove="utility\Util.cs" />
   </ItemGroup>
 
   <ItemGroup>
+    <None Remove="lib\Landis.Library.Climate-v4.1.pdb" />
     <None Remove="lib\Landis.Library.Climate-v4.pdb" />
   </ItemGroup>
 
@@ -41,6 +45,9 @@
   <ItemGroup>
     <ProjectReference Include="..\..\..\..\GIPL\CSharpCode\GiplDammNewInputs.03.11.2020\GiplDamm\GiplDamm.csproj" />
     <ProjectReference Include="..\..\..\..\SHAW\CSharpCode\ShawDammNewInputs.03.11.2020\ShawDamm\ShawDammNewInputs.csproj" />
+    <ProjectReference Include="..\..\..\Library-Succession\src\library-succession.csproj">
+      <Private>true</Private>
+    </ProjectReference>
   </ItemGroup>
   
   <ItemGroup>
@@ -53,8 +60,8 @@
     <Reference Include="Landis.Library.BiomassCohorts-v3">
       <HintPath>lib\Landis.Library.BiomassCohorts-v3.dll</HintPath>
     </Reference>
-    <Reference Include="Landis.Library.Climate-v4">
-      <HintPath>..\..\..\ClimateLibrary\bin\Debug\netstandard2.0\Landis.Library.Climate-v4.dll</HintPath>
+    <Reference Include="Landis.Library.Climate-v4.2">
+      <HintPath>lib\Landis.Library.Climate-v4.2.dll</HintPath>
     </Reference>
     <Reference Include="Landis.Library.Cohorts-v2">
       <HintPath>lib\Landis.Library.Cohorts-v2.dll</HintPath>
@@ -70,9 +77,6 @@
     </Reference>
     <Reference Include="Landis.Library.Parameters-v2">
       <HintPath>lib\Landis.Library.Parameters-v2.dll</HintPath>
-    </Reference>
-    <Reference Include="Landis.Library.Succession-v8">
-      <HintPath>lib\Landis.Library.Succession-v8.dll</HintPath>
     </Reference>
   </ItemGroup>
 </Project>

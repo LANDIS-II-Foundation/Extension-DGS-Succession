@@ -69,18 +69,19 @@ namespace Landis.Extension.Succession.DGS
             if (month == 0)
                 SiteVars.DryDays[site] = 0;
             else
-                SiteVars.DryDays[site] += CalculateDryDays(month, beginGrowing, endGrowing, wiltingPoint, availableWater, priorWaterAvail);
+                SiteVars.DryDays[site] += CalculateDryDays(year, month, beginGrowing, endGrowing, wiltingPoint, availableWater, priorWaterAvail);
 
             return;
         }
 
-        private static int CalculateDryDays(int month, int beginGrowing, int endGrowing, double wiltingPoint, double waterAvail, double priorWaterAvail)
+        public static int CalculateDryDays(int year, int month, int beginGrowing, int endGrowing, double wiltingPoint, double waterAvail, double priorWaterAvail)
         {
             //PlugIn.ModelCore.UI.WriteLine("Month={0}, begin={1}, end={2}.", month, beginGrowing, endGrowing);
             int[] julianMidMonth = { 15, 45, 74, 105, 135, 166, 196, 227, 258, 288, 319, 349 };
             int dryDays = 0;
             int julianDay = julianMidMonth[month];
-            int oldJulianDay = julianMidMonth[month - 1];
+            int daysInMonth = AnnualClimate.DaysInMonth(month, year);
+            int oldJulianDay = (month != 0 )? julianMidMonth[month - 1] : julianMidMonth[(month + 11)];
             double dryDayInterp = 0.0;
             //PlugIn.ModelCore.UI.WriteLine("Month={0}, begin={1}, end={2}, wiltPt={3:0.0}, waterAvail={4:0.0}, priorWater={5:0.0}.", month, beginGrowing, endGrowing, wiltingPoint, waterAvail, priorWaterAvail);
 
