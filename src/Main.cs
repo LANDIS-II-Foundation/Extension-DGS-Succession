@@ -212,8 +212,9 @@ namespace Landis.Extension.Succession.DGS
             if (cohorts != null)
                 foreach (ISpeciesCohorts speciesCohorts in cohorts)
                     foreach (ICohort cohort in speciesCohorts)
-                        total += (int) (cohort.WoodBiomass + cohort.LeafBiomass);
-                    //total += ComputeBiomass(speciesCohorts);
+                        //total += (int)(cohort.WoodBiomass + cohort.LeafBiomass);
+                        total += (int)(cohort.Biomass);
+            //total += ComputeBiomass(speciesCohorts);
             return total;
         }
 
