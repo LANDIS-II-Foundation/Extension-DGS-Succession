@@ -17,6 +17,7 @@ namespace Landis.Extension.Succession.DGS
         double FCFRACleaf{get;set;}
         double BTOLAI{get;set;}
         double KLAI{get;set;}
+        double K { get; set; }
         double MAXLAI{get;set;}
         double MoistureCurve1 { get; set; }
         double MoistureCurve2 { get; set; }
@@ -41,6 +42,7 @@ namespace Landis.Extension.Succession.DGS
         private double fcfracLeaf;
         private double btolai;
         private double klai;
+        private double k;
         private double maxlai;
         private double moisturecurve1;
         private double moisturecurve2;
@@ -177,6 +179,25 @@ namespace Landis.Extension.Succession.DGS
                         throw new InputValueException(value.ToString(),
                             "K LAI must be between 1 and 50000");
                 klai = value;
+            }
+        }
+
+        /// <summary>
+        /// Coefficient that describes the exponential decay functon 
+        /// controlling competition.     
+        /// </summary>
+        public double K
+        {
+            get
+            {
+                return k;
+            }
+            set
+            {
+                if (value < 0.00000001 || value > 5.0)
+                    throw new InputValueException(value.ToString(),
+                        "k must be between 0.00000001 and 5.0");
+                k = value;
             }
         }
         //---------------------------------------------------------------------

@@ -42,8 +42,8 @@ namespace Landis.Extension.Succession.DGS
             Outputs.primaryLog = new MetadataTable<PrimaryLog>("DGS-succession-log.csv");
             Outputs.primaryLogShort = new MetadataTable<PrimaryLogShort>("DGS-succession-log-short.csv");
             Outputs.monthlyLog = new MetadataTable<MonthlyLog>("DGS-succession-monthly-log.csv");
-            Outputs.reproductionLog = new MetadataTable<ReproductionLog>("NECN-reproduction-log.csv");
-            Outputs.establishmentLog = new MetadataTable<EstablishmentLog>("NECN-prob-establish-log.csv");
+            Outputs.reproductionLog = new MetadataTable<ReproductionLog>("DGS-reproduction-log.csv");
+            Outputs.establishmentLog = new MetadataTable<EstablishmentLog>("DGS-prob-establish-log.csv");
 
             OutputMetadata tblOut_monthly = new OutputMetadata()
             {

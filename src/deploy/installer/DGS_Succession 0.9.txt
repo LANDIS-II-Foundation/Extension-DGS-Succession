@@ -1,0 +1,9 @@
+LandisData   Extension
+
+Name         "DGS Succession"
+Version      0.9
+Type         succession
+Assembly     Landis.Extension.Succession.DGS
+Class        Landis.Extension.Succession.DGS.PlugIn
+Description  "Succession with DAMM, SHAW and GIPL"
+CoreVersion  7.0

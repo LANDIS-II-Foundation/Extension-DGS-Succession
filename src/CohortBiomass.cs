@@ -184,8 +184,14 @@ namespace Landis.Extension.Succession.DGS
                 var rec = thu.MonthlySpeciesRecords[Main.Month][cohort.Species];
                 soilTemperature = rec.SoilTemperature;
                 limitT = rec.TemperatureLimit;
+                
+
                 availableWater = rec.AvailableWater;
                 limitH20 = rec.WaterLimit;
+                //limitH20 = 1.0;
+
+
+
             }
             else
             {
@@ -206,7 +212,7 @@ namespace Landis.Extension.Succession.DGS
 
             double limitLAI = CalculateLAI_Limit(cohort, site);
 
-            // RMS 03/2016: Testing alternative more similar to how Biomass Succession operates: REMOVE FOR NEXT RELEASE
+            // RMS 03/2016: Testing alternative more similar to how Biomass Succession operates
             //double limitCapacity = 1.0 - Math.Min(1.0, Math.Exp(siteBiomass / maxBiomass * 5.0) / Math.Exp(5.0));
 
             double competition_limit = CalculateCompetition_Limit(cohort, site);
@@ -214,7 +220,7 @@ namespace Landis.Extension.Succession.DGS
             double potentialNPP = maxNPP * limitLAI * limitH20 * limitT * competition_limit;
             
             double limitN = CalculateN_Limit(site, cohort, potentialNPP, leafFractionNPP);
-            //double limitN = 1.0;
+            
 
             potentialNPP *= limitN;
 
@@ -619,7 +625,9 @@ namespace Landis.Extension.Succession.DGS
 
         private static double CalculateCompetition_Limit(ICohort cohort, ActiveSite site)
         {
-            double k = -0.25;  // This is the value given for all temperature ecosystems. I started with -0.1, latest code with -0.05, -0.25 works nicely for BS and alder
+            //double k = -0.25;  // This is the value given for all temperature ecosystems. I started with -0.1, latest code with -0.05, -0.25 works nicely for BS and alder
+            // making the competition limit a functional group parameter
+            double k = FunctionalType.Table[SpeciesData.FuncType[cohort.Species]].K *-1.0; 
             double monthly_LAI = SiteVars.MonthlyLAI[site][Main.Month];
             double competition_limit = Math.Max(0.0, Math.Exp(k * monthly_LAI));
 

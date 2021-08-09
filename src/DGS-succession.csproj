@@ -33,8 +33,12 @@
   </ItemGroup>
 
   <ItemGroup>
+    <None Remove="lib\Landis.Library.Climate-v4.1.dll" />
     <None Remove="lib\Landis.Library.Climate-v4.1.pdb" />
+    <None Remove="lib\Landis.Library.Climate-v4.2.pdb" />
+    <None Remove="lib\Landis.Library.Climate-v4.dll" />
     <None Remove="lib\Landis.Library.Climate-v4.pdb" />
+    <None Remove="lib\Landis.Library.Climate-v4_old.dll" />
   </ItemGroup>
 
   <ItemGroup>
@@ -43,11 +47,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\..\..\GIPL\CSharpCode\GiplDammNewInputs.03.11.2020\GiplDamm\GiplDamm.csproj" />
-    <ProjectReference Include="..\..\..\..\SHAW\CSharpCode\ShawDammNewInputs.03.11.2020\ShawDamm\ShawDammNewInputs.csproj" />
-    <ProjectReference Include="..\..\..\Library-Succession\src\library-succession.csproj">
-      <Private>true</Private>
-    </ProjectReference>
+    <ProjectReference Include="..\..\Library-GIPL\src\GiplDamm.csproj" />
+    <ProjectReference Include="..\..\Library-Shaw\src\ShawDammNewInputs.csproj" />
   </ItemGroup>
   
   <ItemGroup>
@@ -77,6 +78,9 @@
     </Reference>
     <Reference Include="Landis.Library.Parameters-v2">
       <HintPath>lib\Landis.Library.Parameters-v2.dll</HintPath>
+    </Reference>
+    <Reference Include="Landis.Library.Succession-v8">
+      <HintPath>lib\Landis.Library.Succession-v8.dll</HintPath>
     </Reference>
   </ItemGroup>
 </Project>

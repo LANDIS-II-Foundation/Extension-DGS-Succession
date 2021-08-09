@@ -528,6 +528,7 @@ namespace Landis.Extension.Succession.DGS
             InputVar<double> fcfleaf = new InputVar<double>("FCFRAC: Leaf");
             InputVar<double> btolai = new InputVar<double>("BTOLAI");
             InputVar<double> klai = new InputVar<double>("KLAI");
+            InputVar<double> k = new InputVar<double>("K");
             InputVar<double> maxlai = new InputVar<double>("MAXLAI");
             InputVar<double> mwm = new InputVar<double>("Monthly Wood Mortality");
             InputVar<double> wdr = new InputVar<double>("Wood Decay Rate");
@@ -578,6 +579,9 @@ namespace Landis.Extension.Succession.DGS
 
                 ReadValue(klai, currentLine);
                 funcTParms.KLAI = klai.Value;
+
+                ReadValue(k, currentLine);
+                funcTParms.K = k.Value;
 
                 ReadValue(maxlai, currentLine);
                 funcTParms.MAXLAI = maxlai.Value;
