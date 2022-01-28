@@ -1143,7 +1143,7 @@ namespace Landis.Extension.Succession.DGS
             this.speciesDataset = speciesDataset;
 
             functionalTypes = new FunctionalTypeTable(functionalCnt);
-            fireReductionsTable = new FireReductions[6];
+            fireReductionsTable = new FireReductions[11];
             harvestReductionsTable = new List<HarvestReductions>();
 
             sppFunctionalType = new Landis.Library.Parameters.Species.AuxParm<int>(speciesDataset);

@@ -14,19 +14,19 @@ namespace Landis.Extension.Succession.DGS
         double TempCurve2 { get; set; }
         double TempCurve3 { get; set; }
         double TempCurve4 { get; set; }
-        double FCFRACleaf{get;set;}
-        double BTOLAI{get;set;}
+        double FractionANPPtoLeaf{get;set;}
+        double BiomassToLAI{get;set;}
         double KLAI{get;set;}
         double K { get; set; }
-        double MAXLAI{get;set;}
+        double MaxLAI{get;set;}
         double MoistureCurve1 { get; set; }
         double MoistureCurve2 { get; set; }
         double MoistureCurve3 {get;set;}
         double MoistureCurve4 { get; set; }
         double MonthlyWoodMortality{get;set;}
         double WoodDecayRate{get;set;}
-        double MortCurveShape{get;set;}
-        int LeafNeedleDrop{get;set;}
+        double LongevityMortalityShape{get;set;}
+        int FoliageDropMonth { get;set;}
         double CoarseRootFraction { get; set; }
         double FineRootFraction { get; set; }
 
@@ -51,7 +51,7 @@ namespace Landis.Extension.Succession.DGS
         private double monthlyWoodMortality;
         private double woodDecayRate;
         private double mortCurveShape;
-        private int leafNeedleDrop;
+        private int foliageDropMonth;
         private double coarseRootFraction;
         private double fineRootFraction;
 
@@ -134,7 +134,7 @@ namespace Landis.Extension.Succession.DGS
         /// C allocation fraction of old leaves for mature forest.
         /// Century Model Interface Help - Colorado State University, Fort Collins, CO  80523
         /// </summary>
-        public double FCFRACleaf
+        public double FractionANPPtoLeaf
         {
             get {
                 return fcfracLeaf;
@@ -151,7 +151,7 @@ namespace Landis.Extension.Succession.DGS
         /// Biomass to leaf area index (LAI) conversion factor for trees.  This is a biome-specific parameters.  
         /// Century Model Interface Help - Colorado State University, Fort Collins, CO  80523
         /// </summary>
-        public double BTOLAI
+        public double BiomassToLAI
         {
             get {
                 return btolai;
@@ -204,7 +204,7 @@ namespace Landis.Extension.Succession.DGS
         /// <summary>
         /// The Century manual recommends a maximum of 20 (?)
         /// </summary>
-        public double MAXLAI
+        public double MaxLAI
         {
             get {
                 return maxlai;
@@ -298,7 +298,7 @@ namespace Landis.Extension.Succession.DGS
         /// Determines the shape of the age-related mortality curve.  Ranges from a gradual senescence (5)
         /// to a steep senescence (15).
         /// </summary>
-        public double MortCurveShape 
+        public double LongevityMortalityShape 
         { 
             get { 
                 return mortCurveShape;
@@ -314,16 +314,16 @@ namespace Landis.Extension.Succession.DGS
         /// <summary>
         /// Determines at what month of the year needles or leaves are dropped.
         /// </summary>
-        public int LeafNeedleDrop
+        public int FoliageDropMonth
         {
             get { 
-                return leafNeedleDrop;
+                return foliageDropMonth;
             }
             set {
                     if (value  < 1 || value  > 12)
                         throw new InputValueException(value.ToString(),
                             "Leaf/Needle Drop must be a month of the year, 1-12");
-                leafNeedleDrop = value;
+                foliageDropMonth = value;
             }
         }
 

@@ -56,7 +56,7 @@ namespace Landis.Extension.Succession.DGS
         // 'PPRPTS(2)': The effect of water content on the intercept, allows the user to
         //              increase the value of the intercept and thereby increase the slope of the line.
         // 'PPRPTS(3)': The lowest ratio of available water to PET at which there is no restriction on production.
-        public const double MoistureCurve1 = 0.0;
+        //public const double MoistureCurve1 = 0.0;
 
         // RAD1P:  C / N ratio of slow SOM formed from surface active pool.
         // Minimum allowable C / N used to calculate addition term for C / N

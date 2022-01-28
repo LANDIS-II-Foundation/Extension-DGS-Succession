@@ -94,7 +94,6 @@ namespace Landis.Extension.Succession.DGS
         private static ISiteVar<double> frassC;
         private static ISiteVar<double> lai;
         private static ISiteVar<double> annualPPT_AET; //Annual water budget calculation. I'm coppying LAI implementation
-        private static ISiteVar<double> annualClimaticWaterDeficit; //Annual soil moisture calculation, defined as pet - aet
         private static ISiteVar<int> dryDays;
         private static ISiteVar<double> fineFuels;
         
@@ -109,6 +108,7 @@ namespace Landis.Extension.Succession.DGS
         public static ISiteVar<double> SmolderConsumption;
         public static ISiteVar<double> FlamingConsumption;
         public static ISiteVar<double> AnnualClimaticWaterDeficit; //Annual soil moisture calculation, defined as pet - aet
+        public static ISiteVar<double> AnnualPET; //Annual pet
 
         public static ISiteVar<TempHydroUnit> TempHydroUnit;
         public static ISiteVar<string> ForestTypeName;
@@ -207,7 +207,8 @@ namespace Landis.Extension.Succession.DGS
             frassC              = PlugIn.ModelCore.Landscape.NewSiteVar<double>();
             lai                 = PlugIn.ModelCore.Landscape.NewSiteVar<double>();
             annualPPT_AET       = PlugIn.ModelCore.Landscape.NewSiteVar<double>();
-            AnnualClimaticWaterDeficit  = PlugIn.ModelCore.Landscape.NewSiteVar<double>();
+            AnnualClimaticWaterDeficit = PlugIn.ModelCore.Landscape.NewSiteVar<double>();
+            AnnualPET = PlugIn.ModelCore.Landscape.NewSiteVar<double>();
             SmolderConsumption = PlugIn.ModelCore.Landscape.NewSiteVar<double>();
             FlamingConsumption = PlugIn.ModelCore.Landscape.NewSiteVar<double>(); 
             HarvestPrescriptionName = PlugIn.ModelCore.GetSiteVar<string>("Harvest.PrescriptionName");
@@ -223,6 +224,7 @@ namespace Landis.Extension.Succession.DGS
             PlugIn.ModelCore.RegisterSiteVar(SiteVars.SmolderConsumption, "Succession.SmolderConsumption");
             PlugIn.ModelCore.RegisterSiteVar(SiteVars.FlamingConsumption, "Succession.FlamingConsumption");
             PlugIn.ModelCore.RegisterSiteVar(SiteVars.AnnualClimaticWaterDeficit, "Succession.CWD");
+            PlugIn.ModelCore.RegisterSiteVar(SiteVars.AnnualPET, "Succession.PET");
 
             TempHydroUnit = PlugIn.ModelCore.Landscape.NewSiteVar<TempHydroUnit>();
             //ForestTypeName = PlugIn.ModelCore.GetSiteVar<string>("Output.ForestType");
@@ -332,7 +334,7 @@ namespace Landis.Extension.Succession.DGS
             SiteVars.CohortCRootN[site] = 0.0;
             SiteVars.CohortWoodC[site] = 0.0;
             SiteVars.CohortCRootC[site] = 0.0;
-            //SiteVars.GrossMineralization[site] = 0.0;
+            SiteVars.GrossMineralization[site] = 0.0;
             SiteVars.AGNPPcarbon[site] = 0.0;
             SiteVars.BGNPPcarbon[site] = 0.0;
             SiteVars.LitterfallC[site] = 0.0;
@@ -340,11 +342,11 @@ namespace Landis.Extension.Succession.DGS
             SiteVars.Stream[site]          = new Layer(LayerName.Other, LayerType.Other);
             SiteVars.SourceSink[site]      = new Layer(LayerName.Other, LayerType.Other);
             
-            //SiteVars.SurfaceDeadWood[site].NetMineralization = 0.0;
-            //SiteVars.SurfaceStructural[site].NetMineralization = 0.0;
-            //SiteVars.SurfaceMetabolic[site].NetMineralization = 0.0;
+            SiteVars.SurfaceDeadWood[site].NetMineralization = 0.0;
+            SiteVars.SurfaceStructural[site].NetMineralization = 0.0;
+            SiteVars.SurfaceMetabolic[site].NetMineralization = 0.0;
             
-            //SiteVars.SoilDeadWood[site].NetMineralization = 0.0;
+            SiteVars.SoilDeadWood[site].NetMineralization = 0.0;
             //SiteVars.SoilStructural[site].NetMineralization = 0.0;
             //SiteVars.SoilMetabolic[site].NetMineralization = 0.0;
             
@@ -361,6 +363,7 @@ namespace Landis.Extension.Succession.DGS
             SiteVars.LAI[site] = 0.0;
             SiteVars.AnnualPPT_AET[site] = 0.0;
             SiteVars.AnnualClimaticWaterDeficit[site] = 0.0;
+            SiteVars.AnnualPET[site] = 0.0;
             SiteVars.WoodGrowthMortality[site] = 0.0;
             SiteVars.WoodAgeMortality[site] = 0.0;
             //SiteVars.DryDays[site] = 0;

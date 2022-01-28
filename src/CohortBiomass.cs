@@ -169,7 +169,7 @@ namespace Landis.Extension.Succession.DGS
                                          double[]   mortalityAge)
         {
 
-            double leafFractionNPP  = FunctionalType.Table[SpeciesData.FuncType[cohort.Species]].FCFRACleaf;
+            double leafFractionNPP  = FunctionalType.Table[SpeciesData.FuncType[cohort.Species]].FractionANPPtoLeaf;
             double maxBiomass       = SpeciesData.Max_Biomass[cohort.Species];//.B_MAX_Spp[cohort.Species][ecoregion];
             double sitelai          = SiteVars.LAI[site];
             double maxNPP           = SpeciesData.Max_ANPP[cohort.Species];//.ANPP_MAX_Spp[cohort.Species][ecoregion];
@@ -184,11 +184,12 @@ namespace Landis.Extension.Succession.DGS
                 var rec = thu.MonthlySpeciesRecords[Main.Month][cohort.Species];
                 soilTemperature = rec.SoilTemperature;
                 limitT = rec.TemperatureLimit;
-                
+                //limitT = 1.0;
+
 
                 availableWater = rec.AvailableWater;
-                limitH20 = rec.WaterLimit;
-                //limitH20 = 1.0;
+                //limitH20 = rec.WaterLimit;
+                limitH20 = 1.0;
 
 
 
@@ -210,16 +211,16 @@ namespace Landis.Extension.Succession.DGS
                 Outputs.CalibrateLog.Write("{0:0.00},", availableWater);  //3rd call to calibrate log
 
 
-            double limitLAI = CalculateLAI_Limit(cohort, site);
+            double limitLAI = calculateLAI_Limit(cohort, site);
 
             // RMS 03/2016: Testing alternative more similar to how Biomass Succession operates
             //double limitCapacity = 1.0 - Math.Min(1.0, Math.Exp(siteBiomass / maxBiomass * 5.0) / Math.Exp(5.0));
 
-            double competition_limit = CalculateCompetition_Limit(cohort, site);
+            double competition_limit = calculateCompetition_Limit(cohort, site);
 
             double potentialNPP = maxNPP * limitLAI * limitH20 * limitT * competition_limit;
             
-            double limitN = CalculateN_Limit(site, cohort, potentialNPP, leafFractionNPP);
+            double limitN = calculateN_Limit(site, cohort, potentialNPP, leafFractionNPP);
             
 
             potentialNPP *= limitN;
@@ -287,19 +288,13 @@ namespace Landis.Extension.Succession.DGS
             double monthAdjust = 1.0 / 12.0;
             double totalBiomass = (double) (cohort.WoodBiomass + cohort.LeafBiomass);
             double max_age      = (double) cohort.Species.Longevity;
-            double d            = FunctionalType.Table[SpeciesData.FuncType[cohort.Species]].MortCurveShape;
+            double d            = FunctionalType.Table[SpeciesData.FuncType[cohort.Species]].LongevityMortalityShape;
 
             double M_AGE_wood =    cohort.WoodBiomass *  monthAdjust *
                                     Math.Exp((double) cohort.Age / max_age * d) / Math.Exp(d);
 
             double M_AGE_leaf =    cohort.LeafBiomass *  monthAdjust *
                                     Math.Exp((double) cohort.Age / max_age * d) / Math.Exp(d);
-
-            //if (PlugIn.ModelCore.CurrentTime <= 0 &&  SpinupMortalityFraction > 0.0)
-            //{
-            //    M_AGE_wood += cohort.Biomass * SpinupMortalityFraction;
-            //    M_AGE_leaf += cohort.Biomass * SpinupMortalityFraction;
-            //}
 
             M_AGE_wood = Math.Min(M_AGE_wood, cohort.WoodBiomass);
             M_AGE_leaf = Math.Min(M_AGE_leaf, cohort.LeafBiomass);
@@ -353,12 +348,12 @@ namespace Landis.Extension.Succession.DGS
             }
             else
             {
-                if(Main.Month +1 == FunctionalType.Table[SpeciesData.FuncType[cohort.Species]].LeafNeedleDrop)
+                if(Main.Month +1 == FunctionalType.Table[SpeciesData.FuncType[cohort.Species]].FoliageDropMonth)
                 {
                     M_leaf = cohort.LeafBiomass / 2.0;  //spread across 2 months
                     
                 }
-                if (Main.Month +2 > FunctionalType.Table[SpeciesData.FuncType[cohort.Species]].LeafNeedleDrop)
+                if (Main.Month +2 > FunctionalType.Table[SpeciesData.FuncType[cohort.Species]].FoliageDropMonth)
                 {
                     M_leaf = cohort.LeafBiomass;  //drop the remainder
                 }
@@ -422,7 +417,7 @@ namespace Landis.Extension.Succession.DGS
         {
             IEcoregion ecoregion = PlugIn.ModelCore.Ecoregion[site];
 
-            double leafFrac = FunctionalType.Table[SpeciesData.FuncType[species]].FCFRACleaf;
+            double leafFrac = FunctionalType.Table[SpeciesData.FuncType[species]].FractionANPPtoLeaf;
 
             double B_ACT = SiteVars.ActualSiteBiomass(site);
             double B_MAX = SpeciesData.Max_Biomass[species]; // B_MAX_Spp[species][ecoregion];
@@ -489,7 +484,7 @@ namespace Landis.Extension.Succession.DGS
 
         //--------------------------------------------------------------------------
         //N limit is actual demand divided by maximum uptake.
-        private double CalculateN_Limit(ActiveSite site, ICohort cohort, double NPP, double leafFractionNPP)
+        private double calculateN_Limit(ActiveSite site, ICohort cohort, double NPP, double leafFractionNPP)
         {
 
             //Get Cohort Mineral and Resorbed N allocation.
@@ -529,7 +524,7 @@ namespace Landis.Extension.Succession.DGS
         //--------------------------------------------------------------------------
         // Originally from lacalc.f of CENTURY model
 
-        private static double CalculateLAI_Limit(ICohort cohort, ActiveSite site)
+        private static double calculateLAI_Limit(ICohort cohort, ActiveSite site)
         {
 
             //...Calculate true LAI using leaf biomass and a biomass-to-LAI
@@ -566,13 +561,13 @@ namespace Landis.Extension.Succession.DGS
 
             //...Local variables
             double leafC = (double) cohort.LeafBiomass * 0.47;
-            double largeWoodC = (double) cohort.WoodBiomass * 0.47;
+            double woodC = (double) cohort.WoodBiomass * 0.47;
 
             double lai = 0.0;
             double laitop = -0.47;  // This is the value given for all biomes in the tree.100 file.           
-            double btolai = FunctionalType.Table[SpeciesData.FuncType[cohort.Species]].BTOLAI;
+            double btolai = FunctionalType.Table[SpeciesData.FuncType[cohort.Species]].BiomassToLAI;
             double klai   = FunctionalType.Table[SpeciesData.FuncType[cohort.Species]].KLAI;
-            double maxlai = FunctionalType.Table[SpeciesData.FuncType[cohort.Species]].MAXLAI;
+            double maxlai = FunctionalType.Table[SpeciesData.FuncType[cohort.Species]].MaxLAI;
 
             //double rlai = (Math.Max(0.0, 1.0 - Math.Exp(btolai * leafC)));
             double rlai = Math.Pow ((Math.Sin((Main.Month/12.0) * Math.PI + btolai)), 3.0);
@@ -582,7 +577,7 @@ namespace Landis.Extension.Succession.DGS
                 rlai = 1.0;
             }
 
-            double tlai = (maxlai * largeWoodC)/(klai + largeWoodC);
+            double tlai = (maxlai * woodC)/(klai + woodC);
 
             //if (rlai < tlai) lai = (rlai + tlai) / 2.0;
             lai = tlai * rlai;
@@ -598,18 +593,20 @@ namespace Landis.Extension.Succession.DGS
             // The minimum LAI to calculate effect is 0.1.
             if (lai < 0.1) lai = 0.1;            
 
-            SiteVars.MonthlyLAI[site][Main.Month] = lai;
+            //SiteVars.MonthlyLAI[site][Main.Month] = lai;
 
             double LAI_limit = Math.Max(0.0, 1.0 - Math.Exp(laitop * lai));
 
             //This allows LAI to go to zero for deciduous trees.
 
             if (SpeciesData.LeafLongevity[cohort.Species] <= 1.0 &&
-                (Main.Month > FunctionalType.Table[SpeciesData.FuncType[cohort.Species]].LeafNeedleDrop || Main.Month < 3))
+                (Main.Month > FunctionalType.Table[SpeciesData.FuncType[cohort.Species]].FoliageDropMonth || Main.Month < 3))
             {
                 lai = 0.0;
                 LAI_limit = 0.0;
             }
+
+            SiteVars.MonthlyLAI[site][Main.Month] = lai;
 
             if (PlugIn.ModelCore.CurrentTime > 0 && OtherData.CalibrateMode)
                 Outputs.CalibrateLog.Write("{0:0.00},{1:0.00},{2:0.00},", lai, tlai, rlai);  // 4th call to calibrate log file
@@ -623,7 +620,7 @@ namespace Landis.Extension.Succession.DGS
 
         }
 
-        private static double CalculateCompetition_Limit(ICohort cohort, ActiveSite site)
+        private static double calculateCompetition_Limit(ICohort cohort, ActiveSite site)
         {
             //double k = -0.25;  // This is the value given for all temperature ecosystems. I started with -0.1, latest code with -0.05, -0.25 works nicely for BS and alder
             // making the competition limit a functional group parameter

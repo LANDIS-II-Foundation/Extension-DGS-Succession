@@ -57,9 +57,11 @@ namespace Landis.Extension.Succession.DGS
 
             double ecoDryDays = SiteVars.DryDays[site]; 
             soilMultiplier = SoilMoistureMultiplier(ecoClimate, species, ecoDryDays);
-            
+            //soilMultiplier = 1.0;
+
             tempMultiplier = BotkinDegreeDayMultiplier(ecoClimate, species);
-            
+            //tempMultiplier = 1.0;
+
             minJanTempMultiplier = MinJanuaryTempModifier(ecoClimate, species);
 
             // Liebig's Law of the Minimum is applied to the four multipliers for each year:

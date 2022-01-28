@@ -155,8 +155,8 @@ namespace Landis.Extension.Succession.DGS
             Initialize(modelCore, Parameters.SeedAlgorithm);
 
             // Delegate mortality routines:
-            Cohort.PartialDeathEvent += CohortPartialMortality;
-            Cohort.DeathEvent += CohortTotalMortality;
+            Landis.Library.LeafBiomassCohorts.Cohort.PartialDeathEvent += CohortPartialMortality;
+            Landis.Library.LeafBiomassCohorts.Cohort.DeathEvent += CohortTotalMortality;
 
 
             InitializeSites(Parameters.InitialCommunities, Parameters.InitialCommunitiesMap, modelCore);
@@ -169,16 +169,18 @@ namespace Landis.Extension.Succession.DGS
                 Outputs.CreateCalibrateLogFile();
             //Establishment.InitializeLogFile();
 
-            B_MAX = 0;
-            foreach (ISpecies species in ModelCore.Species)
-            {
-                if (SpeciesData.Max_Biomass[species] > B_MAX)
-                    B_MAX = SpeciesData.Max_Biomass[species];
-            }
+            //B_MAX = 0;
+            //foreach (ISpecies species in ModelCore.Species)
+            //{
+            //    if (SpeciesData.Max_Biomass[species] > B_MAX)
+            //        B_MAX = SpeciesData.Max_Biomass[species];
+            //}
 
             foreach (ActiveSite site in ModelCore.Landscape)
+            {
                 Main.ComputeTotalCohortCN(site, SiteVars.Cohorts[site]);
-
+                SiteVars.FineFuels[site] = (SiteVars.SurfaceStructural[site].Carbon + SiteVars.SurfaceMetabolic[site].Carbon) * 2.0;
+            }
             Outputs.WritePrimaryLogFile(0);
             Outputs.WriteShortPrimaryLogFile(0);
             

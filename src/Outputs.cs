@@ -902,7 +902,6 @@ namespace Landis.Extension.Succession.DGS
 
             //+ SiteVars.SOM1surface[site].Nitrogen
             + SiteVars.SoilPrimary[site].Nitrogen
-            + SiteVars.SoilPrimary[site].Nitrogen
             //+ SiteVars.SOM2[site].Nitrogen
             //+ SiteVars.SOM3[site].Nitrogen;
                     ;

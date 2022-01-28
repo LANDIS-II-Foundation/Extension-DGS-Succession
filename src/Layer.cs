@@ -197,7 +197,8 @@ namespace Landis.Extension.Succession.DGS
                 if (this.Type == LayerType.Surface) anerb = 1.0; // No anaerobic effect on surface material
 
                 //Compute total C flow out of structural in layer
-                double totalCFlow = System.Math.Min(this.Carbon, OtherData.MaxStructuralC)
+                //double totalCFlow = System.Math.Min(this.Carbon, OtherData.MaxStructuralC)
+                double totalCFlow = this.Carbon 
                                 * SiteVars.DecayFactor[site]
                                 * OtherData.LitterParameters[(int)this.Type].DecayRateStrucC
                                 * anerb
@@ -371,8 +372,8 @@ namespace Landis.Extension.Succession.DGS
                 netCFlow = this.Carbon;
             //PlugIn.ModelCore.UI.WriteLine("C FLOW EXCEEDS SOURCE!  Source: {0},{1}; Destination: {2},{3}.", this.Name, this.Type, destination.Name, destination.Type);
 
-            //round these to avoid unexpected behavior
-            this.Carbon = Math.Round((this.Carbon - netCFlow), 2);
+            //this.Carbon = Math.Round((this.Carbon - netCFlow), 2);  //round these to avoid unexpected behavior
+            this.Carbon = this.Carbon - netCFlow;
             //destination.Carbon = Math.Round((destination.Carbon + netCFlow), 2);
             destination.MonthlyCarbonInputs += Math.Round(netCFlow, 2);
         }
@@ -470,7 +471,7 @@ namespace Landis.Extension.Succession.DGS
                 SiteVars.GrossMineralization[site] += mineralNFlow;
 
             //...Net mineralization
-            //this.NetMineralization += mineralNFlow;
+            this.NetMineralization += mineralNFlow;
 
             //PlugIn.ModelCore.UI.WriteLine("     this.Nitrogen={0:0.000}.", this.Nitrogen);
 
@@ -481,7 +482,7 @@ namespace Landis.Extension.Succession.DGS
         public void Respiration(double co2loss, ActiveSite site)
         {
         // Compute flows associated with microbial respiration.
-        // This method is not needed with DAMM
+        // This method is not needed with DAMM. Now I'm not sure if this is correct or not. ML
 
         // Input:
         //  co2loss = CO2 loss associated with decomposition
@@ -534,7 +535,7 @@ namespace Landis.Extension.Succession.DGS
                 SiteVars.GrossMineralization[site] += mineralNFlow;
 
             //c...Update net mineralization
-            //this.NetMineralization += mineralNFlow;
+            this.NetMineralization += mineralNFlow;
 
             return;
         }

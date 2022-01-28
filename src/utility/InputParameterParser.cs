@@ -4,6 +4,8 @@ using Landis.Core;
 using Landis.Utilities;
 using Landis.Library.Succession;
 using System.Collections.Generic;
+using System.Collections;
+using System.Data;
 
 namespace Landis.Extension.Succession.DGS
 {
@@ -301,7 +303,7 @@ namespace Landis.Extension.Succession.DGS
 
             //-----------------Dispersal Parameters----------------------------------------------------------------
 
-                       InputVar<SeedingAlgorithms> seedAlg = new InputVar<SeedingAlgorithms>("SeedingAlgorithm");
+            InputVar<SeedingAlgorithms> seedAlg = new InputVar<SeedingAlgorithms>("SeedingAlgorithm");
             ReadVar(seedAlg);
             parameters.SeedAlgorithm = seedAlg.Value;
 
@@ -525,7 +527,7 @@ namespace Landis.Extension.Succession.DGS
             InputVar<double> tempcurve2 = new InputVar<double>("TempCurve(2)");
             InputVar<double> tempcurve3 = new InputVar<double>("TempCurve(3)");
             InputVar<double> tempcurve4 = new InputVar<double>("TempCurve(4)");
-            InputVar<double> fcfleaf = new InputVar<double>("FCFRAC: Leaf");
+            InputVar<double> fanppleaf = new InputVar<double>("FCFRAC: Leaf");
             InputVar<double> btolai = new InputVar<double>("BTOLAI");
             InputVar<double> klai = new InputVar<double>("KLAI");
             InputVar<double> k = new InputVar<double>("K");
@@ -533,7 +535,7 @@ namespace Landis.Extension.Succession.DGS
             InputVar<double> mwm = new InputVar<double>("Monthly Wood Mortality");
             InputVar<double> wdr = new InputVar<double>("Wood Decay Rate");
             InputVar<double> mortCurveShapeParm = new InputVar<double>("Mortality Curve Shape Parameter");
-            InputVar<int> leafNeedleDrop = new InputVar<int>("Leaf or Needle Drop Month");
+            InputVar<int> foliageDropMonth = new InputVar<int>("Leaf or Needle Drop Month");
 
             InputVar<double> moisturecurve1 = new InputVar<double>("MoistureCurve1");
             InputVar<double> moisturecurve2 = new InputVar<double>("MoistureCurve2");
@@ -571,11 +573,11 @@ namespace Landis.Extension.Succession.DGS
                 ReadValue(tempcurve4, currentLine);
                 funcTParms.TempCurve4 = tempcurve4.Value;
 
-                ReadValue(fcfleaf, currentLine);
-                funcTParms.FCFRACleaf = fcfleaf.Value;
+                ReadValue(fanppleaf, currentLine);
+                funcTParms.FractionANPPtoLeaf = fanppleaf.Value;
 
                 ReadValue(btolai, currentLine);
-                funcTParms.BTOLAI = btolai.Value;
+                funcTParms.BiomassToLAI = btolai.Value;
 
                 ReadValue(klai, currentLine);
                 funcTParms.KLAI = klai.Value;
@@ -584,7 +586,7 @@ namespace Landis.Extension.Succession.DGS
                 funcTParms.K = k.Value;
 
                 ReadValue(maxlai, currentLine);
-                funcTParms.MAXLAI = maxlai.Value;
+                funcTParms.MaxLAI = maxlai.Value;
 
                 ReadValue(moisturecurve1, currentLine);
                 funcTParms.MoistureCurve1 = moisturecurve1.Value;
@@ -605,10 +607,10 @@ namespace Landis.Extension.Succession.DGS
                 funcTParms.MonthlyWoodMortality = mwm.Value;
 
                 ReadValue(mortCurveShapeParm, currentLine);
-                funcTParms.MortCurveShape = mortCurveShapeParm.Value;
+                funcTParms.LongevityMortalityShape = mortCurveShapeParm.Value;
 
-                ReadValue(leafNeedleDrop, currentLine);
-                funcTParms.LeafNeedleDrop = leafNeedleDrop.Value;
+                ReadValue(foliageDropMonth, currentLine);
+                funcTParms.FoliageDropMonth = foliageDropMonth.Value;
 
                 ReadValue(coarseRootFraction, currentLine);
                 funcTParms.CoarseRootFraction = coarseRootFraction.Value;
@@ -626,21 +628,24 @@ namespace Landis.Extension.Succession.DGS
             PlugIn.ModelCore.UI.WriteLine("   Begin reading FIRE REDUCTION parameters.");
             ReadName(Names.FireReductionParameters);
 
-            InputVar<int> frindex = new InputVar<int>("Fire Severity Index MUST = 1-5");
+            InputVar<int> frindex = new InputVar<int>("Fire Severity Index MUST = 1-10");
             InputVar<double> wred = new InputVar<double>("Coarse Litter Reduction");
             InputVar<double> lred = new InputVar<double>("Fine Litter Reduction");
+            InputVar<double> live_wood_red = new InputVar<double>("Cohort Wood Reduction");
+            InputVar<double> live_leaf_red = new InputVar<double>("Cohort Leaf Reduction");
             InputVar<double> som_red = new InputVar<double>("SOM Reduction");
 
-            while (! AtEndOfInput && CurrentName != Names.HarvestReductionParameters)// && CurrentName != Names.AgeOnlyDisturbanceParms)
+            while (! AtEndOfInput && CurrentName != Names.HarvestReductionParameters)
+// && CurrentName != Names.AgeOnlyDisturbanceParms)
             {
                 StringReader currentLine = new StringReader(CurrentLine);
 
                 ReadValue(frindex , currentLine);
                 int ln = (int) frindex.Value.Actual;
 
-                if(ln < 1 || ln > 5)
+                if(ln < 1 || ln > 10)
                     throw new InputValueException(frindex.Value.String,
-                                              "The fire severity index:  {0} must be 1-5,",
+                                              "The fire severity index:  {0} must be 1-10,",
                                               frindex.Value.String);
 
 
@@ -652,6 +657,12 @@ namespace Landis.Extension.Succession.DGS
 
                 ReadValue(lred, currentLine);
                 inputFireReduction.FineLitterReduction = lred.Value;
+
+                ReadValue(live_wood_red, currentLine);
+                inputFireReduction.CohortWoodReduction = live_wood_red.Value;
+
+                ReadValue(live_leaf_red, currentLine);
+                inputFireReduction.CohortLeafReduction = live_leaf_red.Value;
 
                 ReadValue(som_red, currentLine);
                 inputFireReduction.SOMReduction = som_red.Value;

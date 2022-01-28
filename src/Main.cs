@@ -147,6 +147,9 @@ namespace Landis.Extension.Succession.DGS
                         SiteVars.DecayFactor[site] = SoilWater.CalculateDecayFactor((int)OtherData.WType, thu.MonthlySoilTemperatureDecomp[Month], thu.MonthlySoilMoistureDecomp[Month], ratioPrecipPET);
                         SiteVars.AnaerobicEffect[site] = SoilWater.CalculateAnaerobicEffect(drain, ratioPrecipPET, pet, tave);
                         SiteVars.DryDays[site] = SoilWater.CalculateDryDays(Year, Month, beginGrowing, endGrowing, wiltingPoint, thu.MonthlySoilMoistureDecomp[Month], thu.MonthlySoilMoistureDecomp[previousMonth]);
+
+                        SiteVars.AnnualClimaticWaterDeficit[site] = SiteVars.AnnualClimaticWaterDeficit[site] + (pet - AET)*10.0; // converting it to mm 
+                        SiteVars.AnnualPET[site] = SiteVars.AnnualPET[site] + (pet*10.0); // converting it to mm
                     }
                     else
                     {

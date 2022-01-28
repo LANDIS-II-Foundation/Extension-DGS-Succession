@@ -134,7 +134,6 @@ namespace Landis.Extension.Succession.DGS
             // Structural litter first
             double fineLitterReduction = ReductionsTable[severity].FineLitterReduction;
 
-
             double carbonLoss = SiteVars.SurfaceStructural[site].Carbon * fineLitterReduction;
             double nitrogenLoss = SiteVars.SurfaceStructural[site].Nitrogen * fineLitterReduction;
             double summaryNLoss = nitrogenLoss;
