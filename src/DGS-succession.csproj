@@ -45,14 +45,14 @@
     <PackageReference Include="Landis.Core" Version="2.0.0" />
     <PackageReference Include="Landis.Core.Implementation" Version="2.0.0" />
   </ItemGroup>
-
-  <ItemGroup>
-    <ProjectReference Include="..\..\Library-Climate\src\climate-generator.csproj" />
-    <ProjectReference Include="..\..\Library-GIPL\Library-GIPL\src\GiplDamm.csproj" />
-    <ProjectReference Include="..\..\Library-SHAW\Library-Shaw\src\ShawDammNewInputs.csproj" />
-  </ItemGroup>
   
   <ItemGroup>
+    <Reference Include="Landis.Extension.GiplDamm">
+      <HintPath>bin\Debug\netstandard2.0\Landis.Extension.GiplDamm.dll</HintPath>
+    </Reference>
+    <Reference Include="Landis.Extension.ShawDamm">
+      <HintPath>bin\Debug\netstandard2.0\Landis.Extension.ShawDamm.dll</HintPath>
+    </Reference>
     <Reference Include="Landis.Library.AgeOnlyCohorts-v3">
       <HintPath>lib\Landis.Library.AgeOnlyCohorts-v3.dll</HintPath>
     </Reference>
