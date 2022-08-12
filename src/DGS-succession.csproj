@@ -47,8 +47,9 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\Library-GIPL\src\GiplDamm.csproj" />
-    <ProjectReference Include="..\..\Library-Shaw\src\ShawDammNewInputs.csproj" />
+    <ProjectReference Include="..\..\Library-Climate\src\climate-generator.csproj" />
+    <ProjectReference Include="..\..\Library-GIPL\Library-GIPL\src\GiplDamm.csproj" />
+    <ProjectReference Include="..\..\Library-SHAW\Library-Shaw\src\ShawDammNewInputs.csproj" />
   </ItemGroup>
   
   <ItemGroup>
@@ -61,8 +62,8 @@
     <Reference Include="Landis.Library.BiomassCohorts-v3">
       <HintPath>lib\Landis.Library.BiomassCohorts-v3.dll</HintPath>
     </Reference>
-    <Reference Include="Landis.Library.Climate-v4.2">
-      <HintPath>lib\Landis.Library.Climate-v4.2.dll</HintPath>
+    <Reference Include="Landis.Library.Climate-v4.3">
+      <HintPath>..\..\Library-Climate\src\bin\Debug\netstandard2.0\Landis.Library.Climate-v4.3.dll</HintPath>
     </Reference>
     <Reference Include="Landis.Library.Cohorts-v2">
       <HintPath>lib\Landis.Library.Cohorts-v2.dll</HintPath>
