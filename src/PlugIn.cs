@@ -370,6 +370,9 @@ namespace Landis.Extension.Succession.DGS
         {
             ModelCore.UI.WriteLine("AssignTempHydroUnits: Start");
 
+            // debug:
+            if (TempHydroUnits == null) ModelCore.UI.WriteLine("TempHydroUnits is null");
+
             // disable all thus, so I only turn on those that are needed for the year
             foreach (var thu in TempHydroUnits)
             {
@@ -385,6 +388,9 @@ namespace Landis.Extension.Succession.DGS
             SiteVars.TimeOfLastBurn = ModelCore.GetSiteVar<int>("Fire.TimeOfLastEvent");
             SiteVars.Slope = ModelCore.GetSiteVar<ushort>("Fire.Slope");
             SiteVars.Aspect = ModelCore.GetSiteVar<ushort>("Fire.Aspect");
+
+            // debug:
+            if (SiteVars.ForestTypeName == null) ModelCore.UI.WriteLine("SiteVars.ForestTypeName is null");
 
             foreach (var site in ModelCore.Landscape.ActiveSites)
             {
@@ -483,6 +489,7 @@ namespace Landis.Extension.Succession.DGS
             }
 
             ModelCore.UI.WriteLine("AssignTempHydroUnits: End");
+
         }
 
         private void RunTempHydroUnits()
