@@ -227,8 +227,8 @@ namespace Landis.Extension.Succession.DGS
             PlugIn.ModelCore.RegisterSiteVar(SiteVars.AnnualPET, "Succession.PET");
 
             TempHydroUnit = PlugIn.ModelCore.Landscape.NewSiteVar<TempHydroUnit>();
-            //ForestTypeName = PlugIn.ModelCore.GetSiteVar<string>("Output.ForestType");
-            //TimeOfLastBurn = PlugIn.ModelCore.GetSiteVar<int>("Fire.TimeOfLast");
+            ForestTypeName = PlugIn.ModelCore.GetSiteVar<string>("Output.ForestType");
+            TimeOfLastBurn = PlugIn.ModelCore.GetSiteVar<int>("Fire.TimeOfLast");
 
             foreach (ActiveSite site in PlugIn.ModelCore.Landscape)
             {
