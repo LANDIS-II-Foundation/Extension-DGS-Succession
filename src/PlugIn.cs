@@ -306,7 +306,7 @@ namespace Landis.Extension.Succession.DGS
             //AvailableN.CohortMineralNfraction = new Dictionary<ActiveSite, Dictionary<int, Dictionary<int, double>>>();
             //AvailableN.CohortMineralNallocation = new Dictionary<ActiveSite, Dictionary<int, Dictionary<int, double>>>();
 
-            var parallel = false;
+            var parallel = true;
             if (parallel)
             {
                 Parallel.ForEach(sites, site => 
@@ -506,7 +506,7 @@ namespace Landis.Extension.Succession.DGS
 
             ModelCore.UI.WriteLine("RunTempHydroUnits: Start");
 
-            var parallel = false;
+            var parallel = true;
             if (parallel)
             {
                 Parallel.ForEach(TempHydroUnits.Where(x => x.InUseForYear), thu => { thu.RunForYear(year); });
