@@ -596,8 +596,9 @@ namespace Landis.Extension.Succession.DGS
                         {
                             if (site.IsActive)
                             {
-                                pixel.MapCode.Value = (short)(SiteVars.AnnualNEE[site] + 1000);
-                            }
+                                //pixel.MapCode.Value = (short)(SiteVars.AnnualNEE[site] + 1000);
+                                pixel.MapCode.Value = (short)(SiteVars.AnnualNEE[site]);
+                    }
                             else
                             {
                                 //  Inactive site
@@ -607,8 +608,27 @@ namespace Landis.Extension.Succession.DGS
                         }
                     }
 
-                    string path5 = MapNames.ReplaceTemplateVars(@"DGS\TotalC-{timestep}.img", PlugIn.ModelCore.CurrentTime);
-                    using (IOutputRaster<IntPixel> outputRaster = PlugIn.ModelCore.CreateRaster<IntPixel>(path5, PlugIn.ModelCore.Landscape.Dimensions))
+            string path5 = MapNames.ReplaceTemplateVars(@"DGS\SOC-{timestep}.img", PlugIn.ModelCore.CurrentTime);
+            using (IOutputRaster<IntPixel> outputRaster = PlugIn.ModelCore.CreateRaster<IntPixel>(path5, PlugIn.ModelCore.Landscape.Dimensions))
+            {
+                IntPixel pixel = outputRaster.BufferPixel;
+                foreach (Site site in PlugIn.ModelCore.Landscape.AllSites)
+                {
+                    if (site.IsActive)
+                    {
+                        pixel.MapCode.Value = (int)(SiteVars.SoilPrimary[site].Carbon);
+                    }
+                    else
+                    {
+                        //  Inactive site
+                        pixel.MapCode.Value = 0;
+                    }
+                    outputRaster.WriteBufferPixel();
+                }
+            }
+
+            string path6 = MapNames.ReplaceTemplateVars(@"DGS\TotalC-{timestep}.img", PlugIn.ModelCore.CurrentTime);
+                    using (IOutputRaster<IntPixel> outputRaster = PlugIn.ModelCore.CreateRaster<IntPixel>(path6, PlugIn.ModelCore.Landscape.Dimensions))
                     {
                         IntPixel pixel = outputRaster.BufferPixel;
                         foreach (Site site in PlugIn.ModelCore.Landscape.AllSites)
