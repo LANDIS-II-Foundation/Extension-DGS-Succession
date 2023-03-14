@@ -1,0 +1,265 @@
+2022-01-20 13:20:46,525 - LANDIS-II 7.0 (7)
+2022-01-20 13:20:46,530 - 
+2022-01-20 13:20:46,561 - Loading scenario from file "scenario_DGS_SC.txt" ...
+2022-01-20 13:20:46,591 - Initialized random number generator with seed = 940,853,191
+2022-01-20 13:20:46,591 - Loading species data from file "AlaskaSpecies_012821.txt" ...
+2022-01-20 13:20:46,608 - Loading ecoregions from file "AK_climate_regions.txt" ...
+2022-01-20 13:20:46,615 - Initializing landscape from ecoregions map "./SingleCellRasters/singlec_eco.img" ...
+2022-01-20 13:20:46,630 - Cell length = 100 m, cell area = 1 ha
+2022-01-20 13:20:46,631 - Map dimensions: 1 row by 1 column = 1 cell
+2022-01-20 13:20:46,634 - Sites: 1 active (100.0%), 0 inactive (0.0%)
+2022-01-20 13:20:46,638 - Loading DGS Succession extension ...
+2022-01-20 13:20:46,646 -    Registering Data:  Succession.LeafBiomassCohorts.
+2022-01-20 13:20:46,647 -    Registering Data:  Succession.AgeCohorts.
+2022-01-20 13:20:46,647 -    Registering Data:  Succession.BiomassCohorts.
+2022-01-20 13:20:46,647 -    Registering Data:  Succession.FineFuels.
+2022-01-20 13:20:46,647 -    Registering Data:  Succession.SmolderConsumption.
+2022-01-20 13:20:46,647 -    Registering Data:  Succession.FlamingConsumption.
+2022-01-20 13:20:46,647 -    Registering Data:  Succession.CWD.
+2022-01-20 13:20:46,663 -    Begin parsing FUNCTIONAL GROUP table.
+2022-01-20 13:20:46,665 -    Begin reading FIRE REDUCTION parameters.
+2022-01-20 13:20:46,665 -    Begin reading HARVEST REDUCTION parameters.
+2022-01-20 13:20:49,705 - Initializing DGS Succession ...
+2022-01-20 13:20:49,726 -   Read in data from ./SingleCellRasters/Depth_BNZBirch.tif
+2022-01-20 13:20:49,731 -   Read in data from ./SingleCellRasters/Drain_BNZBirch.tif
+2022-01-20 13:20:49,734 -   Read in data from ./SingleCellRasters/singlecell_point3.tif
+2022-01-20 13:20:49,737 -   Read in data from ./SingleCellRasters/singlecell_point3.tif
+2022-01-20 13:20:49,738 -   Read in data from ./SingleCellRasters/FieldCapacity_BNZBirch.tif
+2022-01-20 13:20:49,740 -   Read in data from ./SingleCellRasters/WiltPoint_BNZBirch.tif
+2022-01-20 13:20:49,741 -   Read in data from ./SingleCellRasters/Sand_BNZBirch.tif
+2022-01-20 13:20:49,741 -   Read in data from ./SingleCellRasters/Clay_BNZBirch.tif
+2022-01-20 13:20:49,742 -   Read in data from ./SingleCellRasters/singlecell_point1.tif
+2022-01-20 13:20:49,743 -   Read in data from ./SingleCellRasters/ParticleDensity.tif
+2022-01-20 13:20:49,744 -   Read in data from ./SingleCellRasters/SOC_BNZBirch.tif
+2022-01-20 13:20:49,744 -   Read in data from ./SingleCellRasters/SON_BNZBirch.tif
+2022-01-20 13:20:49,746 -   Read in data from ./SingleCellRasters/singlecell_100.tif
+2022-01-20 13:20:49,747 -   Read in data from ./SingleCellRasters/singlecell_100.tif
+2022-01-20 13:20:49,755 -    Loading weather data ...
+2022-01-20 13:20:53,993 -    Registering Data:  TimeOfLastSuccession.
+2022-01-20 13:20:53,994 -    Registering Data:  Shade.
+2022-01-20 13:20:53,994 -    Creating Dispersal Neighborhood List.
+2022-01-20 13:20:53,995 -    Dispersal:  NeighborRadius=5050, CellLength=100, numCellRadius=50
+2022-01-20 13:20:53,998 -    Loading initial communities from file "initial-communities.txt" ...
+2022-01-20 13:20:54,010 -    Reading initial communities map "ICval10.img" ...
+2022-01-20 13:20:54,173 - Loading Output Biomass Reclass extension ...
+2022-01-20 13:20:54,178 -    Registering Data:  Output.ForestType.
+2022-01-20 13:20:54,182 - Using the following extensions ...
+   Extension Name            Extension Filename       
+   --------------            ------------------       
+   DGS Succession            DGS_Succession_AKinput_210315_SC.txt
+   Output Biomass Reclass    output_BiomassReclass.txt
+
+2022-01-20 13:20:54,183 - Running Output Biomass Reclass ...
+2022-01-20 13:20:54,183 -    Writing Biomass Reclass map to Reclass/biomass-reclass-reclass1-0.img ...
+2022-01-20 13:20:54,206 -    Writing Biomass Reclass map to Reclass/biomass-reclass-reclass2-0.img ...
+2022-01-20 13:20:54,221 - Current time: 1
+2022-01-20 13:20:54,221 - Running DGS Succession ...
+2022-01-20 13:20:54,224 - AssignTempHydroUnits: Start
+2022-01-20 13:20:54,225 - AssignTempHydroUnits: 1 THUs in use:
+2022-01-20 13:20:54,225 - 85 -> 1 sites
+2022-01-20 13:20:54,225 - AssignTempHydroUnits: End
+2022-01-20 13:20:54,227 - RunTempHydroUnits: Start
+2022-01-20 13:20:54,227 - Run THU '85 -> 1 sites' for year 2002
+2022-01-20 13:20:57,495 - RunTempHydroUnits: End
+2022-01-20 13:20:57,496 - ExtensionBaseRun: Start
+2022-01-20 13:20:57,538 - ExtensionBaseRun: Stop
+2022-01-20 13:20:57,662 - Running Output Biomass Reclass ...
+2022-01-20 13:20:57,662 -    Writing Biomass Reclass map to Reclass/biomass-reclass-reclass1-1.img ...
+2022-01-20 13:20:57,676 -    Writing Biomass Reclass map to Reclass/biomass-reclass-reclass2-1.img ...
+2022-01-20 13:20:57,690 - Current time: 2
+2022-01-20 13:20:57,691 - Running DGS Succession ...
+2022-01-20 13:20:57,691 - AssignTempHydroUnits: Start
+2022-01-20 13:20:57,691 - AssignTempHydroUnits: 1 THUs in use:
+2022-01-20 13:20:57,691 - 85 -> 1 sites
+2022-01-20 13:20:57,691 - AssignTempHydroUnits: End
+2022-01-20 13:20:57,692 - RunTempHydroUnits: Start
+2022-01-20 13:20:57,692 - Run THU '85 -> 1 sites' for year 2003
+2022-01-20 13:20:59,797 - RunTempHydroUnits: End
+2022-01-20 13:20:59,798 - ExtensionBaseRun: Start
+2022-01-20 13:20:59,804 - ExtensionBaseRun: Stop
+2022-01-20 13:20:59,915 - Running Output Biomass Reclass ...
+2022-01-20 13:20:59,915 -    Writing Biomass Reclass map to Reclass/biomass-reclass-reclass1-2.img ...
+2022-01-20 13:20:59,931 -    Writing Biomass Reclass map to Reclass/biomass-reclass-reclass2-2.img ...
+2022-01-20 13:20:59,946 - Current time: 3
+2022-01-20 13:20:59,949 - Running DGS Succession ...
+2022-01-20 13:20:59,950 - AssignTempHydroUnits: Start
+2022-01-20 13:20:59,950 - AssignTempHydroUnits: 1 THUs in use:
+2022-01-20 13:20:59,950 - 85 -> 1 sites
+2022-01-20 13:20:59,951 - AssignTempHydroUnits: End
+2022-01-20 13:20:59,951 - RunTempHydroUnits: Start
+2022-01-20 13:20:59,952 - Run THU '85 -> 1 sites' for year 2004
+2022-01-20 13:21:02,628 - RunTempHydroUnits: End
+2022-01-20 13:21:02,628 - ExtensionBaseRun: Start
+2022-01-20 13:21:02,635 - ExtensionBaseRun: Stop
+2022-01-20 13:21:02,746 - Running Output Biomass Reclass ...
+2022-01-20 13:21:02,746 -    Writing Biomass Reclass map to Reclass/biomass-reclass-reclass1-3.img ...
+2022-01-20 13:21:02,760 -    Writing Biomass Reclass map to Reclass/biomass-reclass-reclass2-3.img ...
+2022-01-20 13:21:02,774 - Current time: 4
+2022-01-20 13:21:02,774 - Running DGS Succession ...
+2022-01-20 13:21:02,774 - AssignTempHydroUnits: Start
+2022-01-20 13:21:02,775 - AssignTempHydroUnits: 1 THUs in use:
+2022-01-20 13:21:02,775 - 85 -> 1 sites
+2022-01-20 13:21:02,775 - AssignTempHydroUnits: End
+2022-01-20 13:21:02,775 - RunTempHydroUnits: Start
+2022-01-20 13:21:02,775 - Run THU '85 -> 1 sites' for year 2005
+2022-01-20 13:21:05,729 - RunTempHydroUnits: End
+2022-01-20 13:21:05,729 - ExtensionBaseRun: Start
+2022-01-20 13:21:05,736 - ExtensionBaseRun: Stop
+2022-01-20 13:21:05,845 - Running Output Biomass Reclass ...
+2022-01-20 13:21:05,845 -    Writing Biomass Reclass map to Reclass/biomass-reclass-reclass1-4.img ...
+2022-01-20 13:21:05,859 -    Writing Biomass Reclass map to Reclass/biomass-reclass-reclass2-4.img ...
+2022-01-20 13:21:05,874 - Current time: 5
+2022-01-20 13:21:05,874 - Running DGS Succession ...
+2022-01-20 13:21:05,874 - AssignTempHydroUnits: Start
+2022-01-20 13:21:05,875 - AssignTempHydroUnits: 1 THUs in use:
+2022-01-20 13:21:05,875 - 85 -> 1 sites
+2022-01-20 13:21:05,875 - AssignTempHydroUnits: End
+2022-01-20 13:21:05,875 - RunTempHydroUnits: Start
+2022-01-20 13:21:05,876 - Run THU '85 -> 1 sites' for year 2006
+2022-01-20 13:21:08,476 - RunTempHydroUnits: End
+2022-01-20 13:21:08,476 - ExtensionBaseRun: Start
+2022-01-20 13:21:08,482 - ExtensionBaseRun: Stop
+2022-01-20 13:21:08,594 - Running Output Biomass Reclass ...
+2022-01-20 13:21:08,594 -    Writing Biomass Reclass map to Reclass/biomass-reclass-reclass1-5.img ...
+2022-01-20 13:21:08,608 -    Writing Biomass Reclass map to Reclass/biomass-reclass-reclass2-5.img ...
+2022-01-20 13:21:08,622 - Current time: 6
+2022-01-20 13:21:08,622 - Running DGS Succession ...
+2022-01-20 13:21:08,622 - AssignTempHydroUnits: Start
+2022-01-20 13:21:08,623 - AssignTempHydroUnits: 1 THUs in use:
+2022-01-20 13:21:08,623 - 85 -> 1 sites
+2022-01-20 13:21:08,623 - AssignTempHydroUnits: End
+2022-01-20 13:21:08,623 - RunTempHydroUnits: Start
+2022-01-20 13:21:08,623 - Run THU '85 -> 1 sites' for year 2007
+2022-01-20 13:21:11,188 - RunTempHydroUnits: End
+2022-01-20 13:21:11,190 - ExtensionBaseRun: Start
+2022-01-20 13:21:11,196 - ExtensionBaseRun: Stop
+2022-01-20 13:21:11,301 - Running Output Biomass Reclass ...
+2022-01-20 13:21:11,301 -    Writing Biomass Reclass map to Reclass/biomass-reclass-reclass1-6.img ...
+2022-01-20 13:21:11,315 -    Writing Biomass Reclass map to Reclass/biomass-reclass-reclass2-6.img ...
+2022-01-20 13:21:11,330 - Current time: 7
+2022-01-20 13:21:11,330 - Running DGS Succession ...
+2022-01-20 13:21:11,332 - AssignTempHydroUnits: Start
+2022-01-20 13:21:11,332 - AssignTempHydroUnits: 1 THUs in use:
+2022-01-20 13:21:11,332 - 85 -> 1 sites
+2022-01-20 13:21:11,332 - AssignTempHydroUnits: End
+2022-01-20 13:21:11,333 - RunTempHydroUnits: Start
+2022-01-20 13:21:11,333 - Run THU '85 -> 1 sites' for year 2008
+2022-01-20 13:21:13,894 - RunTempHydroUnits: End
+2022-01-20 13:21:13,895 - ExtensionBaseRun: Start
+2022-01-20 13:21:13,902 - ExtensionBaseRun: Stop
+2022-01-20 13:21:14,013 - Running Output Biomass Reclass ...
+2022-01-20 13:21:14,014 -    Writing Biomass Reclass map to Reclass/biomass-reclass-reclass1-7.img ...
+2022-01-20 13:21:14,030 -    Writing Biomass Reclass map to Reclass/biomass-reclass-reclass2-7.img ...
+2022-01-20 13:21:14,044 - Current time: 8
+2022-01-20 13:21:14,045 - Running DGS Succession ...
+2022-01-20 13:21:14,045 - AssignTempHydroUnits: Start
+2022-01-20 13:21:14,045 - AssignTempHydroUnits: 1 THUs in use:
+2022-01-20 13:21:14,045 - 85 -> 1 sites
+2022-01-20 13:21:14,046 - AssignTempHydroUnits: End
+2022-01-20 13:21:14,046 - RunTempHydroUnits: Start
+2022-01-20 13:21:14,046 - Run THU '85 -> 1 sites' for year 2009
+2022-01-20 13:21:16,816 - RunTempHydroUnits: End
+2022-01-20 13:21:16,817 - ExtensionBaseRun: Start
+2022-01-20 13:21:16,823 - ExtensionBaseRun: Stop
+2022-01-20 13:21:16,940 - Running Output Biomass Reclass ...
+2022-01-20 13:21:16,940 -    Writing Biomass Reclass map to Reclass/biomass-reclass-reclass1-8.img ...
+2022-01-20 13:21:16,956 -    Writing Biomass Reclass map to Reclass/biomass-reclass-reclass2-8.img ...
+2022-01-20 13:21:16,970 - Current time: 9
+2022-01-20 13:21:16,971 - Running DGS Succession ...
+2022-01-20 13:21:16,971 - AssignTempHydroUnits: Start
+2022-01-20 13:21:16,971 - AssignTempHydroUnits: 1 THUs in use:
+2022-01-20 13:21:16,971 - 85 -> 1 sites
+2022-01-20 13:21:16,971 - AssignTempHydroUnits: End
+2022-01-20 13:21:16,972 - RunTempHydroUnits: Start
+2022-01-20 13:21:16,972 - Run THU '85 -> 1 sites' for year 2010
+2022-01-20 13:21:19,954 - RunTempHydroUnits: End
+2022-01-20 13:21:19,955 - ExtensionBaseRun: Start
+2022-01-20 13:21:19,960 - ExtensionBaseRun: Stop
+2022-01-20 13:21:20,071 - Running Output Biomass Reclass ...
+2022-01-20 13:21:20,071 -    Writing Biomass Reclass map to Reclass/biomass-reclass-reclass1-9.img ...
+2022-01-20 13:21:20,085 -    Writing Biomass Reclass map to Reclass/biomass-reclass-reclass2-9.img ...
+2022-01-20 13:21:20,101 - Current time: 10
+2022-01-20 13:21:20,101 - Running DGS Succession ...
+2022-01-20 13:21:20,102 - AssignTempHydroUnits: Start
+2022-01-20 13:21:20,102 - AssignTempHydroUnits: 1 THUs in use:
+2022-01-20 13:21:20,102 - 85 -> 1 sites
+2022-01-20 13:21:20,102 - AssignTempHydroUnits: End
+2022-01-20 13:21:20,103 - RunTempHydroUnits: Start
+2022-01-20 13:21:20,103 - Run THU '85 -> 1 sites' for year 2011
+2022-01-20 13:21:23,095 - RunTempHydroUnits: End
+2022-01-20 13:21:23,095 - ExtensionBaseRun: Start
+2022-01-20 13:21:23,100 - ExtensionBaseRun: Stop
+2022-01-20 13:21:23,214 - Running Output Biomass Reclass ...
+2022-01-20 13:21:23,214 -    Writing Biomass Reclass map to Reclass/biomass-reclass-reclass1-10.img ...
+2022-01-20 13:21:23,230 -    Writing Biomass Reclass map to Reclass/biomass-reclass-reclass2-10.img ...
+2022-01-20 13:21:23,246 - Current time: 11
+2022-01-20 13:21:23,246 - Running DGS Succession ...
+2022-01-20 13:21:23,246 - AssignTempHydroUnits: Start
+2022-01-20 13:21:23,248 - AssignTempHydroUnits: 1 THUs in use:
+2022-01-20 13:21:23,248 - 85 -> 1 sites
+2022-01-20 13:21:23,248 - AssignTempHydroUnits: End
+2022-01-20 13:21:23,248 - RunTempHydroUnits: Start
+2022-01-20 13:21:23,249 - Run THU '85 -> 1 sites' for year 2012
+2022-01-20 13:21:25,828 - RunTempHydroUnits: End
+2022-01-20 13:21:25,829 - ExtensionBaseRun: Start
+2022-01-20 13:21:25,835 - ExtensionBaseRun: Stop
+2022-01-20 13:21:25,942 - Running Output Biomass Reclass ...
+2022-01-20 13:21:25,942 -    Writing Biomass Reclass map to Reclass/biomass-reclass-reclass1-11.img ...
+2022-01-20 13:21:25,958 -    Writing Biomass Reclass map to Reclass/biomass-reclass-reclass2-11.img ...
+2022-01-20 13:21:25,973 - Current time: 12
+2022-01-20 13:21:25,973 - Running DGS Succession ...
+2022-01-20 13:21:25,973 - AssignTempHydroUnits: Start
+2022-01-20 13:21:25,974 - AssignTempHydroUnits: 1 THUs in use:
+2022-01-20 13:21:25,974 - 85 -> 1 sites
+2022-01-20 13:21:25,974 - AssignTempHydroUnits: End
+2022-01-20 13:21:25,974 - RunTempHydroUnits: Start
+2022-01-20 13:21:25,975 - Run THU '85 -> 1 sites' for year 2013
+2022-01-20 13:21:29,144 - RunTempHydroUnits: End
+2022-01-20 13:21:29,145 - ExtensionBaseRun: Start
+2022-01-20 13:21:29,158 - ExtensionBaseRun: Stop
+2022-01-20 13:21:29,265 - Running Output Biomass Reclass ...
+2022-01-20 13:21:29,266 -    Writing Biomass Reclass map to Reclass/biomass-reclass-reclass1-12.img ...
+2022-01-20 13:21:29,280 -    Writing Biomass Reclass map to Reclass/biomass-reclass-reclass2-12.img ...
+2022-01-20 13:21:29,296 - Current time: 13
+2022-01-20 13:21:29,297 - Running DGS Succession ...
+2022-01-20 13:21:29,297 - AssignTempHydroUnits: Start
+2022-01-20 13:21:29,297 - AssignTempHydroUnits: 1 THUs in use:
+2022-01-20 13:21:29,297 - 85 -> 1 sites
+2022-01-20 13:21:29,297 - AssignTempHydroUnits: End
+2022-01-20 13:21:29,298 - RunTempHydroUnits: Start
+2022-01-20 13:21:29,298 - Run THU '85 -> 1 sites' for year 2014
+2022-01-20 13:21:31,581 - RunTempHydroUnits: End
+2022-01-20 13:21:31,582 - ExtensionBaseRun: Start
+2022-01-20 13:21:31,589 - ExtensionBaseRun: Stop
+2022-01-20 13:21:31,701 - Running Output Biomass Reclass ...
+2022-01-20 13:21:31,701 -    Writing Biomass Reclass map to Reclass/biomass-reclass-reclass1-13.img ...
+2022-01-20 13:21:31,717 -    Writing Biomass Reclass map to Reclass/biomass-reclass-reclass2-13.img ...
+2022-01-20 13:21:31,732 - Current time: 14
+2022-01-20 13:21:31,732 - Running DGS Succession ...
+2022-01-20 13:21:31,732 - AssignTempHydroUnits: Start
+2022-01-20 13:21:31,733 - AssignTempHydroUnits: 1 THUs in use:
+2022-01-20 13:21:31,733 - 85 -> 1 sites
+2022-01-20 13:21:31,733 - AssignTempHydroUnits: End
+2022-01-20 13:21:31,733 - RunTempHydroUnits: Start
+2022-01-20 13:21:31,734 - Run THU '85 -> 1 sites' for year 2015
+2022-01-20 13:21:34,322 - RunTempHydroUnits: End
+2022-01-20 13:21:34,323 - ExtensionBaseRun: Start
+2022-01-20 13:21:34,329 - ExtensionBaseRun: Stop
+2022-01-20 13:21:34,439 - Running Output Biomass Reclass ...
+2022-01-20 13:21:34,439 -    Writing Biomass Reclass map to Reclass/biomass-reclass-reclass1-14.img ...
+2022-01-20 13:21:34,454 -    Writing Biomass Reclass map to Reclass/biomass-reclass-reclass2-14.img ...
+2022-01-20 13:21:34,468 - Current time: 15
+2022-01-20 13:21:34,469 - Running DGS Succession ...
+2022-01-20 13:21:34,469 - AssignTempHydroUnits: Start
+2022-01-20 13:21:34,469 - AssignTempHydroUnits: 1 THUs in use:
+2022-01-20 13:21:34,470 - 85 -> 1 sites
+2022-01-20 13:21:34,470 - AssignTempHydroUnits: End
+2022-01-20 13:21:34,470 - RunTempHydroUnits: Start
+2022-01-20 13:21:34,470 - Run THU '85 -> 1 sites' for year 2016
+2022-01-20 13:21:36,587 - RunTempHydroUnits: End
+2022-01-20 13:21:36,589 - ExtensionBaseRun: Start
+2022-01-20 13:21:36,595 - ExtensionBaseRun: Stop
+2022-01-20 13:21:36,702 - Running Output Biomass Reclass ...
+2022-01-20 13:21:36,702 -    Writing Biomass Reclass map to Reclass/biomass-reclass-reclass1-15.img ...
+2022-01-20 13:21:36,717 -    Writing Biomass Reclass map to Reclass/biomass-reclass-reclass2-15.img ...
+2022-01-20 13:21:36,732 - Model run is complete.

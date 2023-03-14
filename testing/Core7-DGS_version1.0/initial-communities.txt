@@ -1,0 +1,5 @@
+LandisData   "Initial Communities"
+
+MapCode  10
+PaperBirch 15 (2500)
+QuakingAspen 3 (200)
