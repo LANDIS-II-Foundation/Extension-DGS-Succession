@@ -1,4 +1,4 @@
-# What is the SCRPPLE Extension?
+# What is the DGS Extension?
 
 The purpose of the Social-Climate Related Pyrogenic Processes and their Landscape Effects (SCRPPLE) is to simulate fire regime change due to climatic and social factors.  The climate is represented primarily via a Fire Weather Index.  Social processes are represented as explicit representation of suppression, accidental ignitions, and prescribed fire.  Human manipulation of the vegetation is represented through fine fuels and ladder fuels.  SCRPPLE uses a very 'data first' philosophy:  The primary mechanisms (ignition, spread, site mortality, and cohort mortality) are parameterized via statistical analyses of landscape-scale data.
 
