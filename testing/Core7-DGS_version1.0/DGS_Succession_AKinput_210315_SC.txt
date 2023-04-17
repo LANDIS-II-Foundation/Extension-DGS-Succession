@@ -8,26 +8,27 @@ ClimateConfigFile		climate_gen_baseline.txt
 AtmosphericNSlope		0.0008  << Shelby  calibrated value 9/30/19
 AtmosphericNIntercept		0.003	<<ML was 0.005, value used is from Shelby
 
-InitialCommunities      		initial-communities.txt
-InitialCommunitiesMap   		ICval10.img
+InitialCommunities      	AK_IC_File-SmithLake2.txt
+InitialCommunitiesMap   	ICMap_CR5_SC.tif
 Latitude			65.6    <<Approx latitude of Fairbanks = 65.575967
 
 ShawGiplConfigFile		ShawGiplConfig.txt
 
-SoilDepthMapName			./SingleCellRasters/Depth_BNZBirch.tif
-SoilDrainMapName			./SingleCellRasters/Drain_BNZBirch.tif
-SoilBaseFlowMapName			./SingleCellRasters/singlecell_point3.tif
-SoilStormFlowMapName			./SingleCellRasters/singlecell_point3.tif
-SoilFieldCapacityMapName		./SingleCellRasters/FieldCapacity_BNZBirch.tif
-SoilWiltingPointMapName			./SingleCellRasters/WiltPoint_BNZBirch.tif
-SoilPercentSandMapName			./SingleCellRasters/Sand_BNZBirch.tif
-SoilPercentClayMapName			./SingleCellRasters/Clay_BNZBirch.tif
-SoilBulkDensityMapName			./SingleCellRasters/singlecell_point1.tif
-SoilParticleDensityMapName		./SingleCellRasters/ParticleDensity.tif
-InitialSOC_PrimaryMapName			./SingleCellRasters/SOC_BNZBirch.tif
-InitialSON_PrimaryMapName			./SingleCellRasters/SON_BNZBirch.tif
-InitialDeadWoodSurfaceMapName	./SingleCellRasters/singlecell_100.tif
-InitialDeadCoarseRootsMapName	./SingleCellRasters/singlecell_100.tif
+>>Soil maps 
+SoilDepthMapName			Depth_SmithLake2.tif
+SoilDrainMapName			Drain_SmithLake2.tif
+SoilBaseFlowMapName			BaseFlow_SmithLake2.tif
+SoilStormFlowMapName			BaseFlow_SmithLake2.tif
+SoilFieldCapacityMapName		FC_SmithLake2.tif
+SoilWiltingPointMapName			WP_SmithLake2.tif
+SoilPercentSandMapName			Sand_SmithLake2.tif
+SoilPercentClayMapName			Clay_SmithLake2.tif
+SoilBulkDensityMapName			BD_SmithLake2.tif
+SoilParticleDensityMapName		PD_SmithLake2.tif
+InitialSOC_PrimaryMapName		SOC_SmithLake2.tif
+InitialSON_PrimaryMapName		SON_SmithLake2.tif
+InitialDeadWoodSurfaceMapName		DeadWood_SmithLake2.tif
+InitialDeadCoarseRootsMapName		DeadWood_SmithLake2.tif
 
 >>General Soil parameters
 InitialFineFuels		0.1
@@ -115,7 +116,7 @@ Feathermoss		4	Y	N	247	1911	-30	0.27	3	N	0	0	0	0	53.0	26	5	5	53	20	400 	10000  <
 Turfmoss		4	Y	N	484	2036	-28	0.28	3	N	0	0	0	0	53.0	26	5	5	53	20	400 	10000  << Originally 80 by setting MaxANPP to lower than 200 based of several lit values that report much less than 100 for whole year
 
 FunctionalGroupParameters 
->> Name		Index	PPDF1	PPDF2	PPDF3	PPDF4	FCFRAC	BTOLAI	KLAI	K	MAXLAI	Moist1 Moist2  Moist3	Moist4  Wood	Monthly	  Mort	    Drop    CRoot  FRoot
+>> Name		Index	PPDF1	PPDF2	PPDF3	PPDF4	FCFRAC	BTOLAI	KLAI	MAXLAI	Moist1 Moist2  Moist3	Moist4  Wood	Monthly	  Mort	    Drop    CRoot  FRoot
 >> 			T-Mean	T-Max	T-shape	T-shape	leaf								DecayR	Wood    MortShape   Month   Frac   Frac
 Spruce	        1        9	450     50        65   0.35    -0.25  	150.0    0.15  4.0   0.58    1.45    650   0.016	0.04    0.004     25        9       0.25      0.9  << 100 reaches 3 in year10, 300 only reaches 2.
 Hardwood        2        22	85	  3.9     5.3	0.5    -0.25  	500.0    0.15  4.0   0.14    0.61    1.90     10      0.06    0.004     25	    9       0.21     1.0 <<  

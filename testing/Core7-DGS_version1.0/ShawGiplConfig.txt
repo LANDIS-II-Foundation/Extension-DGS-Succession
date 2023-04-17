@@ -1,6 +1,6 @@
 #General Shaw Gipl Config File
 
-ListThus				.\SHAW\interiorAK_THUs-new2_adjSlope.csv
+ListThus				.\SHAW\interiorAK_THUs-SmithLake2_new2_adjSlope.csv
 
 ShawGeneralInputs		.\SHAW\general_input.txt
 ShawPlantTypes			.\SHAW\interiorAK_plants.csv

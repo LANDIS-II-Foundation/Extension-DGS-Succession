@@ -1,11 +1,11 @@
 LandisData "Climate Config"				
 		
 ClimateTimeSeries			Daily_SequencedYears
-ClimateFile				Birch_WeatherStation_starts2002-newSH-withTemp.csv
+ClimateFile				SmithLake_MetData_v2.csv
 ClimateFileFormat			Daily_Temp-C_Precip-mmDay
 
 SpinUpClimateTimeSeries			Daily_SequencedYears
-SpinUpClimateFile			Birch_WeatherStation_starts2002-newSH-withTemp.csv
+SpinUpClimateFile			SmithLake_MetData_v2.csv
 SpinUpClimateFileFormat			Daily_Temp-C_Precip-mmDay
 
 UsingFireClimate			yes
