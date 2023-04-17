@@ -1,52 +1,50 @@
-# What is the DGS Succession Extension?
+# What is the SCRPPLE Extension?
 
-The  PnET-Succession extension implements succession with cohorts defined by age ranges and including biomass per cohort. Most parameters are able to change over time, due to climate change for example.
+The purpose of the Social-Climate Related Pyrogenic Processes and their Landscape Effects (SCRPPLE) is to simulate fire regime change due to climatic and social factors.  The climate is represented primarily via a Fire Weather Index.  Social processes are represented as explicit representation of suppression, accidental ignitions, and prescribed fire.  Human manipulation of the vegetation is represented through fine fuels and ladder fuels.  SCRPPLE uses a very 'data first' philosophy:  The primary mechanisms (ignition, spread, site mortality, and cohort mortality) are parameterized via statistical analyses of landscape-scale data.
 
-The DGS-Succession extension is based on the Biomass Succession extension of Scheller and Mladenoff (2004), embedding elements of the DGS-II ecophysiology model of Aber et al (1995) to simulate growth as a competition for available light and water, replacing the existing competition for “growing space” algorithms (De Bruijn et al. 2014). DGS (Photosynthesis and EvapoTranspiration) is a simple, lumped parameter model of carbon and water balances of forests (Aber and Federer 1992), built on two principal relationships: 1) maximum photo-synthetic rate is a function of foliar nitrogen concentration, and 2) stomatal conductance is a function of realized photosynthetic rate. DGS-Succession uses one DGS simulation for each tree species-age cohort and uses water and light consumption by these cohorts to implement competition. DGS-Succession calculates resources in terms of Non-Structural Carbon (NSC) for each cohort in its DGS part and assumes that cohorts die when their NSC level drops below a threshold. The DGS-Succession extension also tracks dead biomass over time, divided into two pools: woody and leaf litter.
+# Citation
+
+Scheller, R.M., A. Kretchun, T.J. Hawbaker, P.D. Henne. 2019. A landscape model of variable social-ecological fire regimes. Ecological Modelling 401: 85-93.
 
 # Release Notes
 
-- Latest official release: Version 4.1 — March 2022
-- [View User Guide](https://github.com/LANDIS-II-Foundation/Extension-DGS-Succession/blob/master/deploy/docs/LANDIS-II%20PnET-Succession%20v4.1%20User%20Guide.pdf).
+- Latest release: Version 3.2.2 — May 2022
 - Full release details found in the User Guide and on GitHub.
+- [View User Guide](https://github.com/LANDIS-II-Foundation/Extension-SCRPPLE/blob/master/docs/LANDIS-II%20SCRAPPLE%20v3.2%20User%20Guide.pdf).
+- SCRPPLE depends on the Climate Library, see: [User Guide for Climate Library](https://github.com/LANDIS-II-Foundation/Library-Climate/blob/master/docs/LANDIS-II%20Climate%20Library%20v4.2%20User%20Guide.pdf)
 
-- Beta release of Version 5.0 - December 2022
-- [View User Guide](https://github.com/LANDIS-II-Foundation/Extension-PnET-Succession/blob/master/deploy/docs/LANDIS-II%20PnET-Succession%20v5.0b18%20User%20Guide.pdf).
-
+- Copyright: The LANDIS-II Foundation
 
 # Requirements
 
-To use PnET-Succession, you need:
+You need:
 
 - The [LANDIS-II model v7.0](http://www.landis-ii.org/install) installed on your computer.
 - Example files (see below)
 
 # Download
 
-Version 4.1 can be downloaded [here](https://github.com/LANDIS-II-Foundation/Extension-PnET-Succession/blob/master/deploy/installer/LANDIS-II-V7%20PnET-Succession%204.1-RC1-setup.exe). To install it on your computer, launch the installer.
-
-Version 5.0-b18 can be downloaded [here](https://github.com/LANDIS-II-Foundation/Extension-PnET-Succession/blob/master/deploy/installer/LANDIS-II-V7%20PnET-Succession%205.0-b18-setup.exe). To install it on your computer, launch the installer.
-
+- The latest version of SCRPPLE can be [downloaded from GitHub](https://github.com/LANDIS-II-Foundation/Extension-SCRPPLE/blob/master/deploy/installer/LANDIS-II-V7%20SCRAPPLE%203.2.2-setup.exe). To install it on your computer, launch the installer.
 
 # Example Files
 
 LANDIS-II requires a global parameter file for your scenario, and separate parameter files for each extension.
 
-Example files are [here](https://github.com/LANDIS-II-Foundation/Extension-PnET-Succession/tree/master/deploy/examples/biomass-Pnet-succession-example/PnET-succession-example.zip).
+Example files can be [downloaded from GitHub](https://downgit.github.io/#/home?url=https://github.com/LANDIS-II-Foundation/Extension-SCRPPLE/tree/master/Testing/Core7-SCRAPPLE3.2).
 
-# Citation
+# Supporting R-Code
 
-Arjan de Bruijn, Eric J. Gustafson, Brian R. Sturtevant, Jane R. Foster, Brian R. Miranda, Nathanael I. Lichti, Douglass F. Jacobs, Toward more robust projections of forest landscape dynamics under novel environmental conditions: Embedding PnET within LANDIS-II. Ecological Modelling Volume 287, 10 September 2014, Pages 44–57
+We also provide R-code that has been used to parameterize SCRPPLE.  This R-code is provided 'as is' and no support is implied.  [R code on GitHub](https://downgit.github.io/#/home?url=https://github.com/LANDIS-II-Foundation/Extension-SCRPPLE/tree/master/Supporting%20R%20Code)
 
 # Support
 
-If you have a question, please contact Eric Gustafson. 
+If you have a question, please contact Robert Scheller. 
 You can also ask for help in the [LANDIS-II users group](http://www.landis-ii.org/users).
 
-If you come across any issue or suspected bug, please post about it in the [issue section of the Github repository](https://github.com/LANDIS-II-Foundation/Extension-PnET-Succession/issues) (GitID required).
+If you come across any issue or suspected bug, please post about it in the [issue section of the Github repository](https://github.com/LANDIS-II-Foundation/Extension-SCRPPLE/issues) (GitHub ID required).
 
-# Authors
+# Author
 
-Arjan de Bruijn, Eric Gustafson, Brian Miranda, USFS and Purdue University
+[The LANDIS-II Foundation](http://www.landis-ii.org)
 
-Mail : eric.gustafson@usda.gov
+Mail : rschell@ncsu.edu
