@@ -1,17 +1,20 @@
 # What is the DGS Extension?
 
-The purpose of the Social-Climate Related Pyrogenic Processes and their Landscape Effects (SCRPPLE) is to simulate fire regime change due to climatic and social factors.  The climate is represented primarily via a Fire Weather Index.  Social processes are represented as explicit representation of suppression, accidental ignitions, and prescribed fire.  Human manipulation of the vegetation is represented through fine fuels and ladder fuels.  SCRPPLE uses a very 'data first' philosophy:  The primary mechanisms (ignition, spread, site mortality, and cohort mortality) are parameterized via statistical analyses of landscape-scale data.
+Here we developed a new succession extension (DGS) of the LANDIS-II forest landscape model which integrates a vegetation dynamics model (NECN) with a soil carbon model (DAMM-McNiP), a hydrologic model (SHAW), and a deep soil profile permafrost model (GIPL) in a spatially-explicit framework. DGS Succession uses the algorithms in the NECN Succession extension of LANDIS-II to simulate growth, mortality and reproduction of vegetation but has three major changes. 
+1) The simple bucket model in NECN was replaced with a physically-based model (SHAW) that simulates energy and water fluxes (e.g. snow depth, evapotranspiration, soil moisture) at multiple levels in the canopy and soil. 
+2) The active, slow, and passive soil pools in NECN were replaced by seven soil pools that are measurable in the field, with carbon and nitrogen dynamics dictated by DAMM-McNiP. 
+3) Soil temperature and soil moisture are simulated only at one depth in NECN, but in DGS, soil temperature (and hence permafrost dynamics) are simulated at as many as 50 user-defined depths down to 4 m with SHAW and 75 m with GIPL.
 
 # Citation
 
-Scheller, R.M., A. Kretchun, T.J. Hawbaker, P.D. Henne. 2019. A landscape model of variable social-ecological fire regimes. Ecological Modelling 401: 85-93.
+Melissa S. Lucash, Adrienne M. Marshall, Shelby A. Weiss, John W. McNabb, Dmitry J. Nicolsky, Gerald N. Flerchinger, Timothy E. Link, Jason G. Vogel, Robert M. Scheller, Rose Z. Abramoff, Vladimir E. Romanovsky. 2023. Burning trees in frozen soil: Simulating fire, vegetation, soil, and hydrology in the boreal forests of Alaska, Ecological Modelling, Volume 481, 110367, https://doi.org/10.1016/j.ecolmodel.2023.110367.
 
 # Release Notes
 
-- Latest release: Version 3.2.2 — May 2022
+- Latest release: Version 1.102 April 17, 2023
 - Full release details found in the User Guide and on GitHub.
-- [View User Guide](https://github.com/LANDIS-II-Foundation/Extension-SCRPPLE/blob/master/docs/LANDIS-II%20SCRAPPLE%20v3.2%20User%20Guide.pdf).
-- SCRPPLE depends on the Climate Library, see: [User Guide for Climate Library](https://github.com/LANDIS-II-Foundation/Library-Climate/blob/master/docs/LANDIS-II%20Climate%20Library%20v4.2%20User%20Guide.pdf)
+- [View User Guide](https://github.com/LANDIS-II-Foundation/Extension-DGS-Succession/blob/master/docs/LANDIS-II%DGS%Succession%v1.0%User%Guide.pdf).
+- DGS depends on the Climate Library, see: [User Guide for Climate Library](https://github.com/LANDIS-II-Foundation/Library-Climate/blob/master/docs/LANDIS-II%20Climate%20Library%20v4.2%20User%20Guide.pdf)
 
 - Copyright: The LANDIS-II Foundation
 
@@ -24,27 +27,24 @@ You need:
 
 # Download
 
-- The latest version of SCRPPLE can be [downloaded from GitHub](https://github.com/LANDIS-II-Foundation/Extension-SCRPPLE/blob/master/deploy/installer/LANDIS-II-V7%20SCRAPPLE%203.2.2-setup.exe). To install it on your computer, launch the installer.
+- The latest version of DGS can be [downloaded from GitHub](https://github.com/LANDIS-II-Foundation/Extension-DGS-Succession/blob/master/deploy/installer/LANDIS-II-V7 DGS%Succession%1.102-setup.exe). To install it on your computer, launch the installer.
 
 # Example Files
 
 LANDIS-II requires a global parameter file for your scenario, and separate parameter files for each extension.
 
-Example files can be [downloaded from GitHub](https://downgit.github.io/#/home?url=https://github.com/LANDIS-II-Foundation/Extension-SCRPPLE/tree/master/Testing/Core7-SCRAPPLE3.2).
+Example files can be [downloaded from GitHub](https://downgit.github.io/#/home?url=https://github.com/LANDIS-II-Foundation/Extension-DGS-Succession/tree/master/testing/Core7-DGS_version1.102).
 
-# Supporting R-Code
-
-We also provide R-code that has been used to parameterize SCRPPLE.  This R-code is provided 'as is' and no support is implied.  [R code on GitHub](https://downgit.github.io/#/home?url=https://github.com/LANDIS-II-Foundation/Extension-SCRPPLE/tree/master/Supporting%20R%20Code)
 
 # Support
 
-If you have a question, please contact Robert Scheller. 
+If you have a question, please contact Dr. Melissa Lucash. 
 You can also ask for help in the [LANDIS-II users group](http://www.landis-ii.org/users).
 
-If you come across any issue or suspected bug, please post about it in the [issue section of the Github repository](https://github.com/LANDIS-II-Foundation/Extension-SCRPPLE/issues) (GitHub ID required).
+If you come across any issue or suspected bug, please post about it in the [issue section of the Github repository](https://github.com/LANDIS-II-Foundation/Extension-DGS-Succession/issues) (GitHub ID required).
 
 # Author
 
 [The LANDIS-II Foundation](http://www.landis-ii.org)
 
-Mail : rschell@ncsu.edu
+Mail : mlucash@uoregon.edu
