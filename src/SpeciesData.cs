@@ -38,6 +38,8 @@ namespace Landis.Extension.Succession.DGS
         public static Landis.Library.Parameters.Species.AuxParm<int> RootingDepth;
         public static Landis.Library.Parameters.Species.AuxParm<int> Max_ANPP;
         public static Landis.Library.Parameters.Species.AuxParm<int> Max_Biomass;
+        public static Landis.Library.Parameters.Species.AuxParm<int> FireTolerance;
+        public static Landis.Library.Parameters.Species.AuxParm<int> ShadeTolerance;
 
         //---------------------------------------------------------------------
         public static void Initialize(IInputParameters parameters)
@@ -63,6 +65,8 @@ namespace Landis.Extension.Succession.DGS
             RootingDepth        = parameters.RootingDepth;
             Max_ANPP            = parameters.MaxANPP;
             Max_Biomass         = parameters.MaxBiomass;
+            FireTolerance       = parameters.FireTolerance;
+            ShadeTolerance      = parameters.ShadeTolerance;
 
             foreach (ISpecies spp in PlugIn.ModelCore.Species)
             {

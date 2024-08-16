@@ -4,7 +4,7 @@ using Landis.Core;
 using Landis.SpatialModeling;
 using Landis.Utilities;
 using Landis.Library.Succession;
-using Landis.Library.LeafBiomassCohorts;  
+using Landis.Library.UniversalCohorts;  
 using System.Collections.Generic;
 using System;
 
@@ -19,8 +19,7 @@ namespace Landis.Extension.Succession.DGS
         private static ISiteVar<int> timeOfLast;
 
         // Live biomass:        
-        private static ISiteVar<Landis.Library.AgeOnlyCohorts.ISiteCohorts> baseCohortsSiteVar;
-        private static ISiteVar<Landis.Library.BiomassCohorts.ISiteCohorts> biomassCohortsSiteVar;
+        private static ISiteVar<Landis.Library.UniversalCohorts.ISiteCohorts> universalCohortsSiteVar;
         
         // Dead biomass:
         private static ISiteVar<Layer> surfaceDeadWood;
@@ -58,7 +57,8 @@ namespace Landis.Extension.Succession.DGS
         private static ISiteVar<double> mineralN;
         private static ISiteVar<double> resorbedN;
         private static ISiteVar<double> waterMovement;  
-        private static ISiteVar<double> availableWater;  
+        private static ISiteVar<double> availableWater;
+        private static ISiteVar<double> activeLayerDepth;
         private static ISiteVar<double> soilWaterContent;
         private static ISiteVar<double> liquidSnowPack;  
         private static ISiteVar<double> decayFactor;
@@ -123,9 +123,8 @@ namespace Landis.Extension.Succession.DGS
         /// </summary>
         public static void Initialize()
         {
-            cohorts = PlugIn.ModelCore.Landscape.NewSiteVar<Library.LeafBiomassCohorts.SiteCohorts>();
-            biomassCohortsSiteVar = Landis.Library.Succession.CohortSiteVar<Landis.Library.BiomassCohorts.ISiteCohorts>.Wrap(cohorts);
-            baseCohortsSiteVar = Landis.Library.Succession.CohortSiteVar<Landis.Library.AgeOnlyCohorts.ISiteCohorts>.Wrap(cohorts);
+            cohorts = PlugIn.ModelCore.Landscape.NewSiteVar<Landis.Library.UniversalCohorts.SiteCohorts>();
+            universalCohortsSiteVar = Landis.Library.Succession.CohortSiteVar<Landis.Library.UniversalCohorts.ISiteCohorts>.Wrap(cohorts);
             fineFuels = PlugIn.ModelCore.Landscape.NewSiteVar<double>();
 
             timeOfLast = PlugIn.ModelCore.Landscape.NewSiteVar<int>();
@@ -166,6 +165,8 @@ namespace Landis.Extension.Succession.DGS
             resorbedN           = PlugIn.ModelCore.Landscape.NewSiteVar<double>();
             waterMovement       = PlugIn.ModelCore.Landscape.NewSiteVar<double>();
             availableWater      = PlugIn.ModelCore.Landscape.NewSiteVar<double>();
+            MonthlyActiveLayerDepth = PlugIn.ModelCore.Landscape.NewSiteVar<double[]>();
+            activeLayerDepth    = PlugIn.ModelCore.Landscape.NewSiteVar<double>();
             liquidSnowPack      = PlugIn.ModelCore.Landscape.NewSiteVar<double>();
             soilWaterContent    = PlugIn.ModelCore.Landscape.NewSiteVar<double>();
             decayFactor         = PlugIn.ModelCore.Landscape.NewSiteVar<double>();
@@ -217,9 +218,7 @@ namespace Landis.Extension.Succession.DGS
 
             CohortResorbedNallocation = PlugIn.ModelCore.Landscape.NewSiteVar<Dictionary<int, Dictionary<int, double>>>();
 
-            PlugIn.ModelCore.RegisterSiteVar(cohorts, "Succession.LeafBiomassCohorts");
-            PlugIn.ModelCore.RegisterSiteVar(baseCohortsSiteVar, "Succession.AgeCohorts");
-            PlugIn.ModelCore.RegisterSiteVar(biomassCohortsSiteVar, "Succession.BiomassCohorts");
+            PlugIn.ModelCore.RegisterSiteVar(universalCohortsSiteVar, "Succession.UniversalCohorts");
             PlugIn.ModelCore.RegisterSiteVar(SiteVars.FineFuels, "Succession.FineFuels");
             PlugIn.ModelCore.RegisterSiteVar(SiteVars.SmolderConsumption, "Succession.SmolderConsumption");
             PlugIn.ModelCore.RegisterSiteVar(SiteVars.FlamingConsumption, "Succession.FlamingConsumption");
@@ -252,6 +251,7 @@ namespace Landis.Extension.Succession.DGS
                 monthlyAGNPPC[site]           = new double[12];
                 monthlyBGNPPC[site]           = new double[12];
                 monthlysoilTemp[site]       = new double[12];
+                MonthlyActiveLayerDepth[site] = new double[12];
                 monthlyNEE[site]            = new double[12];
                 monthlyStreamN[site]         = new double[12];
                 monthlyResp[site]           = new double[12];
@@ -311,7 +311,7 @@ namespace Landis.Extension.Succession.DGS
                 return 0.0;
             
             int youngBiomass;
-            int totalBiomass = Library.LeafBiomassCohorts.Cohorts.ComputeBiomass(siteCohorts, out youngBiomass);
+            int totalBiomass = Landis.Library.UniversalCohorts.Cohorts.ComputeBiomass(siteCohorts, out youngBiomass);
             double B_ACT = totalBiomass - youngBiomass;
 
             //int lastMortality = SiteVars.PrevYearMortality[site];
@@ -546,7 +546,7 @@ namespace Landis.Extension.Succession.DGS
         //---------------------------------------------------------------------
 
         /// <summary>
-        /// Water loss
+        /// Water movement
         /// </summary>
         public static ISiteVar<double> WaterMovement
         {
@@ -560,7 +560,7 @@ namespace Landis.Extension.Succession.DGS
         //---------------------------------------------------------------------
 
         /// <summary>
-        /// Water loss
+        /// Water available to trees
         /// </summary>
         public static ISiteVar<double> AvailableWater
         {
@@ -574,7 +574,12 @@ namespace Landis.Extension.Succession.DGS
         //---------------------------------------------------------------------
 
         /// <summary>
-        /// Water loss
+        ///Active layer depth
+        /// </summary>
+        public static ISiteVar<double[]> MonthlyActiveLayerDepth { get; set; }
+
+        /// <summary>
+        /// Water content in soil
         /// </summary>
         public static ISiteVar<double> SoilWaterContent
         {

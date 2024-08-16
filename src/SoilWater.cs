@@ -40,17 +40,17 @@ namespace Landis.Extension.Succession.DGS
             ////...Calculate external inputs
             IEcoregion ecoregion = PlugIn.ModelCore.Ecoregion[site];
 
-            H2Oinputs = ClimateRegionData.AnnualWeather[ecoregion].MonthlyPrecip[month]; //rain + irract in cm;
-            Precipitation = ClimateRegionData.AnnualWeather[ecoregion].MonthlyPrecip[month]; //rain + irract in cm;
+            H2Oinputs = ClimateRegionData.AnnualClimate[ecoregion].MonthlyPrecip[month]; //rain + irract in cm;
+            Precipitation = ClimateRegionData.AnnualClimate[ecoregion].MonthlyPrecip[month]; //rain + irract in cm;
             
-            tave = ClimateRegionData.AnnualWeather[ecoregion].MonthlyTemp[month];
+            tave = ClimateRegionData.AnnualClimate[ecoregion].MonthlyTemp[month];
             
-            tmax = ClimateRegionData.AnnualWeather[ecoregion].MonthlyMaxTemp[month];
-            tmin = ClimateRegionData.AnnualWeather[ecoregion].MonthlyMinTemp[month];
-            pet = ClimateRegionData.AnnualWeather[ecoregion].MonthlyPET[month];
-            daysInMonth = AnnualClimate.DaysInMonth(month, year);
-            beginGrowing = ClimateRegionData.AnnualWeather[ecoregion].BeginGrowing;
-            endGrowing = ClimateRegionData.AnnualWeather[ecoregion].EndGrowing;
+            tmax = ClimateRegionData.AnnualClimate[ecoregion].MonthlyMaxTemp[month];
+            tmin = ClimateRegionData.AnnualClimate[ecoregion].MonthlyMinTemp[month];
+            pet = ClimateRegionData.AnnualClimate[ecoregion].MonthlyPET[month];
+            daysInMonth = Climate.DaysInMonth[month];
+            beginGrowing = ClimateRegionData.AnnualClimate[ecoregion].BeginGrowingDay;
+            endGrowing = ClimateRegionData.AnnualClimate[ecoregion].EndGrowingDay;
 
             double wiltingPoint = SiteVars.SoilWiltingPoint[site];            
             availableWater = SiteVars.AvailableWater[site];
@@ -80,7 +80,7 @@ namespace Landis.Extension.Succession.DGS
             int[] julianMidMonth = { 15, 45, 74, 105, 135, 166, 196, 227, 258, 288, 319, 349 };
             int dryDays = 0;
             int julianDay = julianMidMonth[month];
-            int daysInMonth = AnnualClimate.DaysInMonth(month, year);
+            int daysInMonth = Climate.DaysInMonth[month];
             int oldJulianDay = (month != 0 )? julianMidMonth[month - 1] : julianMidMonth[(month + 11)];
             double dryDayInterp = 0.0;
             //PlugIn.ModelCore.UI.WriteLine("Month={0}, begin={1}, end={2}, wiltPt={3:0.0}, waterAvail={4:0.0}, priorWater={5:0.0}.", month, beginGrowing, endGrowing, wiltingPoint, waterAvail, priorWaterAvail);
@@ -145,8 +145,15 @@ namespace Landis.Extension.Succession.DGS
             // Decomposition factor relfecting the effects of soil temperature and moisture on decomposition
             // Originally revised from prelim.f of CENTURY
             // Irrigation is zero for natural forests
+            // ML: values revised to account for decline in decomp at high soil moisture
+
             double decayFactor = 0.0;   //represents defac in the original program defac.f
             double W_Decomp = 0.0;      //Water effect on decomposition
+
+            double meanVWC = 0.5;
+            double maxVWC = 2.0;
+            double leftcurveVWC = 2000;
+            double rightcurveVWC = 0.015;
 
             //...where
             //      soilTemp;        //Soil temperature
@@ -163,12 +170,20 @@ namespace Landis.Extension.Succession.DGS
             //      idef = 1;     // for ratio option
 
 
+            //if (idef == 0)
+            //{
+            //if (rwc > 13.0)
+            //W_Decomp = 1.0;
+            //else
+            //W_Decomp = 1.0 / (1.0 + 4.0 * System.Math.Exp(-6.0 * rwc));
+            //}
+
             if (idef == 0)
             {
-                if (rwc > 13.0)
-                    W_Decomp = 1.0;
-                else
-                    W_Decomp = 1.0 / (1.0 + 4.0 * System.Math.Exp(-6.0 * rwc));
+                var frac = (maxVWC - rwc) / (maxVWC - meanVWC);   
+                
+                if (frac > 0.0)
+                    W_Decomp = Math.Exp(leftcurveVWC / rightcurveVWC * (1.0 - Math.Pow(frac, rightcurveVWC))) * Math.Pow(frac, leftcurveVWC);
             }
             else if (idef == 1)
             {
@@ -180,10 +195,13 @@ namespace Landis.Extension.Succession.DGS
 
             double tempModifier = T_Decomp(soilTemp);
 
-            decayFactor = tempModifier * W_Decomp;
+            //decayFactor = tempModifier * W_Decomp;
+            decayFactor = Math.Min(tempModifier, W_Decomp);  //ML changed to adjust for Leibig's law of minimum
 
             //defac must >= 0.0
             if (decayFactor < 0.0) decayFactor = 0.0;
+
+            if (decayFactor > 1.0) decayFactor = 1.0;
 
             //if (soilTemp < 0 && decayFactor > 0.01)
             //{
@@ -214,6 +232,7 @@ namespace Landis.Extension.Succession.DGS
         //---------------------------------------------------------------------------
         public static double CalculateAnaerobicEffect(double drain, double ratioPrecipPET, double pet, double tave)
         {
+            //When anaerob= 1, there is no reduction in decomposition rate.
 
             //Originally from anerob.f of Century
 

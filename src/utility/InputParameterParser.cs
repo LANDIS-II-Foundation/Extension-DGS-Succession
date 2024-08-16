@@ -442,7 +442,9 @@ namespace Landis.Extension.Succession.DGS
             InputVar<int> rootingDepth = new InputVar<int>("Rooting depth");
             InputVar<int> maxANPP = new InputVar<int>("Maximum ANPP");
             InputVar<int> maxBiomass = new InputVar<int>("Maximum Aboveground Biomass");
-            string lastColumn = "the " + maxBiomass.Name + " column";
+            InputVar<int> fireTolerance = new InputVar<int>("Fire Tolerance");
+            InputVar<int> shadeTolerance = new InputVar<int>("Shade Tolerance");
+            string lastColumn = "the " + shadeTolerance.Name + " column";
 
             while (! AtEndOfInput && CurrentName != Names.FunctionalGroupParameters) {
                 StringReader currentLine = new StringReader(CurrentLine);
@@ -510,6 +512,12 @@ namespace Landis.Extension.Succession.DGS
 
                 ReadValue(maxBiomass, currentLine);
                 parameters.SetMaxBiomass(species, maxBiomass.Value);
+
+                ReadValue(fireTolerance, currentLine);
+                parameters.SetFireTolerance(species, fireTolerance.Value);
+
+                ReadValue(shadeTolerance, currentLine);
+                parameters.SetShadeTolerance(species, shadeTolerance.Value);
 
                 CheckNoDataAfter(lastColumn, currentLine);
                 GetNextLine();

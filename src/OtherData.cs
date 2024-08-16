@@ -41,7 +41,8 @@ namespace Landis.Extension.Succession.DGS
         // DAMR(1,1) - Fraction of surface N absorbed by residue. Valid Range: 0.0 to 1.0
         // DAMRMN - Minimum C / N ratio allowed in residue after direct absorption.
         // PABRES - Amount of residue which will give maximum direct absorption of N (g C /m2).
-        public const double FractionSurfNAbsorbed    = 0.0;
+        //public const double FractionSurfNAbsorbed    = 0.0;
+        public const double FractionSurfNAbsorbed = 0.02; //derived from initial value in Table 2. in https://doi.org/10.1016/j.envsoft.2014.12.011
         public const double MinResidueCN       = 15.0;
         public const double ResidueMaxDirectAbsorb  = 100.0;
 
@@ -176,9 +177,13 @@ namespace Landis.Extension.Succession.DGS
         // TEFF(1) - Intercept value for determining the temperature component of DEFAC, the decomposition factor.
         // TEFF(2) - Slope value for determining the temperature component of DEFAC, the decomposition factor.
         // TEFF(3) - Exponent value for determining the temperature component of DEFAC, the decomposition factor.
-        public const double TemperatureEffectIntercept = 0.0;
-        public const double TemperatureEffectSlope = 0.125;
-        public const double TemperatureEffectExponent = 0.06;
+        //public const double TemperatureEffectIntercept = 0.0;
+        //public const double TemperatureEffectSlope = 0.125;
+        //public const double TemperatureEffectExponent = 0.06;
+
+        public const double TemperatureEffectIntercept = 0.1;  //changed to match empirical estimates in AK https://doi.org/10.1093/treephys/24.12.1387
+        public const double TemperatureEffectSlope = 0.1;
+        public const double TemperatureEffectExponent = 0.14;
 
         // ANEREF(1) - Ratio of rain/potential evapotranspiration below which there is no negative impact of soil anaerobic conditions on decomposition.
         // ANEREF(2) - Ratio of rain/potential evapotranspiration above which there is maximum negative impact of soil anaerobic conditions on decomposition.

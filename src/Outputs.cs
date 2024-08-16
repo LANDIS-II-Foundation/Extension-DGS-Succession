@@ -5,7 +5,6 @@ using Landis.SpatialModeling;
 using Landis.Utilities;
 using System.IO;
 using System;
-
 using Landis.Library.Metadata;
 using System.Data;
 using System.Collections.Generic;
@@ -23,6 +22,7 @@ namespace Landis.Extension.Succession.DGS
         public static MetadataTable<PrimaryLogShort> primaryLogShort;
         public static MetadataTable<ReproductionLog> reproductionLog;
         public static MetadataTable<EstablishmentLog> establishmentLog;
+        public static MetadataTable<CalibrateLog> calibrateLog;        
 
         public static void WriteReproductionLog(int CurrentTime)
         {
@@ -425,8 +425,8 @@ namespace Landis.Extension.Succession.DGS
             {
                 IEcoregion ecoregion = PlugIn.ModelCore.Ecoregion[site];
 
-                ppt[ecoregion.Index] = ClimateRegionData.AnnualWeather[ecoregion].MonthlyPrecip[month];
-                airtemp[ecoregion.Index] = ClimateRegionData.AnnualWeather[ecoregion].MonthlyTemp[month];
+                ppt[ecoregion.Index] = ClimateRegionData.AnnualClimate[ecoregion].MonthlyPrecip[month];
+                airtemp[ecoregion.Index] = ClimateRegionData.AnnualClimate[ecoregion].MonthlyTemp[month];
                 soiltemp[ecoregion.Index] += SiteVars.MonthlySoilTemp[site][month];
                 avgNPPtc[ecoregion.Index] += SiteVars.MonthlyAGNPPcarbon[site][month] + SiteVars.MonthlyBGNPPcarbon[site][month];
                 avgResp[ecoregion.Index] += SiteVars.MonthlyResp[site][month];
@@ -451,8 +451,8 @@ namespace Landis.Extension.Succession.DGS
 
                     ml.NumSites = Convert.ToInt32(ClimateRegionData.ActiveSiteCount[ecoregion]);
 
-                    ml.ppt = ClimateRegionData.AnnualWeather[ecoregion].MonthlyPrecip[month];
-                    ml.airtemp = ClimateRegionData.AnnualWeather[ecoregion].MonthlyTemp[month];
+                    ml.ppt = ClimateRegionData.AnnualClimate[ecoregion].MonthlyPrecip[month];
+                    ml.airtemp = ClimateRegionData.AnnualClimate[ecoregion].MonthlyTemp[month];
                     //ml.soiltemp = (soiltemp[ecoregion.Index] / (double)ClimateRegionData.ActiveSiteCount[ecoregion]);
                     ml.avgNPPtc = (avgNPPtc[ecoregion.Index] / (double)ClimateRegionData.ActiveSiteCount[ecoregion]);
                     ml.avgResp = (avgResp[ecoregion.Index] / (double)ClimateRegionData.ActiveSiteCount[ecoregion]);
@@ -468,67 +468,48 @@ namespace Landis.Extension.Succession.DGS
         }
         
         //Write log file for growth and limits
-        public static void CreateCalibrateLogFile()
-        {
-            string logFileName = "DGS-calibrate-log.csv";
-            PlugIn.ModelCore.UI.WriteLine("******************WARNING************************", logFileName);
-            PlugIn.ModelCore.UI.WriteLine("******YOU ARE CURRENTLY IN CALIBRATE MODE********", logFileName);
-            PlugIn.ModelCore.UI.WriteLine("*************************************************", logFileName);
-            PlugIn.ModelCore.UI.WriteLine("   Opening DGS calibrate log file \"{0}\" ...", logFileName);
-            try
-            {
-                CalibrateLog = new StreamWriter(logFileName);
-            }
-            catch (Exception err)
-            {
-                string mesg = string.Format("{0}", err.Message);
-                throw new System.ApplicationException(mesg);
-            }
+        //public static void CreateCalibrateLogFile()
+        //{
+        //    string logFileName = "DGS-calibrate-log.csv";
+        //    PlugIn.ModelCore.UI.WriteLine("******************WARNING************************", logFileName);
+        //    PlugIn.ModelCore.UI.WriteLine("******YOU ARE CURRENTLY IN CALIBRATE MODE********", logFileName);
+        //    PlugIn.ModelCore.UI.WriteLine("*************************************************", logFileName);
+        //    PlugIn.ModelCore.UI.WriteLine("   Opening DGS calibrate log file \"{0}\" ...", logFileName);
+        //    try
+        //    {
+        //        CalibrateLog = new StreamWriter(logFileName);
+        //    }
+        //    catch (Exception err)
+        //    {
+        //        string mesg = string.Format("{0}", err.Message);
+        //        throw new System.ApplicationException(mesg);
+        //    }
 
-            CalibrateLog.AutoFlush = true;
+        //    CalibrateLog.AutoFlush = true;
 
-            CalibrateLog.Write("Year, Month, ClimateRegionIndex, SpeciesName, CohortAge, CohortWoodB, CohortLeafB, ");  // from ComputeChange
-            CalibrateLog.Write("MortalityAGEwood, MortalityAGEleaf, ");  // from ComputeAgeMortality
-            CalibrateLog.Write("availableWater,");  //from Water_limit
-            CalibrateLog.Write("LAI, tlai, rlai,");  // from ComputeChange            
+        //    CalibrateLog.Write("Year, Month, ClimateRegionIndex, SpeciesName, CohortAge, CohortWoodB, CohortLeafB, ");  // from ComputeChange
+        //    CalibrateLog.Write("MortalityAGEwood, MortalityAGEleaf, ");  // from ComputeAgeMortality
+        //    CalibrateLog.Write("availableWater,");  //from Water_limit
+        //    CalibrateLog.Write("LAI, tlai, rlai,");  // from ComputeChange            
 
-            // These three together:
-            CalibrateLog.Write("limitLAI, limitH20, limitT, limitN, competition_limit, ");  //from ComputeActualANPP
-            CalibrateLog.Write("maxNPP, Bmax, Bsite, Bcohort, soilTemp, ");  //from ComputeActualANPP
-            CalibrateLog.Write("actualWoodNPP, actualLeafNPP, ");  //from ComputeActualANPP
+        //    // These three together:
+        //    CalibrateLog.Write("limitLAI, limitH20, limitT, limitN, competition_limit, ");  //from ComputeActualANPP
+        //    CalibrateLog.Write("maxNPP, Bmax, Bsite, Bcohort, soilTemp, ");  //from ComputeActualANPP
+        //    CalibrateLog.Write("actualWoodNPP, actualLeafNPP, ");  //from ComputeActualANPP
 
-            CalibrateLog.Write("MortalityBIOwood, MortalityBIOleaf, ");  // from ComputeGrowthMortality
-            CalibrateLog.Write("NPPwood_C, NPPleaf_C, ");  //from ComputeNPPcarbon
-            //CalibrateLog.Write("mineralNalloc, resorbedNalloc, ");  // from calculateN_Limit            
-            CalibrateLog.WriteLine("deltaWood, deltaLeaf, totalMortalityWood, totalMortalityLeaf, ");  // from ComputeChange
-            //CalibrateLog.Write("resorbedNused, Nuptake, Ndemand");  // from AdjustAvailableN
+        //    CalibrateLog.Write("MortalityBIOwood, MortalityBIOleaf, ");  // from ComputeGrowthMortality
+        //    CalibrateLog.Write("NPPwood_C, NPPleaf_C, ");  //from ComputeNPPcarbon
+        //    //CalibrateLog.Write("mineralNalloc, resorbedNalloc, ");  // from calculateN_Limit            
+        //    CalibrateLog.WriteLine("deltaWood, deltaLeaf, totalMortalityWood, totalMortalityLeaf, ");  // from ComputeChange
+        //    //CalibrateLog.Write("resorbedNused, Nuptake, Ndemand");  // from AdjustAvailableN
 
 
 
-        }
+        //}
         
         public static void WriteMaps()
         {
 
-            //    string pathH2O = MapNames.ReplaceTemplateVars(@"DGS\Annual-water-budget-{timestep}.img", PlugIn.ModelCore.CurrentTime);
-            //    using (IOutputRaster<IntPixel> outputRaster = PlugIn.ModelCore.CreateRaster<IntPixel>(pathH2O, PlugIn.ModelCore.Landscape.Dimensions))
-            //    {
-            //        IntPixel pixel = outputRaster.BufferPixel;
-            //        foreach (Site site in PlugIn.ModelCore.Landscape.AllSites)
-            //        {
-            //            if (site.IsActive)
-            //            {
-            //                pixel.MapCode.Value = (int)((SiteVars.AnnualPPT_AET[site]));
-            //            }
-            //            else
-            //            {
-            //                //  Inactive site
-            //                pixel.MapCode.Value = 0;
-            //            }
-            //            outputRaster.WriteBufferPixel();
-            //        }
-            //}
-            //AMK: Trying out directly writing maps
                 string pathANPP = MapNames.ReplaceTemplateVars(@"DGS\AG_NPP-{timestep}.img", PlugIn.ModelCore.CurrentTime);
                 using (IOutputRaster<IntPixel> outputRaster = PlugIn.ModelCore.CreateRaster<IntPixel>(pathANPP, PlugIn.ModelCore.Landscape.Dimensions))
                 {
@@ -549,25 +530,7 @@ namespace Landis.Extension.Succession.DGS
 
                 }
 
-            //string path = MapNames.ReplaceTemplateVars(@"DGS\SOMTC-{timestep}.img", PlugIn.ModelCore.CurrentTime);
-            //using (IOutputRaster<IntPixel> outputRaster = PlugIn.ModelCore.CreateRaster<IntPixel>(path, PlugIn.ModelCore.Landscape.Dimensions))
-            //{
-            //    IntPixel pixel = outputRaster.BufferPixel;
-            //    foreach (Site site in PlugIn.ModelCore.Landscape.AllSites)
-            //    {
-            //        if (site.IsActive)
-            //        {
-            //            pixel.MapCode.Value = (int)((SiteVars.SOM1surface[site].Carbon + SiteVars.SoilPrimary[site].Carbon));// + SiteVars.SOM2[site].Carbon + SiteVars.SOM3[site].Carbon));
-            //        }
-            //        else
-            //        {
-            //            //  Inactive site
-            //            pixel.MapCode.Value = 0;
-            //        }
-            //        outputRaster.WriteBufferPixel();
-            //    }
-            //}
-
+            
             string path2 = MapNames.ReplaceTemplateVars(@"DGS\MineralN-{timestep}.img", PlugIn.ModelCore.CurrentTime);
                     using (IOutputRaster<ShortPixel> outputRaster = PlugIn.ModelCore.CreateRaster<ShortPixel>(path2, PlugIn.ModelCore.Landscape.Dimensions))
                     {
@@ -652,8 +615,8 @@ namespace Landis.Extension.Succession.DGS
                         }
                     }
                 //}
-
-                    string pathLAI = MapNames.ReplaceTemplateVars(@"DGS\LAI-{timestep}.img", PlugIn.ModelCore.CurrentTime);
+                //
+                string pathLAI = MapNames.ReplaceTemplateVars(@"DGS\LAI-{timestep}.img", PlugIn.ModelCore.CurrentTime);
                 using (IOutputRaster<IntPixel> outputRaster = PlugIn.ModelCore.CreateRaster<IntPixel>(pathLAI, PlugIn.ModelCore.Landscape.Dimensions))
                 {
                     IntPixel pixel = outputRaster.BufferPixel;
@@ -691,6 +654,19 @@ namespace Landis.Extension.Succession.DGS
                     outputRaster.WriteBufferPixel();
                 }
 
+            }
+            internal static void WriteMonthlyMaps(int month)
+            {
+                using (var outputRaster = PlugIn.ModelCore.CreateRaster<IntPixel>($@"DGS\ActiveLayerDepth-{PlugIn.ModelCore.CurrentTime}-{month}.img", PlugIn.ModelCore.Landscape.Dimensions))
+                {
+                    var pixel = outputRaster.BufferPixel;
+
+                    foreach (var site in PlugIn.ModelCore.Landscape.AllSites)
+                    {
+                        pixel.MapCode.Value = site.IsActive ? (int)(SiteVars.MonthlyActiveLayerDepth[site][month]) : 0;
+                        outputRaster.WriteBufferPixel();
+                    }
+                }
             }
 
             string pathTHU = MapNames.ReplaceTemplateVars(@"DGS\THU-{timestep}.img", PlugIn.ModelCore.CurrentTime);

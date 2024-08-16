@@ -19,10 +19,7 @@ namespace Landis.Extension.Succession.DGS
         [DataFieldAttribute(Desc = "Climate Region Index")]
         public int ClimateRegionIndex { set; get; }
 
-        //[DataFieldAttribute(Desc = "Soil Water Holding Capacity")]
-        //public int SoilWaterHoldingCapacity { set; get; }
-
-        [DataFieldAttribute(Unit = FieldUnits.Count, Desc = "Number of Sites")]
+                [DataFieldAttribute(Unit = FieldUnits.Count, Desc = "Number of Sites")]
         public int NumSites { set; get; }
 
         [DataFieldAttribute(Unit = FieldUnits.g_C_m2, Desc = "Net Ecosystem Exchange C", Format = "0.0")]
@@ -77,7 +74,6 @@ namespace Landis.Extension.Succession.DGS
         [DataFieldAttribute(Unit = FieldUnits.g_C_m2, Desc = "Dead Coarse Root C", Format = "0.0")]
         public double C_DeadCRoot { get; set; }
 
-        //log.Write("C:SurfStruc, C:SurfMeta, C:SoilStruc, C:SoilMeta, ");
         [DataFieldAttribute(Unit = FieldUnits.g_C_m2, Desc = "Dead Leaf Structural C", Format = "0.0")]
         public double C_DeadLeaf_Struc { get; set; }
 
@@ -92,20 +88,7 @@ namespace Landis.Extension.Succession.DGS
 
         [DataFieldAttribute(Unit = FieldUnits.g_C_m2, Desc = "Available SOC", Format = "0.0")]
         public double C_SoilAvailable { get; set; }
-
-        //[DataFieldAttribute(Unit = FieldUnits.g_C_m2, Desc = "SOM1 Surface C", Format = "0.0")]
-        //public double C_SOM1surf { get; set; }
-
-        //[DataFieldAttribute(Unit = FieldUnits.g_C_m2, Desc = "Primary SOC", Format = "0.0")]
-        //public double C_SoilPrimary { get; set; }
-
-        //[DataFieldAttribute(Unit = FieldUnits.g_C_m2, Desc = "SOM2 C", Format = "0.0")]
-        //public double C_SOM2 { get; set; }
-
-        //[DataFieldAttribute(Unit = FieldUnits.g_C_m2, Desc = "SOM3 C", Format = "0.0")]
-        //public double C_SOM3 { get; set; }
-
-        //log.Write("N:CohortLeaf, N:CohortWood, N:DeadWood, N:DeadRoot, ");
+        
         [DataFieldAttribute(Unit = FieldUnits.g_N_m2, Desc = "Leaf N", Format = "0.0")]
         public double N_Leaf { get; set; }
 
@@ -136,47 +119,6 @@ namespace Landis.Extension.Succession.DGS
         [DataFieldAttribute(Unit = FieldUnits.g_N_m2, Desc = "Dead Fine Root Metabolic N", Format = "0.0")]
         public double N_DeadFRoot_Meta { get; set; }
 
-        //[DataFieldAttribute(Unit = FieldUnits.g_N_m2, Desc = "SOM1 Surface N", Format = "0.0")]
-        //public double N_SOM1surf { get; set; }
-
-        //[DataFieldAttribute(Unit = FieldUnits.g_N_m2, Desc = "Primary SON", Format = "0.0")]
-        //public double N_SoilPrimary { get; set; }
-
-        //[DataFieldAttribute(Unit = FieldUnits.g_N_m2, Desc = "SOM2 N", Format = "0.0")]
-        //public double N_SOM2 { get; set; }
-
-        //[DataFieldAttribute(Unit = FieldUnits.g_N_m2, Desc = "SOM3 N", Format = "0.0")]
-        //public double N_SOM3 { get; set; }
-
-        //[DataFieldAttribute(Unit = FieldUnits.g_N_m2, Desc = "Surface Structural Net Mineralization", Format = "0.0")]
-        //public double SurfStrucNetMin { get; set; }
-
-        //[DataFieldAttribute(Unit = FieldUnits.g_N_m2, Desc = "Surface Metabolic Net Mineralization", Format = "0.0")]
-        //public double SurfMetaNetMin { get; set; }
-
-        //[DataFieldAttribute(Unit = FieldUnits.g_N_m2, Desc = "Soil Structural Net Mineralization", Format = "0.0")]
-        //public double SoilStrucNetMin { get; set; }
-
-        //[DataFieldAttribute(Unit = FieldUnits.g_N_m2, Desc = "Soil Metabolic Net Mineralization", Format = "0.0")]
-        //public double SoilMetaNetMin { get; set; }
-
-        //log.Write("SOM1surfNetMin, SoilPrimaryNetMin, SOM2NetMin, SOM3NetMin, ");
-        //[DataFieldAttribute(Unit = FieldUnits.g_N_m2, Desc = "SOM1 Surface Net Mineralization", Format = "0.0")]
-        //public double SOM1surfNetMin { get; set; }
-
-        //[DataFieldAttribute(Unit = FieldUnits.g_N_m2, Desc = "SOM1 Soil Net Mineralization", Format = "0.0")]
-        //public double SoilPrimaryNetMin { get; set; }
-
-        //[DataFieldAttribute(Unit = FieldUnits.g_N_m2, Desc = "SOM2 Net Mineralization", Format = "0.0")]
-        //public double SOM2NetMin { get; set; }
-
-        //[DataFieldAttribute(Unit = FieldUnits.g_N_m2, Desc = "SOM3 Net Mineralization", Format = "0.0")]
-        //public double SOM3NetMin { get; set; }
-
-        //[DataFieldAttribute(Unit = FieldUnits.g_N_m2, Desc = "Total Nitrogen Deposition per Timestep", Format = "0.00")]
-        //public double TotalNdep { get; set; }
-
-        //log.Write("StreamC, StreamN, FireCEfflux, FireNEfflux, ");
         [DataFieldAttribute(Unit = FieldUnits.g_C_m2, Desc = "Stream C", Format = "0.00")]
         public double StreamC { get; set; }
 

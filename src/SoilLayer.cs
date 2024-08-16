@@ -5,7 +5,7 @@ using Landis.SpatialModeling;
 using Landis.Utilities;
 using System;
 using Landis.Library.Climate;
-using Landis.Library.LeafBiomassCohorts;
+using Landis.Library.UniversalCohorts;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -222,7 +222,7 @@ namespace Landis.Extension.Succession.DGS
 
         public static void Decompose(int year, int month, ActiveSite site)
         {
-            double month_to_hr = 24.0 * (double)AnnualClimate.DaysInMonth(month, year);
+            double month_to_hr = 24.0 * (double)Climate.DaysInMonth[month];
             double g_to_mg = 1000;           
             double m2_to_cm2 = 10000;            
             double depth_to_volume = 10.0; //We are simulating just the top 10cm.
@@ -243,9 +243,13 @@ namespace Landis.Extension.Succession.DGS
             //    throw new ApplicationException($"Error: SoilLayer.Decompose(): no species in site '{site}'.  Cannot average LeafCN across species.");
 
             var cn_litter = leafCNs.Any() ? leafCNs.Average() : 25.0;
-            
-            double soc_available = SocAvailableForRespiration(site, month);
+
+            double soc_available = SocAvailableForRespiration(site, month, out var freezingPoint_cm);
+
             SiteVars.SoilAvailable[site].Carbon = soc_available;
+
+            SiteVars.MonthlyActiveLayerDepth[site][month] = freezingPoint_cm;
+
 
             if (soc_available < 0.0000001)
             {
@@ -253,8 +257,8 @@ namespace Landis.Extension.Succession.DGS
                 return;
             }
 
-            double SOC = SiteVars.SoilPrimary[site].Carbon;
-            if (SOC > 0.0000001)               
+            //double SOC = SiteVars.SoilPrimary[site].Carbon;
+            if (SiteVars.SoilPrimary[site].Carbon > 0.0000001)               
             {
                 if (PlugIn.ShawGiplEnabled)
                 {
@@ -285,11 +289,13 @@ namespace Landis.Extension.Succession.DGS
             //}           
 
             // convert Landis units to Rose's units, * g_to_mg) / (m2_to_cm2)   
-         
-            SOC *= g_to_mg / (m2_to_cm2 * depth_to_volume);
+
+            //SOC *= g_to_mg / (m2_to_cm2 * depth_to_volume);
+            var SOC = 0.0;
             double soc_available_DAMM = (soc_available * g_to_mg) / (m2_to_cm2 * depth_to_volume);  //SOC = 65.25; //(Rose);
             double son_available_DAMM = (soc_available_DAMM * SiteVars.SoilPrimary[site].Nitrogen) / SiteVars.SoilPrimary[site].Carbon;
-            double SON = (SiteVars.SoilPrimary[site].Nitrogen * g_to_mg) / (m2_to_cm2 * depth_to_volume);  //double SON = 2.1917; //(Rose);
+            //double SON = (SiteVars.SoilPrimary[site].Nitrogen * g_to_mg) / (m2_to_cm2 * depth_to_volume);  //double SON = 2.1917; //(Rose);
+            var SON = 0.0;
             double bulk_density = SiteVars.SoilBulkDensity[site];   //double bulk_density = 0.0377 (Jason), bulk_density = 0.156152207886358 for original testing        
             double particle_density = SiteVars.SoilParticleDensity[site]; //double particle_density = 0.8877 (Jason); particle_density = 1.11176644135636; in original testing.            
             double DOC = (SiteVars.SoilPrimary[site].DOC * g_to_mg) / (m2_to_cm2 * depth_to_volume);  //double DOC = 0.0020000000;
@@ -298,8 +304,10 @@ namespace Landis.Extension.Succession.DGS
                                                                                                       //double microbial_N = SiteVars.SoilPrimary[site].MicrobialNitrogen;  //double microbial_N = 0.197 (Rose);            
                                                                                                       //double enzymatic_concentration = SiteVars.SoilPrimary[site].EnzymaticConcentration;  //double enzymatic_concentration = 0.0339 (Rose);   
 
-            double gross_mineralizaton = SiteVars.GrossMineralization[site] * g_to_mg / (m2_to_cm2 * depth_to_volume);
-            double mineralN = SiteVars.MineralN[site] * g_to_mg / (m2_to_cm2 * depth_to_volume);
+            //double gross_mineralizaton = SiteVars.GrossMineralization[site] * g_to_mg / (m2_to_cm2 * depth_to_volume);
+            var gross_mineralizaton = 0.0;
+            //double mineralN = SiteVars.MineralN[site] * g_to_mg / (m2_to_cm2 * depth_to_volume);
+            var mineralN = 0.0;
             double microbial_C = SiteVars.SoilPrimary[site].MicrobialCarbon;
             double microbial_N = SiteVars.SoilPrimary[site].MicrobialNitrogen;
             double cn_microbial = SiteVars.SoilPrimary[site].MicrobialCarbon/SiteVars.SoilPrimary[site].MicrobialNitrogen;
@@ -309,6 +317,10 @@ namespace Landis.Extension.Succession.DGS
             double LitterCinput = (SiteVars.SoilPrimary[site].MonthlyCarbonInputs * (0.5) * g_to_mg) / (m2_to_cm2 * month_to_hr * depth_to_volume);  // Using 70/30 division.
             double DOCinput= (SiteVars.SoilPrimary[site].MonthlyCarbonInputs * (0.5) * g_to_mg) / (m2_to_cm2 * month_to_hr * depth_to_volume);
             //double cn_litter = SpeciesData.LeafLitterCN[species];  //Using soil CN, though would be best to use Litter C/N. ML
+
+            //double co2loss = SiteVars.MonthlyResp[site][Main.Month] * g_to_mg / (m2_to_cm2 * depth_to_volume);
+            var co2loss = 0.0;
+
             // Splitting C inputs into 50% litter and 50% DOC at the onset.
             //double LitterCinput = 0.00057;  //Jason's value at an hourly rate.
             //double DOCinput = 0.00057;  //Jason's value at an hourly rate.
@@ -337,8 +349,7 @@ namespace Landis.Extension.Succession.DGS
 
             //calculate porosity 
             double porosity = 1 - bulk_density / particle_density;
-            double co2loss= SiteVars.MonthlyResp[site][Main.Month];
-            
+                        
             var cout_old = 0.0;
 
             var sitevarDONmax = 10.0;  //Limit based on 42 kg/ha or 4.2 g/m2, rounded to 5, from Fig 4 in https://www.sciencedirect.com/science/article/abs/pii/S0038071707003008?via%3Dihub
@@ -406,19 +417,19 @@ namespace Landis.Extension.Succession.DGS
             }
 
             // adjust pools, convert Rose's results to Landis units, * m2_to_cm2 / (g_to_mg)
-            SiteVars.SoilPrimary[site].Carbon = SOC * m2_to_cm2 * depth_to_volume / (g_to_mg);
-            SiteVars.SoilPrimary[site].Nitrogen = SON * m2_to_cm2 * depth_to_volume / (g_to_mg);
+            SiteVars.SoilPrimary[site].Carbon += SOC * m2_to_cm2 * depth_to_volume / (g_to_mg);
+            SiteVars.SoilPrimary[site].Nitrogen += SON * m2_to_cm2 * depth_to_volume / (g_to_mg);
             SiteVars.SoilPrimary[site].DOC = DOC * m2_to_cm2 * depth_to_volume / (g_to_mg);
             SiteVars.SoilPrimary[site].DON = DON * m2_to_cm2 * depth_to_volume / (g_to_mg);
             SiteVars.SoilPrimary[site].MicrobialCarbon = microbial_C;
             SiteVars.SoilPrimary[site].MicrobialNitrogen = microbial_N;
             SiteVars.SoilPrimary[site].EnzymaticConcentration = enzymatic_concentration;
-            SiteVars.MineralN[site] = mineralN * m2_to_cm2 * depth_to_volume / (g_to_mg);
+            SiteVars.MineralN[site] += mineralN * m2_to_cm2 * depth_to_volume / (g_to_mg);
 
             // adjust rates, to LANDIS units
-            SiteVars.MonthlyResp[site][Main.Month] = co2loss * m2_to_cm2 * depth_to_volume / (g_to_mg);
+            SiteVars.MonthlyResp[site][Main.Month] += co2loss * m2_to_cm2 * depth_to_volume / (g_to_mg);
             SiteVars.SourceSink[site].Carbon += SiteVars.MonthlyResp[site][Main.Month];
-            SiteVars.GrossMineralization[site] = gross_mineralizaton * m2_to_cm2 * depth_to_volume / (g_to_mg);
+            SiteVars.GrossMineralization[site] += gross_mineralizaton * m2_to_cm2 * depth_to_volume / (g_to_mg);
 
             // make sure the pools aren't allowed to go below zero
             if (SiteVars.SoilPrimary[site].Carbon < 0.0)
@@ -546,10 +557,10 @@ namespace Landis.Extension.Succession.DGS
             return;
         }
 
-        public static double SocAvailableForRespiration(ActiveSite site, int month)
+        public static double SocAvailableForRespiration(ActiveSite site, int month, out double freezingPoint_cm)
         {
             // inputs needed:
-            var landisDepth = SiteVars.SoilDepth[site]/100.0;  // LANDIS is is cm but need to convert m for GIPL soil temp profile below. 
+            var landisDepth = SiteVars.SoilDepth[site] / 100.0;  // LANDIS is is cm but need to convert m for GIPL soil temp profile below. 
             //var k = 11.791;  // original value was set to 1.0           
             var k = 2.618;  // seems to produce more realistic values      
 
@@ -567,13 +578,20 @@ namespace Landis.Extension.Succession.DGS
             }
 
             if (j == -1 && giplTempProfile[0] > 0.0)
+            {
+                freezingPoint_cm = 0.0;
                 return soc;     // all temps above zero
+            }
 
             if (j == -1 && giplTempProfile[0] <= 0.0)
+            {
+                freezingPoint_cm = thu.GiplDepths.Last() * 100.0;   // convert GIPL depth [m] to Landis depth [cm]
                 return 0.0;     // all temps below zero
+            }
 
             // interpolate the gipl depth points bracketing the freezing point to find the freezing depth
             var d = thu.GiplDepths[j] + thu.GiplDepthIncrements[j] * giplTempProfile[j] / (giplTempProfile[j] - giplTempProfile[j + 1]);
+            freezingPoint_cm = d * 100.0;   // convert GIPL depth [m] to Landis depth [cm]
 
             // return the portion of the soc down to d assuming a decaying exponential profile that stops at landisDepth
             return d > landisDepth ? soc : soc * (1.0 - Math.Exp(-k * d)) / (1.0 - Math.Exp(-k * landisDepth));            

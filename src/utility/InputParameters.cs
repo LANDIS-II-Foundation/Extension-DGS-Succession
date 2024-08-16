@@ -116,6 +116,8 @@ namespace Landis.Extension.Succession.DGS
         private Landis.Library.Parameters.Species.AuxParm<int> rootingDepth;
         private Landis.Library.Parameters.Species.AuxParm<int> maxANPP;
         private Landis.Library.Parameters.Species.AuxParm<int> maxBiomass;
+        private Landis.Library.Parameters.Species.AuxParm<int> fireTolerance;
+        private Landis.Library.Parameters.Species.AuxParm<int> shadeTolerance;
 
         private List<ISufficientLight> sufficientLight;
 
@@ -468,6 +470,24 @@ namespace Landis.Extension.Succession.DGS
             get
             {
                 return maxANPP;
+            }
+        }
+        //---------------------------------------------------------------------
+
+        public Landis.Library.Parameters.Species.AuxParm<int> FireTolerance
+        {
+            get
+            {
+                return fireTolerance;
+            }
+        }
+        //---------------------------------------------------------------------
+
+        public Landis.Library.Parameters.Species.AuxParm<int> ShadeTolerance
+        {
+            get
+            {
+                return shadeTolerance;
             }
         }
         //---------------------------------------------------------------------
@@ -949,6 +969,20 @@ namespace Landis.Extension.Succession.DGS
         }
         //---------------------------------------------------------------------
 
+        public void SetFireTolerance(ISpecies species, InputValue<int> newValue)
+        {
+            Debug.Assert(species != null);
+            fireTolerance[species] = CheckBiomassParm(newValue, 0, byte.MaxValue);
+        }
+        //---------------------------------------------------------------------
+
+        public void SetShadeTolerance(ISpecies species, InputValue<int> newValue)
+        {
+            Debug.Assert(species != null);
+            shadeTolerance[species] = CheckBiomassParm(newValue, 0, byte.MaxValue);
+        }
+        //---------------------------------------------------------------------
+
         public void SetAtmosNslope(InputValue<double> newValue)
         {
             atmosNslope = CheckBiomassParm(newValue, -1.0, 2.0);
@@ -1167,6 +1201,8 @@ namespace Landis.Extension.Succession.DGS
             rootingDepth = new Landis.Library.Parameters.Species.AuxParm<int>(speciesDataset);
             maxANPP = new Landis.Library.Parameters.Species.AuxParm<int>(speciesDataset);
             maxBiomass = new Landis.Library.Parameters.Species.AuxParm<int>(speciesDataset);
+            fireTolerance = new Library.Parameters.Species.AuxParm<int>(speciesDataset);
+            shadeTolerance = new Library.Parameters.Species.AuxParm<int>(speciesDataset);
 
             maximumShadeLAI = new double[6];
 
@@ -1208,7 +1244,7 @@ namespace Landis.Extension.Succession.DGS
             }
             return newValue.Actual;
         }
-        
+
         //---------------------------------------------------------------------
 
         private void ValidatePath(string path)

@@ -27,10 +27,7 @@ namespace Landis.Extension.Succession.DGS
         public double ppt {get; set;}
 
         [DataFieldAttribute(Unit = FieldUnits.DegreeC, Desc = "Air Temperature", Format = "0.00")]
-        public double airtemp { get; set; }
-
-        //[DataFieldAttribute(Unit = FieldUnits.DegreeC, Desc = "Soil Temperature", Format = "0.0")]
-        //public double soiltemp { get; set; }
+        public double airtemp { get; set; }        
 
         [DataFieldAttribute(Unit = FieldUnits.g_C_m2, Desc = "Aboveground NPP C", Format = "0.00")]
         public double avgNPPtc { get; set; }
@@ -41,10 +38,10 @@ namespace Landis.Extension.Succession.DGS
         [DataFieldAttribute(Unit = FieldUnits.g_C_m2, Desc = "Net Ecosystem Exchange", Format = "0.00")]
         public double avgNEE { get; set; }
 
-        [DataFieldAttribute(Unit = FieldUnits.g_N_m2, Desc = "N Deposition", Format = "0.000")]
+        [DataFieldAttribute(Unit = FieldUnits.g_N_m2, Desc = "N Deposition", Format = "0.0000")]
         public double Ndep { get; set; }
 
-        [DataFieldAttribute(Unit = FieldUnits.g_N_m2, Desc = "N Leaching", Format = "0.000")]
+        [DataFieldAttribute(Unit = FieldUnits.g_N_m2, Desc = "N Leaching", Format = "0.0000")]
         public double StreamN { get; set; }
     }
 }

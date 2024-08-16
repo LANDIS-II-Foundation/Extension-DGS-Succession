@@ -264,47 +264,37 @@ namespace Landis.Extension.Succession.DGS
             return $"{Name} -> {SiteCount} sites";
         }
 
-        public void RunForYear(int year)//, AnnualClimate_Daily dailyWeather)
+        public void RunForYear(int calendarYear)
         {
-            var dailyWeather = ClimateRegionData.AnnualDailyWeather[ClimateRegion];
-
-            // convert weather data to lists so each month can be grabbed
-            var precips = dailyWeather.DailyPrecip.ToList();
-            var tmaxs = dailyWeather.DailyMaxTemp.ToList();
-            var tavgs = dailyWeather.DailyTemp.ToList();
-            var tmins = dailyWeather.DailyMinTemp.ToList();
-            var winds = dailyWeather.DailyWindSpeed.ToList();
-            var solars = dailyWeather.DailyShortWaveRadiation.ToList();
-            var tdews = dailyWeather.DailyTdew.ToList();        // todo: change this when Tdew is available
-
             // if this is the first year, run the last 6 months of the year as startup
             if (!_firstMonthHasRun)
             {
                 for (var month = 6; month < 12; ++month)
                 {
-                    RunForMonth(year, month, precips, tmaxs, tavgs, tmins, winds, solars, tdews);
+                    RunForMonth(calendarYear, month);
                 }
             }
 
             for (var month = 0; month < 12; ++month)
             {
-                RunForMonth(year, month, precips, tmaxs, tavgs, tmins, winds, solars, tdews);
+                RunForMonth(calendarYear, month);
             }
         }
 
-        public void RunForMonth(int year, int month, List<double> precips, List<double> tmaxs, List<double> tavgs, List<double> tmins, List<double> winds, List<double> solars, List<double> tdews)
+        public void RunForMonth(int calendarYear, int month)
         {
-            // get Landis weather data for the month
-            int startingDay, dayCount;
-            GetDailyWeatherRangeForMonth(month, year, out startingDay, out dayCount);
+            var startingDay = Climate.FirstDayOfMonth[month];
+            var dayCount = Climate.DaysInMonth[month];
 
-            var precip = precips.GetRange(startingDay, dayCount);
-            var tmax = tmaxs.GetRange(startingDay, dayCount);
-            var tavg = tavgs.GetRange(startingDay, dayCount);
-            var tmin = tmins.GetRange(startingDay, dayCount);
-            var wind = winds.GetRange(startingDay, dayCount);
-            var solar = solars.GetRange(startingDay, dayCount);
-            var tdew = tdews.GetRange(startingDay, dayCount);
+            var annualClimate = ClimateRegionData.AnnualClimate[ClimateRegion];
+
+            var precip = annualClimate.DailyPrecipForMonth(month);
+            var tmax = annualClimate.DailyMaxTempForMonth(month);
+            var tavg = annualClimate.DailyTempForMonth(month);
+            var tmin = annualClimate.DailyMinTempForMonth(month);
+            var wind = annualClimate.DailyWindSpeedForMonth(month);
+            var solar = annualClimate.DailyShortWaveRadiationForMonth(month);
+            var tdew = annualClimate.DailyTdewForMonth(month);
 
             var lastMonth = month == 0 ? 11 : month - 1;
 
@@ -349,7 +339,7 @@ namespace Landis.Extension.Succession.DGS
             //  pass the daily air temperature, estimates of daily snow depth, snow thermal conductivity, and snow volumetric heat capacity, and Shaw's soil TOTAL moisture profile at the end
             //  of the previous month.
             //  if this is the first month, there will be no Shaw results, so this will be passed as null, in which case Gipl will use the default profile from its properties file. 
-            var giplResults = MonthlyGiplDammResults[month] = GiplInstance.CalculateSoilTemperature(year, month, tavg.ToArray(), dailySnowDepthEstimate, dailySnowThermalConductivities, dailySnowVolumetricHeatCapacities, MonthlyShawDammResults[lastMonth]?.DailySoilTotalWaterProfiles.Last());
+            var giplResults = MonthlyGiplDammResults[month] = GiplInstance.CalculateSoilTemperature(calendarYear, month, tavg.ToArray(), dailySnowDepthEstimate, dailySnowThermalConductivities, dailySnowVolumetricHeatCapacities, MonthlyShawDammResults[lastMonth]?.DailySoilTotalWaterProfiles.Last());
 
 
             // **
@@ -375,7 +365,7 @@ namespace Landis.Extension.Succession.DGS
             //  also pass an average temperature in case Gipl is not used.  todo: this is not currently enabled in the code.
             // Shaw will return the daily soil moisture profiles, daily snow thickness, daily snow heat capacity, and daily snow volumetric heat capacity.
             //  currently the snow heat capacity and volumetric heat capacity are not used.
-            var shawResults = MonthlyShawDammResults[month] = ShawInstance.CalculateSoilResults(year, month, startingDay, shawWeatherData, MonthlyGiplDammResults[month].DailySoilTemperatureProfilesAtShawDepths, 0.0);
+            var shawResults = MonthlyShawDammResults[month] = ShawInstance.CalculateSoilResults(calendarYear, month, startingDay, shawWeatherData, MonthlyGiplDammResults[month].DailySoilTemperatureProfilesAtShawDepths, 0.0);
 
             // calculate species records for this month based on gipl and shaw results
             foreach (var species in PlugIn.ModelCore.Species)
@@ -450,28 +440,28 @@ namespace Landis.Extension.Succession.DGS
         //    return Console.ReadLine() ?? string.Empty;
         //}
 
-        private static void GetDailyWeatherRangeForMonth(int month, int year, out int startingDay, out int dayCount)
-        {
-            startingDay = _firstDayOfMonth[month];
-            dayCount = _lengthOfMonth[month];
+        //private static void GetDailyWeatherRangeForMonth(int month, int calendarYear, out int startingDay, out int dayCount)
+        //{
+        //    startingDay = _firstDayOfMonth[month];
+        //    dayCount = _lengthOfMonth[month];
 
-            if (IsLeapYear(year))
-            {
-                if (month > 1) ++startingDay;
-                if (month == 1) ++dayCount;
-            }
-        }
+        //    if (IsLeapYear(calendarYear))
+        //    {
+        //        if (month > 1) ++startingDay;
+        //        if (month == 1) ++dayCount;
+        //    }
+        //}
 
-        private static bool IsLeapYear(int year)
-        {
-            if (year % 400 == 0)
-                return true;
+        //private static bool IsLeapYear(int year)
+        //{
+        //    if (year % 400 == 0)
+        //        return true;
 
-            if (year % 100 == 0)
-                return false;
+        //    if (year % 100 == 0)
+        //        return false;
 
-            return year % 4 == 0;
-        }
+        //    return year % 4 == 0;
+        //}
 
         private double[] EstimateDailySnowDepth(List<double> dailyPrecipitation, List<double> dailyAirTemperature, double initialSnowDepth, double initialSnowDensity,
             out double finalSnowDepth, out double finalSnowDensity, out double[] dailySnowThermalConductivities, out double[] dailySnowVolumetricHeatCapacities)

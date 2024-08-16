@@ -77,7 +77,7 @@ namespace Landis.Extension.Succession.DGS
         //---------------------------------------------------------------------
 
         /// <summary>
-        /// Carbon
+        /// Total Carbon
         /// </summary>
         public double Carbon
         {
@@ -93,7 +93,7 @@ namespace Landis.Extension.Succession.DGS
         //---------------------------------------------------------------------
 
         /// <summary>
-        /// Nitrogen
+        /// Total Nitrogen
         /// </summary>
         public double Nitrogen
         {
@@ -125,7 +125,7 @@ namespace Landis.Extension.Succession.DGS
 
         //---------------------------------------------------------------------
         /// <summary>
-        /// Pool Carbon:Nitrogen Ratio
+        /// Lignin fraction
         /// </summary>
         public  double FractionLignin
         {
@@ -168,23 +168,7 @@ namespace Landis.Extension.Succession.DGS
                 grossMineralization = value;
             }
         }
-
-        // --------------------------------------------------
-        //public Layer Clone()  /// This method is enabled in NECN
-        //{
-        //    Layer newLayer = new Layer(this.Name, this.Type);
-
-        //    newLayer.carbon = this.carbon;
-        //    newLayer.nitrogen = this.nitrogen ;
-
-        //    newLayer.decayValue = this.decayValue ;
-        //    newLayer.fractionLignin = this.fractionLignin ;
-
-        //    newLayer.netMineralization = this.netMineralization ;
-        //    newLayer.grossMineralization = this.grossMineralization ;
-
-        //    return newLayer;
-        //}
+             
 
         // --------------------------------------------------
         public void DecomposeStructural(ActiveSite site)

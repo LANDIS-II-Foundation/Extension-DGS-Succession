@@ -18,17 +18,15 @@ namespace Landis.Extension.Succession.DGS
         public static Landis.Library.Parameters.Ecoregions.AuxParm<int> ActiveSiteCount;
         public static Landis.Library.Parameters.Ecoregions.AuxParm<double> AnnualNDeposition;    
         public static Landis.Library.Parameters.Ecoregions.AuxParm<double[]> MonthlyNDeposition; 
-        public static Landis.Library.Parameters.Ecoregions.AuxParm<AnnualClimate_Monthly> AnnualWeather;
+        public static Landis.Library.Parameters.Ecoregions.AuxParm<AnnualClimate> AnnualClimate;
 
-        public static Landis.Library.Parameters.Ecoregions.AuxParm<AnnualClimate_Daily> AnnualDailyWeather;
 
         //---------------------------------------------------------------------
         public static void Initialize(IInputParameters parameters)
         {
             ActiveSiteCount = new Landis.Library.Parameters.Ecoregions.AuxParm<int>(PlugIn.ModelCore.Ecoregions);
-            AnnualWeather = new Landis.Library.Parameters.Ecoregions.AuxParm<AnnualClimate_Monthly>(PlugIn.ModelCore.Ecoregions);
 
-            AnnualDailyWeather = new Landis.Library.Parameters.Ecoregions.AuxParm<AnnualClimate_Daily>(PlugIn.ModelCore.Ecoregions);
+            AnnualClimate = new Landis.Library.Parameters.Ecoregions.AuxParm<AnnualClimate>(PlugIn.ModelCore.Ecoregions);
 
             MonthlyNDeposition = new Landis.Library.Parameters.Ecoregions.AuxParm<double[]>(PlugIn.ModelCore.Ecoregions);
 
@@ -43,79 +41,25 @@ namespace Landis.Extension.Succession.DGS
             foreach (IEcoregion ecoregion in PlugIn.ModelCore.Ecoregions)
             {
                 MonthlyNDeposition[ecoregion] = new double[12];
-
-                if (ecoregion.Active)
-                {
-                    Climate.GenerateEcoregionClimateData(ecoregion, 0, PlugIn.Parameters.Latitude); 
-                    SetSingleAnnualClimate(ecoregion, 0, Climate.Phase.SpinUp_Climate);  // Some placeholder data to get things started.
-                }
             }
 
-            
+            // generate all climate data for all ecoregions 
+            Climate.GenerateEcoregionClimateData(PlugIn.Parameters.Latitude);
+
+            // grab the first year's spinup climate
+            foreach (var ecoregion in PlugIn.ModelCore.Ecoregions.Where(x => x.Active))
+            {
+                AnnualClimate[ecoregion] = Climate.SpinupEcoregionYearClimate[ecoregion.Index][1];      // Climate data year index is 1-based
+            }
         }
-        //---------------------------------------------------------------------
-        // Generates new climate parameters for a SINGLE ECOREGION at an annual time step.
-        public static void SetSingleAnnualClimate(IEcoregion ecoregion, int year, Climate.Phase spinupOrfuture)
+
+        public static void SetAllEcoregionsFutureAnnualClimate(int year)
         {
-            int actualYear = Climate.Future_MonthlyData.Keys.Min() + year;
-
-            if (spinupOrfuture == Climate.Phase.Future_Climate)
+            // grab the year's future climate
+            foreach (var ecoregion in PlugIn.ModelCore.Ecoregions.Where(x => x.Active))
             {
-                //PlugIn.ModelCore.UI.WriteLine("Retrieving {0} for year {1}.", spinupOrfuture.ToString(), actualYear);
-                if (Climate.Future_MonthlyData.ContainsKey(actualYear))
-                {
-                    AnnualWeather[ecoregion] = Climate.Future_MonthlyData[actualYear][ecoregion.Index];
-                }
-
-                if (Climate.Future_DailyData.ContainsKey(actualYear))
-                {
-                    AnnualDailyWeather[ecoregion] = Climate.Future_DailyData[actualYear][ecoregion.Index];
-                }
-                //else
-                //    PlugIn.ModelCore.UI.WriteLine("Key is missing: Retrieving {0} for year {1}.", spinupOrfuture.ToString(), actualYear);
-            }
-            else
-            {
-                //PlugIn.ModelCore.UI.WriteLine("Retrieving {0} for year {1}.", spinupOrfuture.ToString(), actualYear);
-                if (Climate.Spinup_MonthlyData.ContainsKey(actualYear))
-                {
-                    AnnualWeather[ecoregion] = Climate.Spinup_MonthlyData[actualYear][ecoregion.Index];
-                }
-
-                if (Climate.Spinup_DailyData.ContainsKey(actualYear))
-                {
-                    AnnualDailyWeather[ecoregion] = Climate.Spinup_DailyData[actualYear][ecoregion.Index];
-                }
-            }
-           
-        }
-
-        //---------------------------------------------------------------------
-        // Generates new climate parameters for all ecoregions at an annual time step.
-        public static void SetAllEcoregions_FutureAnnualClimate(int year)
-        {
-            int actualYear = Climate.Future_MonthlyData.Keys.Min() + year - 1;
-            foreach (IEcoregion ecoregion in PlugIn.ModelCore.Ecoregions)
-            {
-                if (ecoregion.Active)
-                {
-                    //PlugIn.ModelCore.UI.WriteLine("Retrieving {0} for year {1}.", spinupOrfuture.ToString(), actualYear);
-                    if (Climate.Future_MonthlyData.ContainsKey(actualYear))
-                    {
-                        AnnualWeather[ecoregion] = Climate.Future_MonthlyData[actualYear][ecoregion.Index];
-                    }
-
-                    if (Climate.Future_DailyData.ContainsKey(actualYear))
-                    {
-                        AnnualDailyWeather[ecoregion] = Climate.Future_DailyData[actualYear][ecoregion.Index];
-                    }
-                    //PlugIn.ModelCore.UI.WriteLine("Utilizing Climate Data: Simulated Year = {0}, actualClimateYearUsed = {1}.", actualYear, AnnualWeather[ecoregion].Year);
-                }
-
+                AnnualClimate[ecoregion] = Climate.FutureEcoregionYearClimate[ecoregion.Index][year];      // Climate data year index is 1-based
             }
         }
-        
-
-        
     }
 }

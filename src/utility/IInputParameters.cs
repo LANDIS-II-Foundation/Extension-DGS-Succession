@@ -105,6 +105,8 @@ namespace Landis.Extension.Succession.DGS
         Landis.Library.Parameters.Species.AuxParm<int> RootingDepth { get; }
         Landis.Library.Parameters.Species.AuxParm<int> MaxANPP { get; }
         Landis.Library.Parameters.Species.AuxParm<int> MaxBiomass { get; }
+        Landis.Library.Parameters.Species.AuxParm<int> FireTolerance { get; }
+        Landis.Library.Parameters.Species.AuxParm<int> ShadeTolerance { get; }
 
         double AtmosNslope {get;}
         double AtmosNintercept {get;}

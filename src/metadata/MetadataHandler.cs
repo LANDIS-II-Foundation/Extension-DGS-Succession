@@ -44,6 +44,7 @@ namespace Landis.Extension.Succession.DGS
             Outputs.monthlyLog = new MetadataTable<MonthlyLog>("DGS-succession-monthly-log.csv");
             Outputs.reproductionLog = new MetadataTable<ReproductionLog>("DGS-reproduction-log.csv");
             Outputs.establishmentLog = new MetadataTable<EstablishmentLog>("DGS-prob-establish-log.csv");
+            Outputs.calibrateLog = new MetadataTable<CalibrateLog>("DGS-calibrate-log.csv");
 
             OutputMetadata tblOut_monthly = new OutputMetadata()
             {
@@ -94,6 +95,16 @@ namespace Landis.Extension.Succession.DGS
             };
             tblOut_repro.RetriveFields(typeof(EstablishmentLog));
             Extension.OutputMetadatas.Add(tblOut_pest);
+
+            OutputMetadata tblOut_cali = new OutputMetadata()
+            {
+                Type = OutputType.Table,
+                Name = "CalibrateLog",
+                FilePath = Outputs.calibrateLog.FilePath,
+                Visualize = false,
+            };
+            tblOut_cali.RetriveFields(typeof(CalibrateLog));
+            Extension.OutputMetadatas.Add(tblOut_cali);
 
             //---------------------------------------            
             //          map outputs:         
