@@ -655,19 +655,7 @@ namespace Landis.Extension.Succession.DGS
                 }
 
             }
-            internal static void WriteMonthlyMaps(int month)
-            {
-                using (var outputRaster = PlugIn.ModelCore.CreateRaster<IntPixel>($@"DGS\ActiveLayerDepth-{PlugIn.ModelCore.CurrentTime}-{month}.img", PlugIn.ModelCore.Landscape.Dimensions))
-                {
-                    var pixel = outputRaster.BufferPixel;
-
-                    foreach (var site in PlugIn.ModelCore.Landscape.AllSites)
-                    {
-                        pixel.MapCode.Value = site.IsActive ? (int)(SiteVars.MonthlyActiveLayerDepth[site][month]) : 0;
-                        outputRaster.WriteBufferPixel();
-                    }
-                }
-            }
+            
 
             string pathTHU = MapNames.ReplaceTemplateVars(@"DGS\THU-{timestep}.img", PlugIn.ModelCore.CurrentTime);
             using (IOutputRaster<IntPixel> outputRaster = PlugIn.ModelCore.CreateRaster<IntPixel>(pathTHU, PlugIn.ModelCore.Landscape.Dimensions))
@@ -767,6 +755,20 @@ namespace Landis.Extension.Succession.DGS
                 //    }
                 //}
                 
+            }
+        }
+
+        internal static void WriteMonthlyMaps(int month)
+        {
+            using (var outputRaster = PlugIn.ModelCore.CreateRaster<IntPixel>($@"DGS\ActiveLayerDepth-{PlugIn.ModelCore.CurrentTime}-{month}.img", PlugIn.ModelCore.Landscape.Dimensions))
+            {
+                var pixel = outputRaster.BufferPixel;
+
+                foreach (var site in PlugIn.ModelCore.Landscape.AllSites)
+                {
+                    pixel.MapCode.Value = site.IsActive ? (int)(SiteVars.MonthlyActiveLayerDepth[site][month]) : 0;
+                    outputRaster.WriteBufferPixel();
+                }
             }
         }
 
