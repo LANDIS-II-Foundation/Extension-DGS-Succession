@@ -244,6 +244,9 @@ namespace Landis.Extension.Succession.DGS
                 Outputs.WritePrimaryLogFile(ModelCore.CurrentTime);
                 Outputs.WriteShortPrimaryLogFile(ModelCore.CurrentTime);
                 Outputs.WriteMaps();
+                for (var i = 0; i < 12; ++i)
+                    Outputs.WriteMonthlyMaps(months[i]);
+
                 Outputs.WriteReproductionLog(PlugIn.ModelCore.CurrentTime);
                 Establishment.LogEstablishment();
                 if (PlugIn.InputCommunityMapNames != null && ModelCore.CurrentTime % PlugIn.InputCommunityMapFrequency == 0)

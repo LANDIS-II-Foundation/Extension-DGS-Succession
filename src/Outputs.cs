@@ -568,15 +568,15 @@ namespace Landis.Extension.Succession.DGS
             //    }
             //}
 
-            string path2 = MapNames.ReplaceTemplateVars(@"DGS\MineralN-{timestep}.img", PlugIn.ModelCore.CurrentTime);
-                    using (IOutputRaster<ShortPixel> outputRaster = PlugIn.ModelCore.CreateRaster<ShortPixel>(path2, PlugIn.ModelCore.Landscape.Dimensions))
+            string pathMineralN = MapNames.ReplaceTemplateVars(@"DGS\MineralN-{timestep}.img", PlugIn.ModelCore.CurrentTime);
+                    using (IOutputRaster<ShortPixel> outputRaster = PlugIn.ModelCore.CreateRaster<ShortPixel>(pathMineralN, PlugIn.ModelCore.Landscape.Dimensions))
                     {
                         ShortPixel pixel = outputRaster.BufferPixel;
                         foreach (Site site in PlugIn.ModelCore.Landscape.AllSites)
                         {
                             if (site.IsActive)
                             {
-                                pixel.MapCode.Value = (short)(SiteVars.MineralN[site]);
+                                pixel.MapCode.Value = (short)(SiteVars.MineralN[site] * 1000);
                             }
                             else
                             {
@@ -588,8 +588,8 @@ namespace Landis.Extension.Succession.DGS
                     }
                 //}
 
-                    string path4 = MapNames.ReplaceTemplateVars(@"DGS\NEE-{timestep}.img", PlugIn.ModelCore.CurrentTime);
-                    using (IOutputRaster<ShortPixel> outputRaster = PlugIn.ModelCore.CreateRaster<ShortPixel>(path4, PlugIn.ModelCore.Landscape.Dimensions))
+                    string pathNEE = MapNames.ReplaceTemplateVars(@"DGS\NEE-{timestep}.img", PlugIn.ModelCore.CurrentTime);
+                    using (IOutputRaster<ShortPixel> outputRaster = PlugIn.ModelCore.CreateRaster<ShortPixel>(pathNEE, PlugIn.ModelCore.Landscape.Dimensions))
                     {
                         ShortPixel pixel = outputRaster.BufferPixel;
                         foreach (Site site in PlugIn.ModelCore.Landscape.AllSites)
@@ -608,8 +608,8 @@ namespace Landis.Extension.Succession.DGS
                         }
                     }
 
-            string path5 = MapNames.ReplaceTemplateVars(@"DGS\SOC-{timestep}.img", PlugIn.ModelCore.CurrentTime);
-            using (IOutputRaster<IntPixel> outputRaster = PlugIn.ModelCore.CreateRaster<IntPixel>(path5, PlugIn.ModelCore.Landscape.Dimensions))
+            string pathSOC = MapNames.ReplaceTemplateVars(@"DGS\SOC-{timestep}.img", PlugIn.ModelCore.CurrentTime);
+            using (IOutputRaster<IntPixel> outputRaster = PlugIn.ModelCore.CreateRaster<IntPixel>(pathSOC, PlugIn.ModelCore.Landscape.Dimensions))
             {
                 IntPixel pixel = outputRaster.BufferPixel;
                 foreach (Site site in PlugIn.ModelCore.Landscape.AllSites)
@@ -627,8 +627,8 @@ namespace Landis.Extension.Succession.DGS
                 }
             }
 
-            string path6 = MapNames.ReplaceTemplateVars(@"DGS\TotalC-{timestep}.img", PlugIn.ModelCore.CurrentTime);
-                    using (IOutputRaster<IntPixel> outputRaster = PlugIn.ModelCore.CreateRaster<IntPixel>(path6, PlugIn.ModelCore.Landscape.Dimensions))
+            string pathTotalC = MapNames.ReplaceTemplateVars(@"DGS\TotalC-{timestep}.img", PlugIn.ModelCore.CurrentTime);
+                    using (IOutputRaster<IntPixel> outputRaster = PlugIn.ModelCore.CreateRaster<IntPixel>(pathTotalC, PlugIn.ModelCore.Landscape.Dimensions))
                     {
                         IntPixel pixel = outputRaster.BufferPixel;
                         foreach (Site site in PlugIn.ModelCore.Landscape.AllSites)
@@ -674,14 +674,14 @@ namespace Landis.Extension.Succession.DGS
                 }
 
             string pathavailablewater = MapNames.ReplaceTemplateVars(@"DGS\AvailableWater-{timestep}.img", PlugIn.ModelCore.CurrentTime);
-            using (IOutputRaster<IntPixel> outputRaster = PlugIn.ModelCore.CreateRaster<IntPixel>(pathavailablewater, PlugIn.ModelCore.Landscape.Dimensions))
+            using (IOutputRaster<ShortPixel> outputRaster = PlugIn.ModelCore.CreateRaster<ShortPixel>(pathavailablewater, PlugIn.ModelCore.Landscape.Dimensions))
             {
-                IntPixel pixel = outputRaster.BufferPixel;
+                ShortPixel pixel = outputRaster.BufferPixel;
                 foreach (Site site in PlugIn.ModelCore.Landscape.AllSites)
                 {
                     if (site.IsActive)
                     {
-                        pixel.MapCode.Value = (int)((SiteVars.AvailableWater[site]));
+                        pixel.MapCode.Value = (short)(SiteVars.AvailableWater[site]*100);
                     }
                     else
                     {
@@ -692,6 +692,30 @@ namespace Landis.Extension.Succession.DGS
                 }
 
             }
+
+            //string pathactivelayerdepth = MapNames.ReplaceTemplateVars(@"DGS\ActiveLayerDepth-{timestep}.img", PlugIn.ModelCore.CurrentTime);
+            //using (IOutputRaster<IntPixel> outputRaster = PlugIn.ModelCore.CreateRaster<IntPixel>(pathactivelayerdepth, PlugIn.ModelCore.Landscape.Dimensions))
+            //{
+            //    IntPixel pixel = outputRaster.BufferPixel;
+
+                
+            //        foreach (Site site in PlugIn.ModelCore.Landscape.AllSites)
+            //    {
+
+                    
+            //        if (site.IsActive)
+            //        {
+            //            pixel.MapCode.Value = (int)((SiteVars.ActiveLayerDepth[site]));
+            //        }
+            //        else
+            //        {
+            //            //  Inactive site
+            //            pixel.MapCode.Value = 0;
+            //        }
+            //        outputRaster.WriteBufferPixel();
+            //    }
+
+            //}
 
             string pathTHU = MapNames.ReplaceTemplateVars(@"DGS\THU-{timestep}.img", PlugIn.ModelCore.CurrentTime);
             using (IOutputRaster<IntPixel> outputRaster = PlugIn.ModelCore.CreateRaster<IntPixel>(pathTHU, PlugIn.ModelCore.Landscape.Dimensions))
@@ -791,6 +815,20 @@ namespace Landis.Extension.Succession.DGS
                 //    }
                 //}
                 
+            }
+        }
+
+        internal static void WriteMonthlyMaps(int month)
+        {
+            using (var outputRaster = PlugIn.ModelCore.CreateRaster<IntPixel>($@"DGS\ActiveLayerDepth-{PlugIn.ModelCore.CurrentTime}-{month}.img", PlugIn.ModelCore.Landscape.Dimensions))
+            {
+                var pixel = outputRaster.BufferPixel;
+
+                foreach (var site in PlugIn.ModelCore.Landscape.AllSites)
+                {
+                    pixel.MapCode.Value = site.IsActive ? (int)(SiteVars.MonthlyActiveLayerDepth[site][month]) : 0;
+                    outputRaster.WriteBufferPixel();
+                }
             }
         }
 

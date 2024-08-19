@@ -243,9 +243,13 @@ namespace Landis.Extension.Succession.DGS
             //    throw new ApplicationException($"Error: SoilLayer.Decompose(): no species in site '{site}'.  Cannot average LeafCN across species.");
 
             var cn_litter = leafCNs.Any() ? leafCNs.Average() : 25.0;
-            
-            double soc_available = SocAvailableForRespiration(site, month);
+
+            double soc_available = SocAvailableForRespiration(site, month, out var freezingPoint_cm);
             SiteVars.SoilAvailable[site].Carbon = soc_available;
+
+            //if (month == 7) SiteVars.ActiveLayerDepth[site] = freezingPoint_cm;     // record freezingPoint_cm for August
+            //SiteVars.ActiveLayerDepth[site] = freezingPoint_cm;     // record freezingPoint_cm for August
+            SiteVars.MonthlyActiveLayerDepth[site][month] = freezingPoint_cm;
 
             if (soc_available < 0.0000001)
             {
@@ -546,7 +550,7 @@ namespace Landis.Extension.Succession.DGS
             return;
         }
 
-        public static double SocAvailableForRespiration(ActiveSite site, int month)
+        public static double SocAvailableForRespiration(ActiveSite site, int month, out double freezingPoint_cm)
         {
             // inputs needed:
             var landisDepth = SiteVars.SoilDepth[site]/100.0;  // LANDIS is is cm but need to convert m for GIPL soil temp profile below. 
@@ -563,17 +567,26 @@ namespace Landis.Extension.Succession.DGS
             var j = -1;
             for (var i = 0; i < giplTempProfile.Count - 1; ++i)
             {
-                if (giplTempProfile[i] > 0.0 && giplTempProfile[i + 1] <= 0.0) j = i;
+                if (giplTempProfile[i] > -0.05 && giplTempProfile[i + 1] <= -0.05) j = i;
             }
 
-            if (j == -1 && giplTempProfile[0] > 0.0)
-                return soc;     // all temps above zero
+            if (j == -1 && giplTempProfile[0] > -0.05)
+            {
+                // all temps above zero
+                freezingPoint_cm = -0.05;
+                return soc;
+            }
 
-            if (j == -1 && giplTempProfile[0] <= 0.0)
-                return 0.0;     // all temps below zero
+            if (j == -1 && giplTempProfile[0] <= -0.05)
+            {
+                // all temps below zero
+                freezingPoint_cm = thu.GiplDepths.Last() * 100.0;   // convert GIPL depth [m] to Landis depth [cm]
+                return -0.05;
+            }
 
             // interpolate the gipl depth points bracketing the freezing point to find the freezing depth
             var d = thu.GiplDepths[j] + thu.GiplDepthIncrements[j] * giplTempProfile[j] / (giplTempProfile[j] - giplTempProfile[j + 1]);
+            freezingPoint_cm = d * 100.0;   // convert GIPL depth [m] to Landis depth [cm]
 
             // return the portion of the soc down to d assuming a decaying exponential profile that stops at landisDepth
             return d > landisDepth ? soc : soc * (1.0 - Math.Exp(-k * d)) / (1.0 - Math.Exp(-k * landisDepth));            

@@ -186,11 +186,13 @@ namespace Landis.Extension.Succession.DGS
                 limitT = rec.TemperatureLimit;
                 //limitT = 1.0;
 
+                
 
                 availableWater = rec.AvailableWater;
                 //limitH20 = rec.WaterLimit;
                 limitH20 = 1.0;
 
+                
 
 
             }

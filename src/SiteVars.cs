@@ -58,7 +58,8 @@ namespace Landis.Extension.Succession.DGS
         private static ISiteVar<double> mineralN;
         private static ISiteVar<double> resorbedN;
         private static ISiteVar<double> waterMovement;  
-        private static ISiteVar<double> availableWater;  
+        private static ISiteVar<double> availableWater;
+        //private static ISiteVar<double> activeLayerDepth;
         private static ISiteVar<double> soilWaterContent;
         private static ISiteVar<double> liquidSnowPack;  
         private static ISiteVar<double> decayFactor;
@@ -166,6 +167,8 @@ namespace Landis.Extension.Succession.DGS
             resorbedN           = PlugIn.ModelCore.Landscape.NewSiteVar<double>();
             waterMovement       = PlugIn.ModelCore.Landscape.NewSiteVar<double>();
             availableWater      = PlugIn.ModelCore.Landscape.NewSiteVar<double>();
+            //activeLayerDepth    = PlugIn.ModelCore.Landscape.NewSiteVar<double>();
+            MonthlyActiveLayerDepth = PlugIn.ModelCore.Landscape.NewSiteVar<double[]>();
             liquidSnowPack      = PlugIn.ModelCore.Landscape.NewSiteVar<double>();
             soilWaterContent    = PlugIn.ModelCore.Landscape.NewSiteVar<double>();
             decayFactor         = PlugIn.ModelCore.Landscape.NewSiteVar<double>();
@@ -252,6 +255,7 @@ namespace Landis.Extension.Succession.DGS
                 monthlyAGNPPC[site]           = new double[12];
                 monthlyBGNPPC[site]           = new double[12];
                 monthlysoilTemp[site]       = new double[12];
+                MonthlyActiveLayerDepth[site] = new double[12];
                 monthlyNEE[site]            = new double[12];
                 monthlyStreamN[site]         = new double[12];
                 monthlyResp[site]           = new double[12];
@@ -571,7 +575,26 @@ namespace Landis.Extension.Succession.DGS
                 availableWater = value;
             }
         }
+
         //---------------------------------------------------------------------
+
+        ///// <summary>
+        ///// Water loss
+        ///// </summary>
+        //public static ISiteVar<double> ActiveLayerDepth
+        //{
+        //    get
+        //    {
+        //        return activeLayerDepth;
+        //    }
+        //    set
+        //    {
+        //        activeLayerDepth = value;
+        //    }
+        //}
+        //---------------------------------------------------------------------
+
+        public static ISiteVar<double[]> MonthlyActiveLayerDepth { get; set; }
 
         /// <summary>
         /// Water loss
