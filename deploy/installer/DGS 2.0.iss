@@ -9,9 +9,9 @@
 #define BuildDir "..\..\src\bin\Debug\netstandard2.0"
 
 ; LANDIS-II installation directories
-#define ExtDir "C:\Program Files\LANDIS-II-v7\extensions"
-#define AppDir "C:\Program Files\LANDIS-II-v7"
-#define LandisPlugInDir "C:\Program Files\LANDIS-II-v7\plug-ins-installer-files"
+#define ExtDir "C:\Program Files\LANDIS-II-v8\extensions"
+#define AppDir "C:\Program Files\LANDIS-II-v8"
+#define LandisPlugInDir "C:\Program Files\LANDIS-II-v8\plug-ins-installer-files"
 #define ExtensionsCmd AppDir + "\commands\landis-ii-extensions.cmd"
 
 [Setup]
@@ -54,16 +54,14 @@ Source: {#BuildDir}\Landis.Extension.GiplDamm.dll; DestDir: {#ExtDir}; Flags: un
 Source: {#BuildDir}\Landis.Extension.GiplDamm.pdb; DestDir: {#ExtDir}; Flags: uninsneveruninstall replacesameversion
 Source: {#BuildDir}\Landis.Extension.ShawDamm.dll; DestDir: {#ExtDir}; Flags: uninsneveruninstall replacesameversion
 Source: {#BuildDir}\Landis.Extension.ShawDamm.pdb; DestDir: {#ExtDir}; Flags: uninsneveruninstall replacesameversion
-Source: {#BuildDir}\Landis.Library.AgeOnlyCohorts-v3.dll; DestDir: {#ExtDir}; Flags: uninsneveruninstall replacesameversion
-Source: {#BuildDir}\Landis.Library.Cohorts-v2.dll; DestDir: {#ExtDir}; Flags: uninsneveruninstall replacesameversion
-Source: {#BuildDir}\Landis.Library.BiomassCohorts-v3.dll; DestDir: {#ExtDir}; Flags: uninsneveruninstall replacesameversion
-Source: {#BuildDir}\Landis.Library.LeafBiomassCohorts-v2.dll; DestDir: {#ExtDir}; Flags: uninsneveruninstall replacesameversion
+Source: {#BuildDir}\Landis.Library.Climate-v5.dll; DestDir: {#ExtDir}; Flags: uninsneveruninstall replacesameversion   
+Source: {#BuildDir}\Landis.Library.InitialCommunity.Universal.dll; DestDir: {#ExtDir}; Flags: uninsneveruninstall replacesameversion
 Source: {#BuildDir}\Landis.Library.Metadata-v2.dll; DestDir: {#ExtDir}; Flags: uninsneveruninstall replacesameversion
 Source: {#BuildDir}\Landis.Library.Parameters-v2.dll; DestDir: {#ExtDir}; Flags: uninsneveruninstall replacesameversion
-Source: {#BuildDir}\Landis.Library.Biomass-v2.dll; DestDir: {#ExtDir}; Flags: uninsneveruninstall replacesameversion
-Source: {#BuildDir}\Landis.Library.Climate-v5.dll; DestDir: {#ExtDir}; Flags: uninsneveruninstall replacesameversion   
-Source: {#BuildDir}\Landis.Library.InitialCommunity-vInputBiomass.dll; DestDir: {#ExtDir}; Flags: uninsneveruninstall replacesameversion   
-Source: {#BuildDir}\Landis.Library.Succession-v8.dll; DestDir: {#ExtDir}; Flags: uninsneveruninstall replacesameversion
+Source: {#BuildDir}\Landis.Library.Succession-v9.dll; DestDir: {#ExtDir}; Flags: uninsneveruninstall replacesameversion
+Source: {#BuildDir}\Landis.Library.UniversalCohorts-v1.dll; DestDir: {#ExtDir}; Flags: uninsneveruninstall replacesameversion      
+Source: {#BuildDir}\MathNet.Numerics.dll; DestDir: {#ExtDir}; Flags: uninsneveruninstall replacesameversion   
+
 
 ; Complete example for testing the extension
 ;Source: ..\examples\*.txt; DestDir: {#AppDir}\examples\{#ExtensionName}; Flags: replacesameversion
@@ -77,7 +75,7 @@ Source: {#BuildDir}\Landis.Library.Succession-v8.dll; DestDir: {#ExtDir}; Flags:
 
 ; LANDIS-II identifies the extension with the info in this .txt file
 ; NB. New releases must modify the name of this file and the info in it
-#define InfoTxt "DGS_Succession 1.102.txt"
+#define InfoTxt "DGS_Succession 2.0.txt"
 Source: {#InfoTxt}; DestDir: {#LandisPlugInDir}
 ; NOTE: Don't use "Flags: ignoreversion" on any shared system files
 
