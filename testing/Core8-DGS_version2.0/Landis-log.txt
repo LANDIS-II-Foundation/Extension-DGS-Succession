@@ -1,0 +1,43 @@
+2024-09-02 15:18:40,805 - LANDIS-II 8.0 (8)
+2024-09-02 15:18:40,807 - 
+2024-09-02 15:18:40,839 - Loading scenario from file "scenario_DGS_SC.txt" ...
+2024-09-02 15:18:40,862 - Initialized random number generator with user-supplied seed = 2,487,416,069
+2024-09-02 15:18:40,862 - Loading species data from file "AlaskaSpecies_012821.txt" ...
+2024-09-02 15:18:40,866 - Loading ecoregions from file "ClimateRegion5.txt" ...
+2024-09-02 15:18:40,872 - Core metadata:
+2024-09-02 15:18:40,873 - LANDIS-II v8.0, Seed: 2487416069, CR5_SmithLake2.tif, ClimateRegion5.txt, AlaskaSpecies_012821.txt
+Succession:
+DGS Succession Version: 2.0, Input: DGS_Succession_AKinput_230626_SC.txt
+Disturbance Extensions:
+Other Extensions:
+
+2024-09-02 15:18:40,873 - Initializing landscape from ecoregions map "CR5_SmithLake2.tif" ...
+2024-09-02 15:18:40,879 - Cell length = 200 m, cell area = 4 ha
+2024-09-02 15:18:40,880 - Map dimensions: 1 row by 1 column = 1 cell
+2024-09-02 15:18:40,883 - Sites: 1 active (100.0%), 0 inactive (0.0%)
+2024-09-02 15:18:40,885 - Loading DGS Succession extension ...
+2024-09-02 15:18:40,912 -    Registering Data:  Succession.UniversalCohorts.
+2024-09-02 15:18:40,912 -    Registering Data:  Succession.FineFuels.
+2024-09-02 15:18:40,912 -    Registering Data:  Succession.SmolderConsumption.
+2024-09-02 15:18:40,912 -    Registering Data:  Succession.FlamingConsumption.
+2024-09-02 15:18:40,912 -    Registering Data:  Succession.CWD.
+2024-09-02 15:18:40,913 -    Registering Data:  Succession.PET.
+2024-09-02 15:18:40,923 -    Begin parsing FUNCTIONAL GROUP table.
+2024-09-02 15:18:40,924 -    Begin reading FIRE REDUCTION parameters.
+2024-09-02 15:18:40,924 -    Begin reading HARVEST REDUCTION parameters.
+2024-09-02 15:18:41,663 - Initializing DGS Succession ...
+2024-09-02 15:18:41,678 -   Read in data from Depth_SmithLake2.tif
+2024-09-02 15:18:41,679 -   Read in data from Drain_SmithLake2.tif
+2024-09-02 15:18:41,681 -   Read in data from BaseFlow_SmithLake2.tif
+2024-09-02 15:18:41,682 -   Read in data from BaseFlow_SmithLake2.tif
+2024-09-02 15:18:41,682 -   Read in data from FC_SmithLake2.tif
+2024-09-02 15:18:41,683 -   Read in data from WP_SmithLake2.tif
+2024-09-02 15:18:41,683 -   Read in data from Sand_SmithLake2.tif
+2024-09-02 15:18:41,684 -   Read in data from Clay_SmithLake2.tif
+2024-09-02 15:18:41,685 -   Read in data from BD_SmithLake2.tif
+2024-09-02 15:18:41,686 -   Read in data from PD_SmithLake2.tif
+2024-09-02 15:18:41,687 -   Read in data from SOC_SmithLake2.tif
+2024-09-02 15:18:41,687 -   Read in data from SON_SmithLake2.tif
+2024-09-02 15:18:41,688 -   Read in data from DeadWood_SmithLake2.tif
+2024-09-02 15:18:41,688 -   Read in data from DeadWood_SmithLake2.tif
+2024-09-02 15:18:41,709 - Error in ReadClimateData: Unexpected headers '#precip,,,,...' for Daily data in climate file 'SmithLake_MetData_v2.csv'
