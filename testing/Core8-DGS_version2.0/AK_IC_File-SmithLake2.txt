@@ -1,0 +1,5 @@
+LandisData "Initial Communities"
+
+MapCode  1 
+BlackSpruce 25 (900) 26 (900)  <<slack from Adrienne: my best guess for biomass at Smith Lake 2 is 1.8 kg/m2
+ 
