@@ -187,9 +187,12 @@ namespace Landis.Extension.Succession.DGS
             AnnualNEE           = PlugIn.ModelCore.Landscape.NewSiteVar<double>();
             FireCEfflux         = PlugIn.ModelCore.Landscape.NewSiteVar<double>();
             FireNEfflux         = PlugIn.ModelCore.Landscape.NewSiteVar<double>();
-            monthlyResp         = PlugIn.ModelCore.Landscape.NewSiteVar<double[]>();
+            monthlyResp = PlugIn.ModelCore.Landscape.NewSiteVar<double[]>();
+            MonthlyDeadWoodResp = PlugIn.ModelCore.Landscape.NewSiteVar<double[]>();
+            MonthlyDeadRootResp = PlugIn.ModelCore.Landscape.NewSiteVar<double[]>();
+            MonthlyDeadLeafResp = PlugIn.ModelCore.Landscape.NewSiteVar<double[]>();
 
-            cohortLeafN         = PlugIn.ModelCore.Landscape.NewSiteVar<double>();
+            cohortLeafN = PlugIn.ModelCore.Landscape.NewSiteVar<double>();
             cohortFRootN         = PlugIn.ModelCore.Landscape.NewSiteVar<double>();
             cohortLeafC         = PlugIn.ModelCore.Landscape.NewSiteVar<double>();
             cohortFRootC     = PlugIn.ModelCore.Landscape.NewSiteVar<double>();
@@ -231,14 +234,14 @@ namespace Landis.Extension.Succession.DGS
 
             foreach (ActiveSite site in PlugIn.ModelCore.Landscape)
             {
-                surfaceDeadWood[site]       = new Layer(LayerName.Wood, LayerType.Surface);
-                soilDeadWood[site]          = new Layer(LayerName.CoarseRoot, LayerType.Soil);
+                surfaceDeadWood[site]       = new Layer(LayerName.Wood, LayerType.Surface);             // dead wood pool
+                soilDeadWood[site]          = new Layer(LayerName.CoarseRoot, LayerType.Soil);          // dead coarse roots pool
                 
-                surfaceStructural[site]     = new Layer(LayerName.Structural, LayerType.Surface);
-                surfaceMetabolic[site]      = new Layer(LayerName.Metabolic, LayerType.Surface);
-                soilStructural[site]        = new Layer(LayerName.Structural, LayerType.Soil);
-                soilMetabolic[site]         = new Layer(LayerName.Metabolic, LayerType.Soil);
-                soilPrimary[site]           = new SoilLayer(SoilName.Primary); //, LayerType.Soil);  
+                surfaceStructural[site]     = new Layer(LayerName.Structural, LayerType.Surface);       // dead leaf pool (structural)
+                surfaceMetabolic[site]      = new Layer(LayerName.Metabolic, LayerType.Surface);        // dead leaf pool (metabolic)
+                soilStructural[site]        = new Layer(LayerName.Structural, LayerType.Soil);          // dead fine roots pool (structural)
+                soilMetabolic[site]         = new Layer(LayerName.Metabolic, LayerType.Soil);           // dead fine roots pool (metabolic)
+                soilPrimary[site]           = new SoilLayer(SoilName.Primary); //, LayerType.Soil);     // soil pool
                 soilAvailable[site]        = new SoilLayer(SoilName.Available); //, LayerType.Soil);  
                 //LayerType.Soil)[site] = new SoilLayer(SoilName.Primary); //, LayerType.Soil);
                 //som1surface[site]           = new Layer(LayerName.SOM1, LayerType.Surface);
@@ -254,7 +257,10 @@ namespace Landis.Extension.Succession.DGS
                 MonthlyActiveLayerDepth[site] = new double[12];
                 monthlyNEE[site]            = new double[12];
                 monthlyStreamN[site]         = new double[12];
-                monthlyResp[site]           = new double[12];
+                monthlyResp[site] = new double[12];
+                MonthlyDeadWoodResp[site] = new double[12];
+                MonthlyDeadRootResp[site] = new double[12];
+                MonthlyDeadLeafResp[site] = new double[12];
                 monthlyLAI[site] = new double[12];
                 //monthlymineralN[site]       = new double[12];
 
@@ -920,6 +926,11 @@ namespace Landis.Extension.Succession.DGS
                 monthlyResp = value;
             }
         }
+
+        public static ISiteVar<double[]> MonthlyDeadWoodResp { get; set; }
+        public static ISiteVar<double[]> MonthlyDeadRootResp { get; set; }
+        public static ISiteVar<double[]> MonthlyDeadLeafResp { get; set; }
+
         //---------------------------------------------------------------------
         /// <summary>
         /// A summary of Net Ecosystem Exchange (g C/m2), from a flux tower's perspective,

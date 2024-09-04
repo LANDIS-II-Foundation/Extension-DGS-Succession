@@ -691,7 +691,7 @@ namespace Landis.Extension.Succession.DGS
             double k = FunctionalType.Table[SpeciesData.FuncType[cohort.Species]].K *-1.0; 
             double monthly_LAI = SiteVars.MonthlyLAI[site][Main.Month];
             double competition_limit = Math.Max(0.0, Math.Exp(k * monthly_LAI));
-
+            
             return competition_limit;
 
         }

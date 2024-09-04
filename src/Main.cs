@@ -94,6 +94,9 @@ namespace Landis.Extension.Succession.DGS
                     SiteVars.MonthlySoilTemp[site][Month] = 0.0;
                     SiteVars.MonthlyNEE[site][Month] = 0.0;
                     SiteVars.MonthlyResp[site][Month] = 0.0;
+                    SiteVars.MonthlyDeadWoodResp[site][Month] = 0.0;
+                    SiteVars.MonthlyDeadRootResp[site][Month] = 0.0;
+                    SiteVars.MonthlyDeadLeafResp[site][Month] = 0.0;
                     SiteVars.MonthlyStreamN[site][Month] = 0.0;
                     SiteVars.MonthlyLAI[site][Month] = 0.0;
                     SiteVars.SourceSink[site].Carbon = 0.0;

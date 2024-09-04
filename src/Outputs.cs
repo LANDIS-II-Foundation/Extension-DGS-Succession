@@ -402,6 +402,9 @@ namespace Landis.Extension.Succession.DGS
             double[] airtemp = new double[PlugIn.ModelCore.Ecoregions.Count];
             double[] soiltemp = new double[PlugIn.ModelCore.Ecoregions.Count];
             double[] avgNPPtc = new double[PlugIn.ModelCore.Ecoregions.Count];
+            double[] avgDeadWoodResp = new double[PlugIn.ModelCore.Ecoregions.Count];
+            double[] avgDeadRootResp = new double[PlugIn.ModelCore.Ecoregions.Count];
+            double[] avgDeadLeafResp = new double[PlugIn.ModelCore.Ecoregions.Count];
             double[] avgResp = new double[PlugIn.ModelCore.Ecoregions.Count];
             double[] avgNEE = new double[PlugIn.ModelCore.Ecoregions.Count];
 
@@ -409,18 +412,6 @@ namespace Landis.Extension.Succession.DGS
             double[] StreamN = new double[PlugIn.ModelCore.Ecoregions.Count];
              
             
-            foreach (IEcoregion ecoregion in PlugIn.ModelCore.Ecoregions)
-            {
-                ppt[ecoregion.Index] = 0.0;
-                airtemp[ecoregion.Index] = 0.0;
-                soiltemp[ecoregion.Index] = 0.0;
-                avgNPPtc[ecoregion.Index] = 0.0;
-                avgResp[ecoregion.Index] = 0.0;
-                avgNEE[ecoregion.Index] = 0.0;
-                Ndep[ecoregion.Index] = 0.0;
-                StreamN[ecoregion.Index] = 0.0;
-            }
-
             foreach (ActiveSite site in PlugIn.ModelCore.Landscape)
             {
                 IEcoregion ecoregion = PlugIn.ModelCore.Ecoregion[site];
@@ -429,6 +420,9 @@ namespace Landis.Extension.Succession.DGS
                 airtemp[ecoregion.Index] = ClimateRegionData.AnnualClimate[ecoregion].MonthlyTemp[month];
                 soiltemp[ecoregion.Index] += SiteVars.MonthlySoilTemp[site][month];
                 avgNPPtc[ecoregion.Index] += SiteVars.MonthlyAGNPPcarbon[site][month] + SiteVars.MonthlyBGNPPcarbon[site][month];
+                avgDeadWoodResp[ecoregion.Index] += SiteVars.MonthlyDeadWoodResp[site][month];
+                avgDeadRootResp[ecoregion.Index] += SiteVars.MonthlyDeadRootResp[site][month];
+                avgDeadLeafResp[ecoregion.Index] += SiteVars.MonthlyDeadLeafResp[site][month];
                 avgResp[ecoregion.Index] += SiteVars.MonthlyResp[site][month];
                 avgNEE[ecoregion.Index] += SiteVars.MonthlyNEE[site][month];
                 SiteVars.AnnualNEE[site] += SiteVars.MonthlyNEE[site][month];
@@ -451,10 +445,13 @@ namespace Landis.Extension.Succession.DGS
 
                     ml.NumSites = Convert.ToInt32(ClimateRegionData.ActiveSiteCount[ecoregion]);
 
-                    ml.ppt = ClimateRegionData.AnnualClimate[ecoregion].MonthlyPrecip[month];
-                    ml.airtemp = ClimateRegionData.AnnualClimate[ecoregion].MonthlyTemp[month];
-                    //ml.soiltemp = (soiltemp[ecoregion.Index] / (double)ClimateRegionData.ActiveSiteCount[ecoregion]);
+                    ml.Ppt = ClimateRegionData.AnnualClimate[ecoregion].MonthlyPrecip[month];
+                    ml.Airtemp = ClimateRegionData.AnnualClimate[ecoregion].MonthlyTemp[month];
+                    //ml.SoilTemp = (soiltemp[ecoregion.Index] / (double)ClimateRegionData.ActiveSiteCount[ecoregion]);
                     ml.avgNPPtc = (avgNPPtc[ecoregion.Index] / (double)ClimateRegionData.ActiveSiteCount[ecoregion]);
+                    ml.AvgDeadWoodResp = (avgDeadWoodResp[ecoregion.Index] / (double)ClimateRegionData.ActiveSiteCount[ecoregion]);
+                    ml.AvgDeadRootResp = (avgDeadRootResp[ecoregion.Index] / (double)ClimateRegionData.ActiveSiteCount[ecoregion]);
+                    ml.AvgDeadLeafResp = (avgDeadLeafResp[ecoregion.Index] / (double)ClimateRegionData.ActiveSiteCount[ecoregion]);
                     ml.avgResp = (avgResp[ecoregion.Index] / (double)ClimateRegionData.ActiveSiteCount[ecoregion]);
                     ml.avgNEE = (avgNEE[ecoregion.Index] / (double)ClimateRegionData.ActiveSiteCount[ecoregion]);
                     ml.Ndep = Ndep[ecoregion.Index];

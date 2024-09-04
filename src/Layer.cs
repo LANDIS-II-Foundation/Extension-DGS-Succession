@@ -315,7 +315,7 @@ namespace Landis.Extension.Succession.DGS
                     else
                         co2loss = totalCFlow * OtherData.MetabolicToCO2Soil;
 
-                    //this.Respiration(co2loss, site);  ML is turning this off for DAMM.
+                    this.Respiration(co2loss, site);
 
 
                     //Decompose metabolic into SOC / SON
@@ -497,11 +497,24 @@ namespace Landis.Extension.Succession.DGS
                 co2loss = this.Carbon;
 
             //round these to avoid unexpected behavior
-            this.Carbon = Math.Round((this.Carbon - co2loss));
+            //this.Carbon = Math.Round((this.Carbon - co2loss));
+            this.Carbon -= co2loss;
             SiteVars.SourceSink[site].Carbon = Math.Round((SiteVars.SourceSink[site].Carbon + co2loss));
 
             //Add lost CO2 to monthly heterotrophic respiration
             SiteVars.MonthlyResp[site][Main.Month] += co2loss;
+
+            if (type == LayerType.Soil)
+            {
+                SiteVars.MonthlyDeadRootResp[site][Main.Month] += co2loss;
+            }
+            else if (type == LayerType.Surface)
+            {
+                if (name == LayerName.Wood)
+                    SiteVars.MonthlyDeadWoodResp[site][Main.Month] += co2loss;
+                else
+                    SiteVars.MonthlyDeadLeafResp[site][Main.Month] += co2loss;
+            }
 
             this.Nitrogen -= mineralNFlow;
             SiteVars.MineralN[site] += mineralNFlow;

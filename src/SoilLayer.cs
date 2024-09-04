@@ -564,6 +564,8 @@ namespace Landis.Extension.Succession.DGS
             //var k = 11.791;  // original value was set to 1.0           
             var k = 2.618;  // seems to produce more realistic values      
 
+            const double thresholdTemp = 0.0;
+
             var thu = SiteVars.TempHydroUnit[site];
 
             var giplTempProfile = thu.MonthlyGiplDammResults[month].AverageSoilTemperatureProfile;
@@ -574,23 +576,23 @@ namespace Landis.Extension.Succession.DGS
             var j = -1;
             for (var i = 0; i < giplTempProfile.Count - 1; ++i)
             {
-                if (giplTempProfile[i] > 0.0 && giplTempProfile[i + 1] <= 0.0) j = i;
+                if (giplTempProfile[i] > thresholdTemp && giplTempProfile[i + 1] <= thresholdTemp) j = i;
             }
 
-            if (j == -1 && giplTempProfile[0] > 0.0)
+            if (j == -1 && giplTempProfile[0] > thresholdTemp)
             {
                 freezingPoint_cm = 0.0;
-                return soc;     // all temps above zero
+                return soc;     // all temps above thresholdTemp
             }
 
-            if (j == -1 && giplTempProfile[0] <= 0.0)
+            if (j == -1 && giplTempProfile[0] <= thresholdTemp)
             {
                 freezingPoint_cm = thu.GiplDepths.Last() * 100.0;   // convert GIPL depth [m] to Landis depth [cm]
-                return 0.0;     // all temps below zero
+                return 0.0;     // all temps below thresholdTemp
             }
 
             // interpolate the gipl depth points bracketing the freezing point to find the freezing depth
-            var d = thu.GiplDepths[j] + thu.GiplDepthIncrements[j] * giplTempProfile[j] / (giplTempProfile[j] - giplTempProfile[j + 1]);
+            var d = thu.GiplDepths[j] + thu.GiplDepthIncrements[j] * (giplTempProfile[j] - thresholdTemp) / (giplTempProfile[j] - giplTempProfile[j + 1]);
             freezingPoint_cm = d * 100.0;   // convert GIPL depth [m] to Landis depth [cm]
 
             // return the portion of the soc down to d assuming a decaying exponential profile that stops at landisDepth
