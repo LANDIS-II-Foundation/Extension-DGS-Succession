@@ -20,15 +20,6 @@ namespace Landis.Extension.Succession.DGS
         public static int Month;
         public static int MonthCnt;
 
-        //public static int[] SiteMonth;
-        //public static int[] SiteMonthCnt;
-
-        //public static int siteCounter;
-        //public static Stopwatch timer1;
-        //public static Stopwatch soilLayerTimer;
-
-        //private static object _locker = new object();
-
         /// <summary>
         /// Grows all cohorts at a site for a specified number of years.
         /// Litter is decomposed following the Century model.
@@ -51,7 +42,7 @@ namespace Landis.Extension.Succession.DGS
 
             //timer1.Start();
 
-            ISiteCohorts siteCohorts = SiteVars.Cohorts[site];
+            SiteCohorts siteCohorts = SiteVars.Cohorts[site];
             IEcoregion ecoregion = PlugIn.ModelCore.Ecoregion[site];
 
             for (int y = 0; y < years; ++y) {
@@ -100,7 +91,7 @@ namespace Landis.Extension.Succession.DGS
                     SiteVars.MonthlyStreamN[site][Month] = 0.0;
                     SiteVars.MonthlyLAI[site][Month] = 0.0;
                     SiteVars.SourceSink[site].Carbon = 0.0;
-                    SiteVars.TotalWoodBiomass[site] = Main.ComputeWoodBiomass((ActiveSite) site);
+                    SiteVars.TotalWoodBiomass[site] = ComputeWoodBiomass((ActiveSite) site);
                     //SiteVars.LAI[site] = Century.ComputeLAI((ActiveSite)site);
                                    
                     var ppt = ClimateRegionData.AnnualClimate[ecoregion].MonthlyPrecip[Month];
@@ -217,11 +208,15 @@ namespace Landis.Extension.Succession.DGS
             int total = 0;
             if (cohorts != null)
                 foreach (ISpeciesCohorts speciesCohorts in cohorts)
+                {
                     foreach (ICohort cohort in speciesCohorts)
+                    {
                         //total += (int)(cohort.WoodBiomass + cohort.LeafBiomass);
                         //total += (int)(cohort.Data.Biomass);
                         total += (int)(cohort.Data.AdditionalParameters.WoodBiomass + cohort.Data.AdditionalParameters.LeafBiomass);
-            //total += ComputeBiomass(speciesCohorts);
+                        //total += ComputeBiomass(speciesCohorts);
+                    }
+                }
             return total;
         }
 
@@ -235,7 +230,8 @@ namespace Landis.Extension.Succession.DGS
                 {
                     foreach (ICohort cohort in speciesCohorts)
                     {
-                        total += (int)(Convert.ToInt32(cohort.Data.AdditionalParameters.LeafBiomass));
+                        //total += (int)(Convert.ToInt32(cohort.Data.AdditionalParameters.LeafBiomass));
+                        total += (int)(cohort.Data.AdditionalParameters.LeafBiomass);
                     }
                 }
             //total += ComputeBiomass(speciesCohorts);
@@ -251,8 +247,9 @@ namespace Landis.Extension.Succession.DGS
                 {
                     foreach (ICohort cohort in speciesCohorts)
                     {
-                        double woodB = Convert.ToDouble(cohort.Data.AdditionalParameters.WoodBiomass);
-                        woodBiomass += woodB;
+                         //double woodBiomass = Convert.ToDouble(cohort.Data.AdditionalParameters.WoodBiomass);
+                         woodBiomass = cohort.Data.AdditionalParameters.WoodBiomass;
+                        //woodBiomass += woodB;
                     }
                 }
             return woodBiomass;
@@ -283,11 +280,9 @@ namespace Landis.Extension.Succession.DGS
         private static void CalculateCohortCN(ActiveSite site, ICohort cohort)
         {
             ISpecies species = cohort.Species;
-            double leafBio = cohort.Data.AdditionalParameters.LeafBiomass;
-            double woodBio = cohort.Data.AdditionalParameters.WoodBiomass;
 
-            double leafC = leafBio * 0.47;
-            double woodC = woodBio * 0.47;
+            double leafC = cohort.Data.AdditionalParameters.LeafBiomass * 0.47;
+            double woodC = cohort.Data.AdditionalParameters.WoodBiomass * 0.47;
 
             double fRootC = Roots.CalculateFineRoot(cohort, leafC);
             double cRootC = Roots.CalculateCoarseRoot(cohort, woodC);

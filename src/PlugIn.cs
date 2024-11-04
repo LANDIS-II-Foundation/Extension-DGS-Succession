@@ -108,6 +108,9 @@ namespace Landis.Extension.Succession.DGS
             dynamic tempObject = additionalCohortParameters;
             tempObject.WoodBiomass = 0.0f;
             tempObject.LeafBiomass = 0.0f;
+            tempObject.MineralNallocation = 0.0f;
+            tempObject.MineralNfraction = 0.0f;
+            tempObject.Nresorption = 0.0f;
         }
 
         //---------------------------------------------------------------------
@@ -162,6 +165,7 @@ namespace Landis.Extension.Succession.DGS
             Reproduction.Establish = Establish;
             Reproduction.AddNewCohort = AddNewCohort;
             Reproduction.MaturePresent = MaturePresent;
+            Cohort.ComputeCohortData = ComputeCohortData;
             Initialize(modelCore, Parameters.SeedAlgorithm);
 
             Cohort.MortalityEvent += CohortMortality;
@@ -615,7 +619,8 @@ namespace Landis.Extension.Succession.DGS
             ExtensionType disturbanceType = eventArgs.DisturbanceType;
             ActiveSite site = eventArgs.Site;
 
-            ICohort cohort = (ICohort)eventArgs.Cohort;
+            //ICohort cohort = (ICohort)eventArgs.Cohort;
+            ICohort cohort = (Landis.Library.UniversalCohorts.ICohort)eventArgs.Cohort;
 
             double fractionPartialMortality = eventArgs.Reduction;
             double foliarInput = cohort.Data.AdditionalParameters.LeafBiomass * fractionPartialMortality;
@@ -805,6 +810,17 @@ namespace Landis.Extension.Succession.DGS
 
             return establishProbability > 0.0;
         }
+
+
+        public CohortData ComputeCohortData(ushort age, int biomass, int anpp, ExpandoObject parametersToAdd)
+        {
+            IDictionary<string, object> tempObject = parametersToAdd;
+
+            int newBiomass = Convert.ToInt32(tempObject["LeafBiomass"]) + Convert.ToInt32(tempObject["WoodBiomass"]);
+
+            return new CohortData(age, newBiomass, anpp, parametersToAdd);
+        }
+
 
         //---------------------------------------------------------------------
 

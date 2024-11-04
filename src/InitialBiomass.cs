@@ -8,6 +8,7 @@ using System.Collections.Generic;
 using Landis.Library.UniversalCohorts;
 //using Landis.Library.Climate;
 using System;
+using System.Dynamic;
 //using Landis.Cohorts;
 
 
@@ -102,25 +103,26 @@ namespace Landis.Extension.Succession.DGS
         }
 
         //---------------------------------------------------------------------
-        //public static ISiteCohorts MakeBiomassCohorts(List<Landis.Library.UniversalCohorts.ICohort> sortedCohorts, ActiveSite site)
+        //public static SiteCohorts MakeBiomassCohorts(List<Landis.Library.UniversalCohorts.ICohort> sortedCohorts, ActiveSite site)
         public static ISiteCohorts MakeBiomassCohorts(List<ICohort> sortedCohorts, ActiveSite site)
         {
 
             IEcoregion ecoregion = PlugIn.ModelCore.Ecoregion[site];
 
-            SiteVars.Cohorts[site] = new Landis.Library.UniversalCohorts.SiteCohorts();
+            //SiteVars.Cohorts[site] = new Landis.Library.UniversalCohorts.SiteCohorts();
+            SiteVars.Cohorts[site] = new SiteCohorts();
 
             foreach (ICohort cohort in sortedCohorts)
             {
                 //foreach(ICohort cohort in cohorts)
-                SiteVars.Cohorts[site].AddNewCohort(cohort.Species, cohort.Data.Age, cohort.Data.Biomass, cohort.Data.AdditionalParameters);
+                //SiteVars.Cohorts[site].AddNewCohort(cohort.Species, cohort.Data.Age, cohort.Data.Biomass, cohort.Data.AdditionalParameters);
+                SiteVars.Cohorts[site].AddNewCohort(cohort.Species, cohort.Data.Age, cohort.Data.Biomass, 0, cohort.Data.AdditionalParameters);
             }
             return SiteVars.Cohorts[site];
         }
 
-
         //public static List<Landis.Library.UniversalCohorts.ICohort> SortCohorts(List<Landis.Library.UniversalCohorts.ISpeciesCohorts> sppCohorts)
-          public static List<ICohort> SortCohorts(List<ISpeciesCohorts> sppCohorts)
+        public static List<ICohort> SortCohorts(List<ISpeciesCohorts> sppCohorts)
         {
             //List<Landis.Library.UniversalCohorts.ICohort> cohorts = new List<Landis.Library.UniversalCohorts.ICohort>();
             //foreach (Landis.Library.UniversalCohorts.ISpeciesCohorts speciesCohorts in sppCohorts)
