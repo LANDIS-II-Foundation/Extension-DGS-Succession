@@ -773,7 +773,8 @@ namespace Landis.Extension.Succession.DGS
             tempObject.WoodBiomass = initialBiomass[0];
             tempObject.LeafBiomass = initialBiomass[1];
 
-            SiteVars.Cohorts[site].AddNewCohort(species, 1, System.Convert.ToInt32(initialBiomass[0] + initialBiomass[1]), woodLeafBiomasses);
+            //SiteVars.Cohorts[site].AddNewCohort(species, 1, System.Convert.ToInt32(initialBiomass[0] + initialBiomass[1]), , woodLeafBiomasses);
+            SiteVars.Cohorts[site].AddNewCohort(species, 1, Convert.ToInt32(initialBiomass[0] + initialBiomass[1]), 0, woodLeafBiomasses);
 
             if (reproductionType == "plant")
                 SpeciesByPlant[species.Index]++;
@@ -812,7 +813,7 @@ namespace Landis.Extension.Succession.DGS
         }
 
 
-        public CohortData ComputeCohortData(ushort age, int biomass, int anpp, ExpandoObject parametersToAdd)
+        public CohortData ComputeCohortData(ushort age, int biomass, double anpp, ExpandoObject parametersToAdd)
         {
             IDictionary<string, object> tempObject = parametersToAdd;
 

@@ -44,7 +44,7 @@ namespace Landis.Extension.Succession.DGS
         /// Productivity (ANPP), age-related mortality (M_AGE), and development-
         /// related mortality (M_BIO).
         /// </summary>
-        public double ComputeChange(ICohort cohort, ActiveSite site, out int ANPP, out ExpandoObject otherParams)
+        public double ComputeChange(ICohort cohort, ActiveSite site, out double ANPP, out ExpandoObject otherParams)
         {
             dynamic tempObject = new ExpandoObject();
             tempObject.WoodBiomass = 0;
@@ -79,7 +79,8 @@ namespace Landis.Extension.Succession.DGS
 
             // ****** Growth *******
             double[] actualANPP = ComputeActualANPP(cohort, site, siteBiomass, mortalityAge);
-            
+            ANPP = actualANPP[0] + actualANPP[1];
+
             //  Growth-related mortality
             double[] mortalityGrowth = ComputeGrowthMortality(cohort, site, siteBiomass, actualANPP);
 
@@ -156,11 +157,14 @@ namespace Landis.Extension.Succession.DGS
             double deltaWood = (double)(actualANPP[0] - totalMortality[0]);
             double deltaLeaf = (double)(actualANPP[1] - totalMortality[1] - defoliatedLeafBiomass);
 
-            ANPP = (int)actualANPP[0] + (int)actualANPP[1];
+            //ANPP = (int)actualANPP[0] + (int)actualANPP[1];
 
             tempObject.WoodBiomass = deltaWood;
             tempObject.LeafBiomass = deltaLeaf;
+
             otherParams = tempObject;
+
+            double deltaAGB = deltaWood + deltaLeaf;
 
             //if((totalMortality[1] + defoliatedLeafBiomass) > cohort.LeafBiomass)
             //PlugIn.ModelCore.UI.WriteLine("Mortality Calcs. WoodMortality={0:0.000}, leafMortality={1:0.000}, DefoliatedLeafBiomass={2:0.000}", totalMortality[0], totalMortality[1], defoliatedLeafBiomass);
@@ -178,7 +182,7 @@ namespace Landis.Extension.Succession.DGS
                 CalibrateLog.WriteLogFile();
             }
 
-            return 0;
+            return  deltaAGB;
         }
 
 
