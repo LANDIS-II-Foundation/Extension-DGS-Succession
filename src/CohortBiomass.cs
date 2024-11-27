@@ -435,7 +435,7 @@ namespace Landis.Extension.Succession.DGS
         /// <summary>
         /// Computes the initial biomass for a cohort at a site.
         /// </summary>
-        public static float[] InitialBiomass(ISpecies species, ISiteCohorts siteCohorts,
+        public static float[] InitialBiomass(ISpecies species, SiteCohorts siteCohorts,
                                             ActiveSite site)
         {
             IEcoregion ecoregion = PlugIn.ModelCore.Ecoregion[site];

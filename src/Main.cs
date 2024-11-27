@@ -24,7 +24,7 @@ namespace Landis.Extension.Succession.DGS
         /// Grows all cohorts at a site for a specified number of years.
         /// Litter is decomposed following the Century model.
         /// </summary>
-        public static ISiteCohorts Run(ActiveSite site,
+        public static SiteCohorts Run(ActiveSite site,
                                        int         years,
                                        bool        isSuccessionTimeStep)
         {
@@ -203,7 +203,7 @@ namespace Landis.Extension.Succession.DGS
 
         //---------------------------------------------------------------------
 
-        public static int ComputeLivingBiomass(ISiteCohorts cohorts)
+        public static int ComputeLivingBiomass(SiteCohorts cohorts)
         {
             int total = 0;
             if (cohorts != null)
@@ -222,7 +222,7 @@ namespace Landis.Extension.Succession.DGS
 
         //---------------------------------------------------------------------
 
-        public static int ComputeNeedleBiomass(ISiteCohorts cohorts)
+        public static int ComputeNeedleBiomass(SiteCohorts cohorts)
         {
             int total = 0;
             if (cohorts != null)
@@ -256,7 +256,7 @@ namespace Landis.Extension.Succession.DGS
         }
 
         //---------------------------------------------------------------------
-        public static void ComputeTotalCohortCN(ActiveSite site, ISiteCohorts cohorts)
+        public static void ComputeTotalCohortCN(ActiveSite site, SiteCohorts cohorts)
         {
             SiteVars.CohortLeafC[site] = 0;
             SiteVars.CohortFRootC[site] = 0;

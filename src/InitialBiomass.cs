@@ -19,7 +19,7 @@ namespace Landis.Extension.Succession.DGS
     /// </summary>
     public class InitialBiomass
     {
-        private ISiteCohorts cohorts;
+        private SiteCohorts cohorts;
 
 
         //---------------------------------------------------------------------
@@ -27,7 +27,7 @@ namespace Landis.Extension.Succession.DGS
         /// <summary>
         /// The site's initial cohorts.
         /// </summary>
-        public ISiteCohorts Cohorts
+        public SiteCohorts Cohorts
         {
             get
             {
@@ -38,7 +38,7 @@ namespace Landis.Extension.Succession.DGS
 
         //---------------------------------------------------------------------
 
-        private InitialBiomass(ISiteCohorts cohorts)
+        private InitialBiomass(SiteCohorts cohorts)
         {
             this.cohorts = cohorts;
 
@@ -96,7 +96,7 @@ namespace Landis.Extension.Succession.DGS
             //List<Landis.Library.UniversalCohorts.ICohort> sortedAgeCohorts = SortCohorts(initialCommunity.Cohorts);
             List<ICohort> sortedAgeCohorts = SortCohorts(initialCommunity.Cohorts);
 
-            ISiteCohorts cohorts = MakeBiomassCohorts(sortedAgeCohorts, site);
+            var cohorts = MakeBiomassCohorts(sortedAgeCohorts, site);
             initialBiomass = new InitialBiomass(cohorts);
 
             return initialBiomass;
@@ -104,7 +104,7 @@ namespace Landis.Extension.Succession.DGS
 
         //---------------------------------------------------------------------
         //public static SiteCohorts MakeBiomassCohorts(List<Landis.Library.UniversalCohorts.ICohort> sortedCohorts, ActiveSite site)
-        public static ISiteCohorts MakeBiomassCohorts(List<ICohort> sortedCohorts, ActiveSite site)
+        public static SiteCohorts MakeBiomassCohorts(List<ICohort> sortedCohorts, ActiveSite site)
         {
 
             IEcoregion ecoregion = PlugIn.ModelCore.Ecoregion[site];

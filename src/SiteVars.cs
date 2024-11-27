@@ -329,7 +329,7 @@ namespace Landis.Extension.Succession.DGS
         public static double ActualSiteBiomass(ActiveSite site)
         {
             IEcoregion ecoregion = PlugIn.ModelCore.Ecoregion[site];
-            ISiteCohorts siteCohorts = Cohorts[site];
+            SiteCohorts siteCohorts = Cohorts[site];
 
             if(siteCohorts == null)
                 return 0.0;
