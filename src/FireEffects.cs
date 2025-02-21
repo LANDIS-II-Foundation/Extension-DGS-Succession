@@ -209,10 +209,10 @@ namespace Landis.Extension.Succession.DGS
         public static double CrownScorching(ICohort cohort, byte siteSeverity)
         {
 
-            int difference = (int)siteSeverity - SpeciesData.FireTolerance[cohort.Species];
+            int difference = (int)siteSeverity - PlugIn.Parameters.FireTolerance[cohort.Species];
             double ageFraction = 1.0 - ((double) cohort.Data.Age / (double) cohort.Species.Longevity);
             
-            if(SpeciesData.Epicormic[cohort.Species])
+            if (PlugIn.Parameters.Epicormic[cohort.Species])
             {
                 if(difference < 0)
                     return 0.5 * ageFraction;

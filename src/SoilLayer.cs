@@ -235,7 +235,7 @@ namespace Landis.Extension.Succession.DGS
             {
                 foreach (ICohort cohort in speciesCohorts)
                 {
-                    leafCNs.Add(SpeciesData.LeafCN[cohort.Species]);
+                    leafCNs.Add(PlugIn.Parameters.LeafCN[cohort.Species]);
                 }
             }
 
@@ -344,8 +344,8 @@ namespace Landis.Extension.Succession.DGS
             var dgas = PlugIn.Parameters.DiffConstantO2;
             var dliq = PlugIn.Parameters.DiffConstantSOMLiquid;
             var o2airfrac = PlugIn.Parameters.FractionVolumeO2;
-            var soilMoistureA = PlugIn.Parameters.DiffConstantSOMLiquid;
-            var soilMoistureB = PlugIn.Parameters.FractionVolumeO2;
+            //var soilMoistureA = PlugIn.Parameters.SoilMoistureA;
+            //var soilMoistureB = PlugIn.Parameters.SoilMoistureB;
 
             //calculate porosity 
             double porosity = 1 - bulk_density / particle_density;

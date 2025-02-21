@@ -22,7 +22,7 @@ namespace Landis.Extension.Succession.DGS
             double totalNdemand = CalculateCohortNDemand(site, cohort, actualANPP);
 
             // Use resorbed N first and only if it is spring time unless you are evergreen.  
-            double leafLongevity = SpeciesData.LeafLongevity[cohort.Species];
+            double leafLongevity = PlugIn.Parameters.LeafLongevity[cohort.Species];
             if ((leafLongevity <= 1.0 && Main.Month > 0 && Main.Month < 6) || leafLongevity > 1.0)
             {
                 resorbedNallocation = Math.Max(0.0, cohort.Data.AdditionalParameters.Nresorption);
@@ -40,8 +40,8 @@ namespace Landis.Extension.Succession.DGS
         public static double CalculateResorbedFoliarN(ActiveSite site, ISpecies species, double leafBiomass)
         {
            
-                double leafN = leafBiomass * 0.47 / SpeciesData.LeafCN[species];
-                double litterN = leafBiomass * 0.47 / SpeciesData.LeafLitterCN[species];
+                double leafN = leafBiomass * 0.47 / PlugIn.Parameters.LeafCN[species];
+                double litterN = leafBiomass * 0.47 / PlugIn.Parameters.FoliageLitterCN[species];
 
                 double resorbedN = leafN - litterN;
                 
@@ -144,7 +144,7 @@ namespace Landis.Extension.Succession.DGS
                 return 0.0;
              
 
-            if (SpeciesData.NFixer[cohort.Species])  // We fix our own N!
+            if (PlugIn.Parameters.NFixer[cohort.Species])  // We fix our own N!
                 return 0.0;
 
             double ANPPwood = 0.0;
@@ -161,8 +161,8 @@ namespace Landis.Extension.Succession.DGS
                 ANPPwood = ANPP[0];                                
                 ANPPcoarseRoot = Roots.CalculateCoarseRoot(cohort, ANPPwood);               
                 
-                woodN       = ANPPwood * 0.47  / SpeciesData.WoodCN[cohort.Species];
-                coarseRootN = ANPPcoarseRoot * 0.47  / SpeciesData.CoarseRootCN[cohort.Species];
+                woodN       = ANPPwood * 0.47  / PlugIn.Parameters.WoodCN[cohort.Species];
+                coarseRootN = ANPPcoarseRoot * 0.47  / PlugIn.Parameters.CoarseRootCN[cohort.Species];
             }
 
             if(ANPP[1] > 0.0)  // Leaf
@@ -170,8 +170,8 @@ namespace Landis.Extension.Succession.DGS
                 ANPPleaf = ANPP[1];                                
                 ANPPfineRoot = Roots.CalculateFineRoot(cohort, ANPPleaf);
                          
-                leafN       = ANPPleaf * 0.47 / SpeciesData.LeafCN[cohort.Species];
-                fineRootN   = ANPPfineRoot * 0.47/ SpeciesData.FineRootCN[cohort.Species];
+                leafN       = ANPPleaf * 0.47 / PlugIn.Parameters.LeafCN[cohort.Species];
+                fineRootN   = ANPPfineRoot * 0.47/ PlugIn.Parameters.FineRootCN[cohort.Species];
 
             }
 
@@ -200,7 +200,7 @@ namespace Landis.Extension.Succession.DGS
             double resorbedNallocation = 0.0;
 
             // Use resorbed N first and only if it is spring time unless you are evergreen.  
-            double leafLongevity = SpeciesData.LeafLongevity[cohort.Species];
+            double leafLongevity = PlugIn.Parameters.LeafLongevity[cohort.Species];
             if ((leafLongevity <= 1.0 && Main.Month > 2 && Main.Month < 6) || leafLongevity > 1.0)
             {
                 resorbedNallocation = Math.Max(0.0, cohort.Data.AdditionalParameters.Nresorption);

@@ -112,7 +112,7 @@ namespace Landis.Extension.Succession.DGS
         private static double SoilMoistureMultiplier(AnnualClimate weather, ISpecies species, double dryDays)
 
         {
-            double sppAllowableDrought = SpeciesData.MaxDrought[species];
+            double sppAllowableDrought = PlugIn.Parameters.MaxDrought[species];
             double growDays = 0.0;
             double maxDrought;
             double Soil_Moist_GF = 0.0;
@@ -145,8 +145,8 @@ namespace Landis.Extension.Succession.DGS
             //Calc species degree day multipliers  
             //Botkin et al. 1972. J. Ecol. 60:849 - 87
             
-            double max_Grow_Deg_Days = SpeciesData.GDDmax[species]; 
-            double min_Grow_Deg_Days = SpeciesData.GDDmin[species];
+            double max_Grow_Deg_Days = PlugIn.Parameters.GDDmax[species]; 
+            double min_Grow_Deg_Days = PlugIn.Parameters.GDDmin[species];
             
             double Deg_Day_GF = 0.0;
             double Deg_Days = (double) weather.GrowingDegreeDays; 
@@ -166,7 +166,7 @@ namespace Landis.Extension.Succession.DGS
         // Is the January mean temperature greater than the species specified minimum?
         {
         
-            int speciesMinimum = SpeciesData.MinJanTemp[species];
+            int speciesMinimum = PlugIn.Parameters.MinJanTemp[species];
             
             if (weather.MonthlyTemp[0] < speciesMinimum)
                 return 0.0;

@@ -29,9 +29,9 @@ namespace Landis.Extension.Succession.DGS
 
             if(coarseRootBiomass > 0)
             WoodLayer.PartitionResidue(coarseRootBiomass,  
-                            FunctionalType.Table[SpeciesData.FuncType[species]].WoodDecayRate,
-                            SpeciesData.CoarseRootCN[species], 
-                            SpeciesData.CoarseRootLignin[species], 
+                            PlugIn.Parameters.WoodDecayRate[species],
+                            PlugIn.Parameters.CoarseRootCN[species],
+                            PlugIn.Parameters.CoarseRootLignin[species], 
                             LayerName.CoarseRoot,
                             LayerType.Soil,
                             site);
@@ -54,8 +54,8 @@ namespace Landis.Extension.Succession.DGS
             LitterLayer.PartitionResidue(
                             fineRootBiomass,
                             inputDecayValue,
-                            SpeciesData.FineRootCN[species],
-                            SpeciesData.FineRootLignin[species],
+                            PlugIn.Parameters.FineRootCN[species],
+                            PlugIn.Parameters.FineRootLignin[species],
                             OtherData.StructuralCN,
                             LayerName.FineRoot,
                             LayerType.Soil,
@@ -68,11 +68,11 @@ namespace Landis.Extension.Succession.DGS
         /// </summary>
         public static double CalculateCoarseRoot(ICohort cohort, double wood)
         {
-            return (wood * FunctionalType.Table[SpeciesData.FuncType[cohort.Species]].CoarseRootFraction);
+            return (wood * PlugIn.Parameters.CoarseRootFraction[cohort.Species]);
         }
         public static double CalculateFineRoot(ICohort cohort, double foliarBiomass)
         {
-            return (foliarBiomass * FunctionalType.Table[SpeciesData.FuncType[cohort.Species]].FineRootFraction);
+            return (foliarBiomass * PlugIn.Parameters.FineRootFraction[cohort.Species]);
         }
     }
 }

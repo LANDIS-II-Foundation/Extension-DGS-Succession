@@ -128,7 +128,7 @@ namespace Landis.Extension.Succession.DGS
             ProbEstablishAdjust = Parameters.ProbEstablishAdjustment;
             MetadataHandler.InitializeMetadata(Timestep, modelCore, SoilCarbonMapNames, SoilNitrogenMapNames, ANPPMapNames, ANEEMapNames, TotalCMapNames); //,LAIMapNames, ShadeClassMapNames);
             
-            FunctionalType.Initialize(Parameters);
+            //FunctionalType.Initialize(Parameters);
             SpeciesData.Initialize(Parameters);
             ReadMaps.ReadSoilDepthMap(Parameters.SoilDepthMapName);
             ReadMaps.ReadSoilDrainMap(Parameters.SoilDrainMapName);
@@ -534,33 +534,40 @@ namespace Landis.Extension.Succession.DGS
 
         //---------------------------------------------------------------------
 
+        //---------------------------------------------------------------------
+        // Although this function is no longer referenced, it is required through inheritance from the succession library
         public override byte ComputeShade(ActiveSite site)
         {
-            IEcoregion ecoregion = ModelCore.Ecoregion[site];
-
-            byte finalShade = 0;
-
-            if (!ecoregion.Active)
-                return 0;
-
-            for (byte shade = 5; shade >= 1; shade--)
-            {
-                if(ShadeLAI[shade] <=0 ) 
-                {
-                    string mesg = string.Format("Maximum LAI has not been defined for shade class {0}", shade);
-                    throw new System.ApplicationException(mesg);
-                }
-                if (SiteVars.LAI[site] >= ShadeLAI[shade])
-                {
-                    finalShade = shade;
-                    break;
-                }
-            }
-
-            //PlugIn.ModelCore.UI.WriteLine("Yr={0},      Shade Calculation:  B_MAX={1}, B_ACT={2}, Shade={3}.", PlugIn.ModelCore.CurrentTime, B_MAX, B_ACT, finalShade);
-
-            return finalShade;
+            return (byte)SiteVars.LAI[site]; // finalShade;
         }
+
+        //public override byte ComputeShade(ActiveSite site)
+        //{
+        //    IEcoregion ecoregion = ModelCore.Ecoregion[site];
+
+        //    byte finalShade = 0;
+
+        //    if (!ecoregion.Active)
+        //        return 0;
+
+        //    for (byte shade = 5; shade >= 1; shade--)
+        //    {
+        //        if (ShadeLAI[shade] <= 0)
+        //        {
+        //            string mesg = string.Format("Maximum LAI has not been defined for shade class {0}", shade);
+        //            throw new System.ApplicationException(mesg);
+        //        }
+        //        if (SiteVars.LAI[site] >= ShadeLAI[shade])
+        //        {
+        //            finalShade = shade;
+        //            break;
+        //        }
+        //    }
+
+        //    //PlugIn.ModelCore.UI.WriteLine("Yr={0},      Shade Calculation:  B_MAX={1}, B_ACT={2}, Shade={3}.", PlugIn.ModelCore.CurrentTime, B_MAX, B_ACT, finalShade);
+
+        //    return finalShade;
+        //}
         //---------------------------------------------------------------------
 
         protected override void InitializeSite (ActiveSite site)
@@ -720,43 +727,107 @@ namespace Landis.Extension.Succession.DGS
             Main.Run(site, years, successionTimestep.HasValue);
 
         }
-        //---------------------------------------------------------------------
-        /// <summary>
-        /// Determines if there is sufficient light at a site for a species to
-        /// germinate/resprout.
-        /// This is a Delegate method to base succession.
-        /// </summary>
+
         public bool SufficientLight(ISpecies species, ActiveSite site)
         {
+            var a = PlugIn.Parameters.LightLAIShape[species];
+            var b = PlugIn.Parameters.LightLAIScale[species];
+            var c = PlugIn.Parameters.LightLAILocation[species];
+            var adjust = PlugIn.Parameters.LightLAIAdjust[species];
+            var lai = SiteVars.LAI[site];
 
-            //PlugIn.ModelCore.UI.WriteLine("  Calculating Sufficient Light from Succession.");
-            byte siteShade = ModelCore.GetSiteVar<byte>("Shade")[site];
-
-            double lightProbability = 0.0;
-            bool found = false;
-
-            foreach (ISufficientLight lights in sufficientLight)
-            {
-
-                //PlugIn.ModelCore.UI.WriteLine("Sufficient Light:  ShadeClass={0}, Prob0={1}.", lights.ShadeClass, lights.ProbabilityLight0);
-                if (lights.ShadeClass == SpeciesData.ShadeTolerance[species])
-                {
-                    if (siteShade == 0) lightProbability = lights.ProbabilityLight0;
-                    if (siteShade == 1) lightProbability = lights.ProbabilityLight1;
-                    if (siteShade == 2) lightProbability = lights.ProbabilityLight2;
-                    if (siteShade == 3) lightProbability = lights.ProbabilityLight3;
-                    if (siteShade == 4) lightProbability = lights.ProbabilityLight4;
-                    if (siteShade == 5) lightProbability = lights.ProbabilityLight5;
-                    found = true;
-                }
-            }
-
-            if (!found)
-                ModelCore.UI.WriteLine("A Sufficient Light value was not found for {0}.", species.Name);
+            var lightProbability = adjust * (((a / b) * Math.Pow((lai / b), (a - 1)) * Math.Exp(-Math.Pow((lai / b), a))) + c); //3-parameter Weibull PDF equation
+            lightProbability = Math.Min(lightProbability, 1.0);
+            //if(OtherData.CalibrateMode) PlugIn.ModelCore.UI.WriteLine("Estimated Weibull light probability for species {0} = {1:0.000}, at LAI = {2:0.00}", species.Name, lightProbability, SiteVars.LAI[site]);
 
             return modelCore.GenerateUniform() < lightProbability;
 
+            //if (modelCore.GenerateUniform() < lightProbability)
+            //    isSufficientlight = true;
+
+            //// ------------------------------------------------------------------------
+            //// Modify light probability modified by the amount of nursery log on the site
+            //// W.Hotta 2020.01.22
+            ////
+            //// Compute the availability of nursery log on the site
+            ////   Option1: function type is linear
+            ////   Option2: function type is power
+
+            //if (!SpeciesData.NurseLog_depend[species])
+            //    return isSufficientlight;
+
+            //double nurseryLogAvailabilityModifier = 2.0; // tuning parameter (only even)
+            //double nurseryLogAvailability = 1 - Math.Pow(ComputeNurseryLogAreaRatio(species, site) - 1, nurseryLogAvailabilityModifier);
+            //if (OtherData.CalibrateMode)
+            //{
+            //    ModelCore.UI.WriteLine("original_lightProbability:{0},{1},{2}", ModelCore.CurrentTime, species.Name, lightProbability);
+            //    ModelCore.UI.WriteLine("siteLAI:{0}", SiteVars.LAI[site]);
+            //}
+
+            //// Case 1. CWD-dependent species (species which can only be established on nursery log)
+            //if (SpeciesData.NurseLog_depend[species]) // W.Hotta (2021.08.01)
+            //{
+            //    lightProbability *= nurseryLogAvailability;
+            //    isSufficientlight = modelCore.GenerateUniform() < lightProbability;
+            //    if (isSufficientlight) regenType = "nurse_log";
+            //}
+            //// Case 2. CWD-independent species (species which can be established on both forest floor & nursery log)
+            //else
+            //{
+            //    // 1. Can the cohort establish on forest floor? (lightProbability is considering both Tree and Grass species)
+            //    if (modelCore.GenerateUniform() < lightProbability)
+            //    {
+            //        isSufficientlight = true;
+            //        regenType = "surface";
+            //    }
+            //    if (OtherData.CalibrateMode)
+            //    {
+            //        ModelCore.UI.WriteLine("nurseryLogPenalty:{0},{1},{2}", ModelCore.CurrentTime, species.Name, nurseryLogAvailability);
+            //        ModelCore.UI.WriteLine("modified_lightProbability:{0},{1},{2}", ModelCore.CurrentTime, species.Name, lightProbability);
+            //        ModelCore.UI.WriteLine("regeneration_type:{0},{1},{2}", ModelCore.CurrentTime, species.Name, regenType);
+            //    }
+            //}
+
+            //return isSufficientlight;
         }
+
+        ////---------------------------------------------------------------------
+        ///// <summary>
+        ///// Determines if there is sufficient light at a site for a species to
+        ///// germinate/resprout.
+        ///// This is a Delegate method to base succession.
+        ///// </summary>
+        //public bool SufficientLight(ISpecies species, ActiveSite site)
+        //{
+
+        //    //PlugIn.ModelCore.UI.WriteLine("  Calculating Sufficient Light from Succession.");
+        //    byte siteShade = ModelCore.GetSiteVar<byte>("Shade")[site];
+
+        //    double lightProbability = 0.0;
+        //    bool found = false;
+
+        //    foreach (ISufficientLight lights in sufficientLight)
+        //    {
+
+        //        //PlugIn.ModelCore.UI.WriteLine("Sufficient Light:  ShadeClass={0}, Prob0={1}.", lights.ShadeClass, lights.ProbabilityLight0);
+        //        if (lights.ShadeClass == SpeciesData.ShadeTolerance[species])
+        //        {
+        //            if (siteShade == 0) lightProbability = lights.ProbabilityLight0;
+        //            if (siteShade == 1) lightProbability = lights.ProbabilityLight1;
+        //            if (siteShade == 2) lightProbability = lights.ProbabilityLight2;
+        //            if (siteShade == 3) lightProbability = lights.ProbabilityLight3;
+        //            if (siteShade == 4) lightProbability = lights.ProbabilityLight4;
+        //            if (siteShade == 5) lightProbability = lights.ProbabilityLight5;
+        //            found = true;
+        //        }
+        //    }
+
+        //    if (!found)
+        //        ModelCore.UI.WriteLine("A Sufficient Light value was not found for {0}.", species.Name);
+
+        //    return modelCore.GenerateUniform() < lightProbability;
+
+        //}
         //---------------------------------------------------------------------
         
         /// <summary>

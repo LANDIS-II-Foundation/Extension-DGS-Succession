@@ -374,7 +374,7 @@ namespace Landis.Extension.Succession.DGS
         //---------------------------------------------------------------------
         public static void Initialize(IInputParameters parameters)
         {
-            Table = parameters.FunctionalTypes;
+            //Table = parameters.FunctionalTypes;
             //PlugIn.ModelCore.UI.WriteLine("  Functional Table [1].PPDF1={0}.", parameters.FunctionalTypeTable[1].PPDF1);
         }
 

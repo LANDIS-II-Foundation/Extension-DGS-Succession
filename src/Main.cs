@@ -289,10 +289,10 @@ namespace Landis.Extension.Succession.DGS
 
             double totalC = leafC + woodC + fRootC + cRootC;
 
-            double leafN  = leafC /  (double) SpeciesData.LeafCN[species];
-            double woodN = woodC / (double) SpeciesData.WoodCN[species];
-            double cRootN = cRootC / (double) SpeciesData.CoarseRootCN[species];
-            double fRootN = fRootC / (double) SpeciesData.FineRootCN[species];
+            double leafN  = leafC /  (double) PlugIn.Parameters.LeafCN[species];
+            double woodN = woodC / (double) PlugIn.Parameters.WoodCN[species];
+            double cRootN = cRootC / (double) PlugIn.Parameters.CoarseRootCN[species];
+            double fRootN = fRootC / (double) PlugIn.Parameters.FineRootCN[species];
 
             //double totalN = woodN + cRootN + leafN + fRootN;
 

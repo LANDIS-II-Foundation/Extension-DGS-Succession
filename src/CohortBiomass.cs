@@ -193,11 +193,11 @@ namespace Landis.Extension.Succession.DGS
                                          double    siteBiomass,
                                          double[]   mortalityAge)
         {
-            dynamic additionalParameters = cohort.Data.AdditionalParameters; 
-            double leafFractionNPP  = FunctionalType.Table[SpeciesData.FuncType[cohort.Species]].FractionANPPtoLeaf;
-            double maxBiomass       = SpeciesData.Max_Biomass[cohort.Species];//.B_MAX_Spp[cohort.Species][ecoregion];
+            dynamic additionalParameters = cohort.Data.AdditionalParameters;
+            double leafFractionNPP = PlugIn.Parameters.FractionANPPtoLeaf[cohort.Species];
+            double maxBiomass = PlugIn.Parameters.MaxBiomass[cohort.Species];//.B_MAX_Spp[cohort.Species][ecoregion];
             double sitelai          = SiteVars.LAI[site];
-            double maxNPP           = SpeciesData.Max_ANPP[cohort.Species];//.ANPP_MAX_Spp[cohort.Species][ecoregion];
+            double maxNPP           = PlugIn.Parameters.MaxANPP[cohort.Species];//.ANPP_MAX_Spp[cohort.Species][ecoregion];
 
             double limitT, soilTemperature, limitH20, availableWater;
 
@@ -282,7 +282,7 @@ namespace Landis.Extension.Succession.DGS
                 CalibrateLog.soilTemp = soilTemperature;
                 CalibrateLog.availableWater = availableWater;
                 CalibrateLog.maxNPP = maxNPP;
-                CalibrateLog.maxB = SpeciesData.Max_Biomass[cohort.Species];
+                CalibrateLog.maxB = PlugIn.Parameters.MaxBiomass[cohort.Species];
                 CalibrateLog.siteB = siteBiomass;
                 CalibrateLog.cohortB = (additionalParameters.WoodBiomass + additionalParameters.LeafBiomass);
                 CalibrateLog.actualWoodNPP = woodNPP;
@@ -305,7 +305,7 @@ namespace Landis.Extension.Succession.DGS
             double monthAdjust = 1.0 / 12.0;
             double totalBiomass = (double) (additionalParameters.WoodBiomass + additionalParameters.LeafBiomass);
             double max_age      = (double) cohort.Species.Longevity;
-            double d            = FunctionalType.Table[SpeciesData.FuncType[cohort.Species]].LongevityMortalityShape;
+            double d            = PlugIn.Parameters.LongevityMortalityShape[cohort.Species];
 
             double M_AGE_wood =     additionalParameters.WoodBiomass *  monthAdjust *
                                     Math.Exp((double) cohort.Data.Age / max_age * d) / Math.Exp(d);
@@ -343,10 +343,10 @@ namespace Landis.Extension.Succession.DGS
         private double[] ComputeGrowthMortality(ICohort cohort, ActiveSite site, double siteBiomass, double[] AGNPP)
         {
             dynamic additionalParameters = cohort.Data.AdditionalParameters; 
-            double maxBiomass = SpeciesData.Max_Biomass[cohort.Species];
+            double maxBiomass = PlugIn.Parameters.MaxBiomass[cohort.Species];
             double NPPwood = (double)AGNPP[0];
             
-            double M_wood_fixed = additionalParameters.WoodBiomass * FunctionalType.Table[SpeciesData.FuncType[cohort.Species]].MonthlyWoodMortality;
+            double M_wood_fixed = additionalParameters.WoodBiomass * PlugIn.Parameters.MonthlyWoodMortality[cohort.Species];
             double M_leaf = 0.0;
 
             double relativeBiomass = siteBiomass / maxBiomass;
@@ -361,19 +361,19 @@ namespace Landis.Extension.Succession.DGS
             double M_wood = (NPPwood * M_wood_NPP) + M_wood_fixed;
 
             // Leaves and Needles dropped.
-            if (SpeciesData.LeafLongevity[cohort.Species] > 1.0) 
+            if (PlugIn.Parameters.LeafLongevity[cohort.Species] > 1.0) 
             {
-                M_leaf = additionalParameters.LeafBiomass / (double) SpeciesData.LeafLongevity[cohort.Species] / 12.0;  //Needle deposit spread across the year.
+                M_leaf = additionalParameters.LeafBiomass / (double) PlugIn.Parameters.LeafLongevity[cohort.Species] / 12.0;  //Needle deposit spread across the year.
                
             }
             else
             {
-                if(Main.Month +1 == FunctionalType.Table[SpeciesData.FuncType[cohort.Species]].FoliageDropMonth)
+                if (Main.Month +1 == PlugIn.Parameters.FoliageDropMonth[cohort.Species])
                 {
                     M_leaf = additionalParameters.LeafBiomass / 2.0;  //spread across 2 months
                     
                 }
-                if (Main.Month +2 > FunctionalType.Table[SpeciesData.FuncType[cohort.Species]].FoliageDropMonth)
+                if (Main.Month +2 > PlugIn.Parameters.FoliageDropMonth[cohort.Species])
                 {
                     M_leaf = additionalParameters.LeafBiomass;  //drop the remainder
                 }
@@ -440,10 +440,10 @@ namespace Landis.Extension.Succession.DGS
         {
             IEcoregion ecoregion = PlugIn.ModelCore.Ecoregion[site];
 
-            double leafFrac = FunctionalType.Table[SpeciesData.FuncType[species]].FractionANPPtoLeaf;
+            double leafFrac = PlugIn.Parameters.FractionANPPtoLeaf[species];
 
             double B_ACT = SiteVars.ActualSiteBiomass(site);
-            double B_MAX = SpeciesData.Max_Biomass[species]; // B_MAX_Spp[species][ecoregion];
+            double B_MAX = PlugIn.Parameters.MaxBiomass[species]; // B_MAX_Spp[species][ecoregion];
 
             //  Initial biomass exponentially declines in response to
             //  competition.
@@ -563,7 +563,7 @@ namespace Landis.Extension.Succession.DGS
             double WoodNPP = NPP * (1.0 - leafFractionNPP);
 
             double limitN = 0.0;
-            if (SpeciesData.NFixer[cohort.Species])
+            if (PlugIn.Parameters.NFixer[cohort.Species])
                 limitN = 1.0;  // No limit for N-fixing shrubs
             else
             {
@@ -634,14 +634,14 @@ namespace Landis.Extension.Succession.DGS
 
             double lai = 0.0;
             double laitop = -0.47;  // This is the value given for all biomes in the tree.100 file.           
-            double btolai = FunctionalType.Table[SpeciesData.FuncType[cohort.Species]].BiomassToLAI;
-            double klai   = FunctionalType.Table[SpeciesData.FuncType[cohort.Species]].KLAI;
-            double maxlai = FunctionalType.Table[SpeciesData.FuncType[cohort.Species]].MaxLAI;
+            double btolai = PlugIn.Parameters.LeafBiomassToLAI[cohort.Species];
+            double klai   = PlugIn.Parameters.KLAI[cohort.Species];
+            double maxlai = PlugIn.Parameters.MaxLAI[cohort.Species];
 
             //double rlai = (Math.Max(0.0, 1.0 - Math.Exp(btolai * leafC)));
             double rlai = Math.Pow ((Math.Sin((Main.Month/12.0) * Math.PI + btolai)), 3.0);
 
-            if (SpeciesData.LeafLongevity[cohort.Species] > 1.0)
+            if (PlugIn.Parameters.LeafLongevity[cohort.Species] > 1.0)
             {
                 rlai = 1.0;
             }
@@ -668,8 +668,8 @@ namespace Landis.Extension.Succession.DGS
 
             //This allows LAI to go to zero for deciduous trees.
 
-            if (SpeciesData.LeafLongevity[cohort.Species] <= 1.0 &&
-                (Main.Month > FunctionalType.Table[SpeciesData.FuncType[cohort.Species]].FoliageDropMonth || Main.Month < 3))
+            if (PlugIn.Parameters.LeafLongevity[cohort.Species] <= 1.0 &&
+                (Main.Month > PlugIn.Parameters.FoliageDropMonth[cohort.Species] || Main.Month < 3))
             {
                 lai = 0.0;
                 LAI_limit = 0.0;
@@ -692,7 +692,7 @@ namespace Landis.Extension.Succession.DGS
         {
             //double k = -0.25;  // This is the value given for all temperature ecosystems. I started with -0.1, latest code with -0.05, -0.25 works nicely for BS and alder
             // making the competition limit a functional group parameter
-            double k = FunctionalType.Table[SpeciesData.FuncType[cohort.Species]].K *-1.0; 
+            double k = -PlugIn.Parameters.CompLimit[cohort.Species]; 
             double monthly_LAI = SiteVars.MonthlyLAI[site][Main.Month];
             double competition_limit = Math.Max(0.0, Math.Exp(k * monthly_LAI));
             
@@ -706,8 +706,8 @@ namespace Landis.Extension.Succession.DGS
         {
             if (PlugIn.ShawGiplEnabled)
             {
-                var hasAdventRoots = SpeciesData.AdventRoots[species];
-                var rootingdepth = SpeciesData.RootingDepth[species] / 100.0;   // convert rooting depth to meters
+                var hasAdventRoots = PlugIn.Parameters.AdventRoots[species];
+                var rootingdepth = PlugIn.Parameters.RootingDepth[species] / 100.0;   // convert rooting depth to meters
                                                                                 //var thu = PlugIn.TempHydroUnits[PlugIn.ModelCore.Ecoregion[site]];
                 //var thu = PlugIn.TempHydroUnit;
                 var thu = SiteVars.TempHydroUnit[site];
@@ -742,10 +742,10 @@ namespace Landis.Extension.Succession.DGS
             //if (waterLimit < 0.01) waterLimit = 0.01;
 
             //return waterLimit;
-            var A1 = FunctionalType.Table[SpeciesData.FuncType[species]].MoistureCurve1;
-            var A2 = FunctionalType.Table[SpeciesData.FuncType[species]].MoistureCurve2;
-            var A3 = FunctionalType.Table[SpeciesData.FuncType[species]].MoistureCurve3;
-            var A4 = FunctionalType.Table[SpeciesData.FuncType[species]].MoistureCurve4;
+            var A1 = PlugIn.Parameters.MoistureCurve1[species];
+            var A2 = PlugIn.Parameters.MoistureCurve2[species];
+            var A3 = PlugIn.Parameters.MoistureCurve3[species];
+            var A4 = PlugIn.Parameters.MoistureCurve4[species];
 
             var frac = (A2 - availableWater) / (A2 - A1);
             var waterLimit = 0.0;
@@ -782,8 +782,8 @@ namespace Landis.Extension.Succession.DGS
 
             if (PlugIn.ShawGiplEnabled)
             {
-                var hasAdventRoots = SpeciesData.AdventRoots[species];
-                var rootingdepth = SpeciesData.RootingDepth[species] / 100.0;   // convert rooting depth to meters
+                var hasAdventRoots = PlugIn.Parameters.AdventRoots[species];
+                var rootingdepth = PlugIn.Parameters.RootingDepth[species] / 100.0;   // convert rooting depth to meters
                 //var thu = PlugIn.TempHydroUnit;
                 var thu = SiteVars.TempHydroUnit[site];
 
@@ -825,10 +825,10 @@ namespace Landis.Extension.Succession.DGS
             //       Fort collins, Colorado  80523
             // https://mountainscholar.org/bitstream/handle/10217/16102/IBP153.pdf?sequence=1&isAllowed=y
 
-            var A1 = FunctionalType.Table[SpeciesData.FuncType[species]].TempCurve1;
-            var A2 = FunctionalType.Table[SpeciesData.FuncType[species]].TempCurve2;
-            var A3 = FunctionalType.Table[SpeciesData.FuncType[species]].TempCurve3;
-            var A4 = FunctionalType.Table[SpeciesData.FuncType[species]].TempCurve4;
+            var A1 = PlugIn.Parameters.TemperatureCurve1[species];
+            var A2 = PlugIn.Parameters.TemperatureCurve2[species];
+            var A3 = PlugIn.Parameters.TemperatureCurve3[species];
+            var A4 = PlugIn.Parameters.TemperatureCurve4[species];
 
             var frac = (A2 - soilTemperature) / (A2 - A1);
             var temp_limit = 0.0;

@@ -369,10 +369,9 @@ namespace Landis.Extension.Succession.DGS
 
             // calculate species records for this month based on gipl and shaw results
             foreach (var species in PlugIn.ModelCore.Species)
-
             {
-                var hasAdventRoots = SpeciesData.AdventRoots[species];
-                var rootingdepth = SpeciesData.RootingDepth[species] / 100.0;   // convert rooting depth to meters
+                var hasAdventRoots = PlugIn.Parameters.AdventRoots[species];
+                var rootingdepth = PlugIn.Parameters.RootingDepth[species] / 100.0;   // convert rooting depth to meters
                 var startingDepth = hasAdventRoots ? 0.0 : SpeciesData.AdventitiousLayerDepth;
 
                 // average Gipl's soil temperature profile (at Shaw depths) to get the soil temperature.

@@ -25,10 +25,10 @@ namespace Landis.Extension.Succession.DGS
         {
         
             if(woodBiomass > 0)
-            WoodLayer.PartitionResidue(woodBiomass,  
-                            FunctionalType.Table[SpeciesData.FuncType[species]].WoodDecayRate,
-                            SpeciesData.WoodCN[species], 
-                            SpeciesData.WoodLignin[species], 
+            WoodLayer.PartitionResidue(woodBiomass,
+                            PlugIn.Parameters.WoodDecayRate[species],
+                            PlugIn.Parameters.WoodCN[species], 
+                            PlugIn.Parameters.WoodLignin[species], 
                             LayerName.Wood,
                             LayerType.Surface,
                             site);
@@ -54,8 +54,8 @@ namespace Landis.Extension.Succession.DGS
                 LitterLayer.PartitionResidue(
                             foliarBiomass,
                             inputDecayValue,
-                            SpeciesData.LeafCN[species],
-                            SpeciesData.LeafLignin[species],
+                            PlugIn.Parameters.LeafCN[species],
+                            PlugIn.Parameters.LeafLignin[species],
                             OtherData.StructuralCN,
                             LayerName.Leaf,
                             LayerType.Surface,
@@ -82,8 +82,8 @@ namespace Landis.Extension.Succession.DGS
                 LitterLayer.PartitionResidue(
                             foliarBiomass,
                             inputDecayValue,
-                            SpeciesData.LeafLitterCN[species],
-                            SpeciesData.LeafLignin[species],
+                            PlugIn.Parameters.FoliageLitterCN[species],
+                            PlugIn.Parameters.LeafLignin[species],
                             OtherData.StructuralCN,
                             LayerName.Leaf,
                             LayerType.Surface,
@@ -111,7 +111,7 @@ namespace Landis.Extension.Succession.DGS
                 // Frass C added is a function of defoliated leaf biomass, but adjusted for the CN of litter and frass
                 // Any C lost is due to insect metabolism
                 double inputFrassC = inputFrassBiomass * 0.47;
-                double inputFrassN = inputFrassC / (double) SpeciesData.LeafLitterCN[species];
+                double inputFrassN = inputFrassC / (double)PlugIn.Parameters.FoliageLitterCN[species];
                 double actualFrassC = inputFrassN * (double) OtherData.CNratiofrass;  // the difference between input and actual is C lost to insect metabolism
                 double actualFrassBiomass = actualFrassC / 0.47;
 
