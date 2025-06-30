@@ -1,0 +1,11 @@
+Name,Sand,Silt,Clay,Rock,Organic,BulkDensity,Ksat,KsatLateral,AirEntry,ThetaSat,Campbells,BrooksCoreyPoreSize,ThetaResidual,BrooksCoreyPoreConnectivity,nVanGenuchten,vanGenuchtenPoreConnectivity,alphaVanGenuchten
+,SAND,SILT,CLAY,ROCK,OM,RHOB,SATCON,SATKL,SOILWRC(1),SOILWRC(2),SOILWRC(3),SOILWRC(3),SOILWRC(4),SOILWRC(5),SOILWRC(3),SOILWRC(5),SOILWRC(6)
+,all,all,all,all,all,all,all,all,all,all,if IWRC = 1,If IWRC = 2,"If IWRC = 2, 3",If IWRC = 2,If IWRC = 3,If IWRC = 3,If IWRC = 3
+,percent,percent,percent,percent,percent,kg/m3,cm/hr,cm/hr,m,-,-,-,-,-,-,-,m^-1
+Organic,33,33,33,0,100,262,443,0,0,0.625,,,0.15,,1.54,-1.66,30.2
+Mineral1,23,67,10,10,6,913,234,0,0,0.566,,,0.021,,1.41,0.5,4.44
+Mineral2,23,67,10,10,6,1158,181,0,0,0.546,,,0.071,,1.32,0.5,2.3
+Mineral3,23,67,10,10,2,1223,141,0,0,0.454,,,0.088,,1.41,0.5,4.77
+,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,
+,"[0.0, 100.0]","[0.0, 100.0]","[0.0, 100.0]","[0.0, 100.0]","[0.0, 100.0]","[0.0, inf)","[0.0, inf)","[0.0, inf)",,,,,,,,,

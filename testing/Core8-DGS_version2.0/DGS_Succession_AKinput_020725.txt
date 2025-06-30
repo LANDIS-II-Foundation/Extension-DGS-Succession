@@ -1,0 +1,94 @@
+LandisData	"DGS Succession"
+
+Timestep  1
+
+CalibrateMode no
+
+>> Climate and N inputs
+ClimateConfigFile		climate_gen_baseline.txt
+AtmosphericNSlope		0.0008  << Shelby  calibrated value 9/30/19
+AtmosphericNIntercept		0.003	<<ML was 0.005, value used is from Shelby
+
+InitialCommunities      	AK_IC_File-THU37.csv
+InitialCommunitiesMap   	ICval10.img
+Latitude			65.6    <<Approx latitude of Fairbanks = 65.575967
+
+ShawGiplConfigFile		singleCellVogelShawGiplConfig.txt
+
+>>Soil maps 
+SoilDepthMapName			./SingleCellRasters/singlecell_100.tif
+SoilDrainMapName			./SingleCellRasters/singlecell_point3.tif
+SoilBaseFlowMapName			./SingleCellRasters/singlecell_point3.tif
+SoilStormFlowMapName			./SingleCellRasters/singlecell_point3.tif
+SoilFieldCapacityMapName		./SingleCellRasters/singlecell_point4.tif
+SoilWiltingPointMapName			./SingleCellRasters/singlecell_point1.tif
+SoilPercentSandMapName			./SingleCellRasters/singlecell_point56.tif
+SoilPercentClayMapName			./SingleCellRasters/singlecell_point3.tif
+SoilBulkDensityMapName			./SingleCellRasters/singlecell_point1.tif
+SoilParticleDensityMapName		./SingleCellRasters/ParticleDensity.tif
+InitialSOC_PrimaryMapName			./SingleCellRasters/singlecell_4600.tif
+InitialSON_PrimaryMapName			./SingleCellRasters/singlecell_60.tif
+InitialDeadWoodSurfaceMapName	./SingleCellRasters/singlecell_100.tif
+InitialDeadCoarseRootsMapName	./SingleCellRasters/singlecell_100.tif
+
+>>General Soil parameters
+InitialFineFuels		0.1
+InitialMineralN			1.697   << This came from Smith et al. 2000 Table 4 (old burn values)
+DenitrificationRate		0.001
+WaterDecayFunction Linear <<Linear or Ratio  Still needed for DecayFactor
+
+>>DAMM Soil parameters
+InitialMicrobialC		1.9703	<< Rose's input
+InitialMicrobialN		0.197	<< Rose's input
+InitialEnzymeConc	0.0339
+ActEnergySOMDepoly	66.2675487981142
+ActEnergyDOCUptake	67.8225452963818
+ExpConstSOMDepoly	116986794418
+ExpConstDOCUptake	115130563903
+FractionSOMUnprotect	0.0004048
+CNEnzymes		2.86940
+KmSOMDepoly		0.00249
+KmDOCUptake		0.33217
+EnzTurnRate		0.00095780
+MicrobialTurnRate	0.0001437
+CarbonUseEfficiency	0.357329
+PropEnzymeSOM		0.522748
+PropCEnzymeProduction	0.551334
+PropNEnzymeProduction	0.50446
+FractDeadMicrobialBiomassSOM	0.551334
+MMConstantO2		0.128
+DiffConstantO2		1.676
+DiffConstantSOMLiquid	3.3386
+FractionVolumeO2	0.205165
+DOCFraction			0.0016669     << DOC is about 0.2% of SOC pool, Kane et al. 2006. This controls the initial amount of DOC.
+DONFraction			0.0016669    << Fraction of TON that is DON, wasn't sure so used same as DOC
+FractionLitterToDOC		0.066          << Soil DOC is 8 gC/m2/y, Litterfall 122 gC/m2y, so fraction is 0.066
+
+>>Dispersal parameters
+SeedingAlgorithm  WardSeedDispersal
+ProbabilityEstablishAdjust 	0.4	<< AFRI
+
+SpeciesParameters DGS_Spp_Table-WR-Updated.csv
+
+FireReductionParameters 
+>> I used Table 7 in de Groot et al. 2013 to get at fine fuel consumption, then did best guesses based on those values for the other categories (11/24/21, SW)
+>>	Severity	WoodLitter	Litter	CohortWood	CohortLeaf	SOM
+>>	Fire		Reduct		Reduct	Reduct		Reduct		Reduction
+	1		0.2		0.3	0.1		0.4		0.3
+	2		0.4		0.5	0.3		0.6		0.5
+	3		0.8		0.9	0.7		1.0		0.9
+	4		0.8		0.9	0.7		1.0		0.9
+	5		0.8		0.9	0.7		1.0		0.9
+	6		0.8		0.9	0.7		1.0		0.9
+	7		0.8		0.9	0.7		1.0		0.9
+	8		0.8		0.9	0.7		1.0		0.9
+	9		0.8		0.9	0.7		1.0		0.9
+	10		0.8		0.9	0.7		1.0		0.9
+	
+
+
+HarvestReductionParameters
+>>	Name		WoodLitter	Litter		SOM		CohortWood	CohortLeaf
+>>	Reduct		Reduct		Reduction	Removal		Removal		Removal
+	Clearcut	0.0		0.01		0.02		0.85		0.15
+

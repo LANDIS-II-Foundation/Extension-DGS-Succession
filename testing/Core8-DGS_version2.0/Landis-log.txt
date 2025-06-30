@@ -1,0 +1,105 @@
+2025-06-30 11:04:10,560 - LANDIS-II 8.0 (8)
+2025-06-30 11:04:10,562 - 
+2025-06-30 11:04:10,702 - Loading scenario from file "scenario_DGS_SC.txt" ...
+2025-06-30 11:04:10,726 - Initialized random number generator with user-supplied seed = 4,357
+2025-06-30 11:04:10,726 - Loading species data from file "AlaskaSpecies_012821.txt" ...
+2025-06-30 11:04:10,730 - Loading ecoregions from file "AK_climate_regions.txt" ...
+2025-06-30 11:04:10,784 - Core metadata:
+2025-06-30 11:04:10,785 - LANDIS-II v8.0, Seed: 4357, singlec_eco.img, AK_climate_regions.txt, AlaskaSpecies_012821.txt
+Succession:
+DGS Succession Version: 2.0, Input: DGS_Succession_AKinput_020725.txt
+Disturbance Extensions:
+Other Extensions:
+Output Biomass Reclass Version: 4.0, Input: output_BiomassReclass.txt
+
+2025-06-30 11:04:10,785 - Initializing landscape from ecoregions map "singlec_eco.img" ...
+2025-06-30 11:04:10,820 - Cell length = 100 m, cell area = 1 ha
+2025-06-30 11:04:10,821 - Map dimensions: 1 row by 1 column = 1 cell
+2025-06-30 11:04:10,825 - Sites: 1 active (100.0%), 0 inactive (0.0%)
+2025-06-30 11:04:10,827 - Loading DGS Succession extension ...
+2025-06-30 11:04:11,130 -    Registering Data:  Succession.UniversalCohorts.
+2025-06-30 11:04:11,131 -    Registering Data:  Succession.FineFuels.
+2025-06-30 11:04:11,131 -    Registering Data:  Succession.SmolderConsumption.
+2025-06-30 11:04:11,132 -    Registering Data:  Succession.FlamingConsumption.
+2025-06-30 11:04:11,132 -    Registering Data:  Succession.CWD.
+2025-06-30 11:04:11,132 -    Registering Data:  Succession.PET.
+2025-06-30 11:04:11,296 -    Begin reading FIRE REDUCTION parameters.
+2025-06-30 11:04:11,297 -    Begin reading HARVEST REDUCTION parameters.
+2025-06-30 11:04:14,214 - Initializing DGS Succession ...
+2025-06-30 11:04:14,226 -   Read in data from ./SingleCellRasters/singlecell_100.tif
+2025-06-30 11:04:14,229 -   Read in data from ./SingleCellRasters/singlecell_point3.tif
+2025-06-30 11:04:14,231 -   Read in data from ./SingleCellRasters/singlecell_point3.tif
+2025-06-30 11:04:14,231 -   Read in data from ./SingleCellRasters/singlecell_point3.tif
+2025-06-30 11:04:14,231 -   Read in data from ./SingleCellRasters/singlecell_point4.tif
+2025-06-30 11:04:14,232 -   Read in data from ./SingleCellRasters/singlecell_point1.tif
+2025-06-30 11:04:14,233 -   Read in data from ./SingleCellRasters/singlecell_point56.tif
+2025-06-30 11:04:14,233 -   Read in data from ./SingleCellRasters/singlecell_point3.tif
+2025-06-30 11:04:14,234 -   Read in data from ./SingleCellRasters/singlecell_point1.tif
+2025-06-30 11:04:14,234 -   Read in data from ./SingleCellRasters/ParticleDensity.tif
+2025-06-30 11:04:14,237 -   Read in data from ./SingleCellRasters/singlecell_4600.tif
+2025-06-30 11:04:14,237 -   Read in data from ./SingleCellRasters/singlecell_60.tif
+2025-06-30 11:04:14,238 -   Read in data from ./SingleCellRasters/singlecell_100.tif
+2025-06-30 11:04:14,239 -   Read in data from ./SingleCellRasters/singlecell_100.tif
+2025-06-30 11:05:20,067 -    Registering Data:  TimeOfLastSuccession.
+2025-06-30 11:05:20,067 -    Registering Data:  Shade.
+2025-06-30 11:05:20,068 -    Creating Dispersal Neighborhood List.
+2025-06-30 11:05:20,068 -    Dispersal:  NeighborRadius=5050, CellLength=100, numCellRadius=50
+2025-06-30 11:05:20,071 -    Loading initial communities from file "AK_IC_File-THU37.csv" ...
+2025-06-30 11:05:20,076 -    Reading initial communities map "ICval10.img" ...
+2025-06-30 11:05:20,614 - Loading Output Biomass Reclass extension ...
+2025-06-30 11:05:20,655 -    Registering Data:  Output.ForestType.
+2025-06-30 11:05:20,657 - Using the following extensions ...
+   Extension Name            Extension Filename       
+   --------------            ------------------       
+   DGS Succession            DGS_Succession_AKinput_020725.txt
+   Output Biomass Reclass    output_BiomassReclass.txt
+
+2025-06-30 11:05:20,657 - Running Output Biomass Reclass ...
+2025-06-30 11:05:20,658 -    Writing Biomass Reclass map to outputs/biomass-reclass/biomass-reclass-reclass1-0.tif ...
+2025-06-30 11:05:20,665 -    Writing Biomass Reclass map to outputs/biomass-reclass/biomass-reclass-reclass2-0.tif ...
+2025-06-30 11:05:20,669 - Current time: 1
+2025-06-30 11:05:20,670 - Running DGS Succession ...
+2025-06-30 11:05:20,671 - AssignTempHydroUnits: Start
+2025-06-30 11:05:20,672 - AssignTempHydroUnits: 1 THUs in use:
+2025-06-30 11:05:20,673 - 33 -> 1 sites
+2025-06-30 11:05:20,673 - AssignTempHydroUnits: End
+2025-06-30 11:05:20,678 - RunTempHydroUnits: Start
+2025-06-30 11:05:25,330 - RunTempHydroUnits: End
+2025-06-30 11:05:25,330 - ExtensionBaseRun: Start
+2025-06-30 11:05:25,400 - ExtensionBaseRun: Stop
+2025-06-30 11:05:25,798 - Running Output Biomass Reclass ...
+2025-06-30 11:05:25,798 -    Writing Biomass Reclass map to outputs/biomass-reclass/biomass-reclass-reclass1-1.tif ...
+2025-06-30 11:05:25,800 -    Writing Biomass Reclass map to outputs/biomass-reclass/biomass-reclass-reclass2-1.tif ...
+2025-06-30 11:05:25,803 - Current time: 2
+2025-06-30 11:05:25,803 - Running DGS Succession ...
+2025-06-30 11:05:25,803 - AssignTempHydroUnits: Start
+2025-06-30 11:05:25,803 - AssignTempHydroUnits: 1 THUs in use:
+2025-06-30 11:05:25,804 - 33 -> 1 sites
+2025-06-30 11:05:25,804 - AssignTempHydroUnits: End
+2025-06-30 11:05:25,804 - RunTempHydroUnits: Start
+2025-06-30 11:05:28,030 - RunTempHydroUnits: End
+2025-06-30 11:05:28,031 - ExtensionBaseRun: Start
+2025-06-30 11:05:28,041 - ExtensionBaseRun: Stop
+2025-06-30 11:05:28,372 - Running Output Biomass Reclass ...
+2025-06-30 11:05:28,372 -    Writing Biomass Reclass map to outputs/biomass-reclass/biomass-reclass-reclass1-2.tif ...
+2025-06-30 11:05:28,375 -    Writing Biomass Reclass map to outputs/biomass-reclass/biomass-reclass-reclass2-2.tif ...
+2025-06-30 11:05:28,378 - Current time: 3
+2025-06-30 11:05:28,378 - Running DGS Succession ...
+2025-06-30 11:05:28,378 - AssignTempHydroUnits: Start
+2025-06-30 11:05:28,379 - AssignTempHydroUnits: 1 THUs in use:
+2025-06-30 11:05:28,379 - 33 -> 1 sites
+2025-06-30 11:05:28,380 - AssignTempHydroUnits: End
+2025-06-30 11:05:28,380 - RunTempHydroUnits: Start
+2025-06-30 11:05:30,607 - RunTempHydroUnits: End
+2025-06-30 11:05:30,607 - ExtensionBaseRun: Start
+2025-06-30 11:05:30,618 - ExtensionBaseRun: Stop
+2025-06-30 11:05:30,950 - Running Output Biomass Reclass ...
+2025-06-30 11:05:30,950 -    Writing Biomass Reclass map to outputs/biomass-reclass/biomass-reclass-reclass1-3.tif ...
+2025-06-30 11:05:30,953 -    Writing Biomass Reclass map to outputs/biomass-reclass/biomass-reclass-reclass2-3.tif ...
+2025-06-30 11:05:30,955 - Current time: 4
+2025-06-30 11:05:30,956 - Running DGS Succession ...
+2025-06-30 11:05:30,956 - AssignTempHydroUnits: Start
+2025-06-30 11:05:30,956 - AssignTempHydroUnits: 1 THUs in use:
+2025-06-30 11:05:30,957 - 33 -> 1 sites
+2025-06-30 11:05:30,958 - AssignTempHydroUnits: End
+2025-06-30 11:05:30,958 - RunTempHydroUnits: Start

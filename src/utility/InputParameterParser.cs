@@ -6,6 +6,7 @@ using Landis.Library.Succession;
 using System.Collections.Generic;
 using System.Collections;
 using System.Data;
+using Landis.Library.InitialCommunities.Universal;
 
 namespace Landis.Extension.Succession.DGS
 {
@@ -291,13 +292,13 @@ namespace Landis.Extension.Succession.DGS
             ReadVar(fracDOC);
             parameters.SetFractionDOC(fracDOC.Value);
 
-            InputVar<double> sma = new InputVar<double>("SoilMoistureA");
-            ReadVar(sma);
-            parameters.SetSoilMoistureA(sma.Value);
+            //InputVar<double> sma = new InputVar<double>("SoilMoistureA");
+            //ReadVar(sma);
+            //parameters.SetSoilMoistureA(sma.Value);
 
-            InputVar<double> smb = new InputVar<double>("SoilMoistureB");
-            ReadVar(smb);
-            parameters.SetSoilMoistureB(smb.Value);
+            //InputVar<double> smb = new InputVar<double>("SoilMoistureB");
+            //ReadVar(smb);
+            //parameters.SetSoilMoistureB(smb.Value);
 
             
 
@@ -331,298 +332,384 @@ namespace Landis.Extension.Succession.DGS
             //--------------------------
             //  LAI and light table
 
-            ReadName("MaximumLAI"); //"AvailableLightBiomass");
-            InputVar<byte> shadeClassVar = new InputVar<byte>("Shade Class");
-            InputVar<double> maxLAI = new InputVar<double>("Maximum LAI");
+            //ReadName("MaximumLAI"); //"AvailableLightBiomass");
+            //InputVar<byte> shadeClassVar = new InputVar<byte>("Shade Class");
+            //InputVar<double> maxLAI = new InputVar<double>("Maximum LAI");
 
-            for (byte shadeClass = 1; shadeClass <= 5; shadeClass++)
-            {
-                if (AtEndOfInput)
-                    throw NewParseException("Expected a line with available light class {0}", shadeClass);
+            //for (byte shadeClass = 1; shadeClass <= 5; shadeClass++)
+            //{
+            //    if (AtEndOfInput)
+            //        throw NewParseException("Expected a line with available light class {0}", shadeClass);
 
-                StringReader currentLine = new StringReader(CurrentLine);
-                ReadValue(shadeClassVar, currentLine);
-                if (shadeClassVar.Value.Actual != shadeClass)
-                    throw new InputValueException(shadeClassVar.Value.String,
-                                                  "Expected the available light class {0}", shadeClass);
+            //    StringReader currentLine = new StringReader(CurrentLine);
+            //    ReadValue(shadeClassVar, currentLine);
+            //    if (shadeClassVar.Value.Actual != shadeClass)
+            //        throw new InputValueException(shadeClassVar.Value.String,
+            //                                      "Expected the available light class {0}", shadeClass);
 
-                ReadValue(maxLAI, currentLine);
-                parameters.SetMaximumShadeLAI(shadeClass, maxLAI.Value);
+            //    ReadValue(maxLAI, currentLine);
+            //    parameters.SetMaximumShadeLAI(shadeClass, maxLAI.Value);
 
-                CheckNoDataAfter("the " + maxLAI + " column", currentLine);
-                GetNextLine();
-            }
+            //    CheckNoDataAfter("the " + maxLAI + " column", currentLine);
+            //    GetNextLine();
+            //}
 
             //----------------------------------------------------------
             //  Read table of sufficient light probabilities.
             //  Available light classes are in increasing order.
-            ReadName("LightEstablishmentTable");
+            //ReadName("LightEstablishmentTable");
 
-            InputVar<byte> sc = new InputVar<byte>("Available Light Class");
-            InputVar<double> pl0 = new InputVar<double>("Probability of Germination - Light Level 0");
-            InputVar<double> pl1 = new InputVar<double>("Probability of Germination - Light Level 1");
-            InputVar<double> pl2 = new InputVar<double>("Probability of Germination - Light Level 2");
-            InputVar<double> pl3 = new InputVar<double>("Probability of Germination - Light Level 3");
-            InputVar<double> pl4 = new InputVar<double>("Probability of Germination - Light Level 4");
-            InputVar<double> pl5 = new InputVar<double>("Probability of Germination - Light Level 5");
+            //InputVar<byte> sc = new InputVar<byte>("Available Light Class");
+            //InputVar<double> pl0 = new InputVar<double>("Probability of Germination - Light Level 0");
+            //InputVar<double> pl1 = new InputVar<double>("Probability of Germination - Light Level 1");
+            //InputVar<double> pl2 = new InputVar<double>("Probability of Germination - Light Level 2");
+            //InputVar<double> pl3 = new InputVar<double>("Probability of Germination - Light Level 3");
+            //InputVar<double> pl4 = new InputVar<double>("Probability of Germination - Light Level 4");
+            //InputVar<double> pl5 = new InputVar<double>("Probability of Germination - Light Level 5");
 
-            int previousNumber = 0;
+            //int previousNumber = 0;
 
-            while (! AtEndOfInput && CurrentName != Names.SpeciesParameters
-                                  && previousNumber != 6) {
-                StringReader currentLine = new StringReader(CurrentLine);
+            //while (! AtEndOfInput && CurrentName != Names.SpeciesParameters
+            //                      && previousNumber != 6) {
+            //    StringReader currentLine = new StringReader(CurrentLine);
 
-                ISufficientLight suffLight = new SufficientLight();
+            //    ISufficientLight suffLight = new SufficientLight();
 
-                ReadValue(sc, currentLine);
-                suffLight.ShadeClass = sc.Value;
+            //    ReadValue(sc, currentLine);
+            //    suffLight.ShadeClass = sc.Value;
 
-                //  Check that the current shade class is 1 more than
-                //  the previous number (numbers are must be in increasing order).
-                if (sc.Value.Actual != (byte) previousNumber + 1)
-                    throw new InputValueException(sc.Value.String,
-                                                  "Expected the severity number {0}",
-                                                  previousNumber + 1);
-                previousNumber = (int) sc.Value.Actual;
+            //    //  Check that the current shade class is 1 more than
+            //    //  the previous number (numbers are must be in increasing order).
+            //    if (sc.Value.Actual != (byte) previousNumber + 1)
+            //        throw new InputValueException(sc.Value.String,
+            //                                      "Expected the severity number {0}",
+            //                                      previousNumber + 1);
+            //    previousNumber = (int) sc.Value.Actual;
 
-                ReadValue(pl0, currentLine);
-                suffLight.ProbabilityLight0 = pl0.Value;
+            //    ReadValue(pl0, currentLine);
+            //    suffLight.ProbabilityLight0 = pl0.Value;
 
-                ReadValue(pl1, currentLine);
-                suffLight.ProbabilityLight1 = pl1.Value;
+            //    ReadValue(pl1, currentLine);
+            //    suffLight.ProbabilityLight1 = pl1.Value;
 
-                ReadValue(pl2, currentLine);
-                suffLight.ProbabilityLight2 = pl2.Value;
+            //    ReadValue(pl2, currentLine);
+            //    suffLight.ProbabilityLight2 = pl2.Value;
 
-                ReadValue(pl3, currentLine);
-                suffLight.ProbabilityLight3 = pl3.Value;
+            //    ReadValue(pl3, currentLine);
+            //    suffLight.ProbabilityLight3 = pl3.Value;
 
-                ReadValue(pl4, currentLine);
-                suffLight.ProbabilityLight4 = pl4.Value;
+            //    ReadValue(pl4, currentLine);
+            //    suffLight.ProbabilityLight4 = pl4.Value;
 
-                ReadValue(pl5, currentLine);
-                suffLight.ProbabilityLight5 = pl5.Value;
+            //    ReadValue(pl5, currentLine);
+            //    suffLight.ProbabilityLight5 = pl5.Value;
 
-                parameters.LightClassProbabilities.Add(suffLight);
+            //    parameters.LightClassProbabilities.Add(suffLight);
 
-                CheckNoDataAfter("the " + pl5.Name + " column",
-                                 currentLine);
-                GetNextLine();
-            }
-            if (parameters.LightClassProbabilities.Count == 0)
-                throw NewParseException("No sufficient light probabilities defined.");
-            if (previousNumber != 5)
-                throw NewParseException("Expected shade class {0}", previousNumber + 1);
+            //    CheckNoDataAfter("the " + pl5.Name + " column",
+            //                     currentLine);
+            //    GetNextLine();
+            //}
+            //if (parameters.LightClassProbabilities.Count == 0)
+            //    throw NewParseException("No sufficient light probabilities defined.");
+            //if (previousNumber != 5)
+            //    throw NewParseException("Expected shade class {0}", previousNumber + 1);
 
             //-------------------------
             //  Species Parameters table
 
-            ReadName("SpeciesParameters");
+            var csv = new InputVar<string>("SpeciesParameters");
+            ReadVar(csv);
+            var speciesParser = new CSVParser();
+            var speciesTable = speciesParser.ParseToDataTable(csv.Value);
 
-            speciesLineNums.Clear();  //  If parser re-used (i.e., for testing purposes)
+            foreach (DataRow row in speciesTable.Rows)
+            {
+                var species = ReadSpecies(System.Convert.ToString(row["SpeciesCode"]));
+                
+                parameters.SetGDDmin(species, System.Convert.ToInt32(row["GDDMinimum"]));
+                parameters.SetGDDmax(species, System.Convert.ToInt32(row["GDDMaximum"]));
+                parameters.SetMinJanTemp(species, System.Convert.ToInt32(row["MinJanuaryT"]));
+                parameters.SetMaxDrought(species, System.Convert.ToDouble(row["MaxDrought"]));
+                parameters.SetLightLAIShape(species, System.Convert.ToDouble(row["LightLAIShape"]));
+                parameters.SetLightLAIScale(species, System.Convert.ToDouble(row["LightLAIScale"]));
+                parameters.SetLightLAILocation(species, System.Convert.ToDouble(row["LightLAILocation"]));
+                parameters.SetLightLAIAdjust(species, ReadLightLAIAdjust(row));
 
-            InputVar<int> ft = new InputVar<int>("Functional Type");
-            InputVar<bool> nt = new InputVar<bool>("Nitrogen Fixer");
-            InputVar<bool> adventRoots = new InputVar<bool>("Adventitous Roots");
-            InputVar<int> gddmn = new InputVar<int>("Growing Degree Day Minimum");
-            InputVar<int> gddmx = new InputVar<int>("Growing Degree Day Maximum");
-            InputVar<int> mjt = new InputVar<int>("Minimum January Temperature");
-            InputVar<double> maxd = new InputVar<double>("Maximum Allowable Drought");
-            InputVar<double> leafLongevity = new InputVar<double>("Leaf Longevity");
-            InputVar<bool> epicorm = new InputVar<bool>("Epicormic:  Y/N");
-            InputVar<double> leafLignin = new InputVar<double>("Leaf Percent Lignin");
-            InputVar<double> wLignin = new InputVar<double>("Wood Percent Lignin");
-            InputVar<double> crLignin = new InputVar<double>("Coarse Root Percent Lignin");
-            InputVar<double> frLignin = new InputVar<double>("Fine Root Percent Lignin");
-            InputVar<double> leafCN = new InputVar<double>("Leaf CN Ratio");
-            InputVar<double> woodCN = new InputVar<double>("Wood CN Ratio");
-            InputVar<double> cRootCN = new InputVar<double>("Coarse Root CN Ratio");
-            InputVar<double> foliarCN = new InputVar<double>("Foliage CN Ratio");
-            InputVar<double> fRootCN = new InputVar<double>("Fine Root CN Ratio");
-            InputVar<int> rootingDepth = new InputVar<int>("Rooting depth");
-            InputVar<int> maxANPP = new InputVar<int>("Maximum ANPP");
-            InputVar<int> maxBiomass = new InputVar<int>("Maximum Aboveground Biomass");
-            string lastColumn = "the " + maxBiomass.Name + " column";
+                parameters.AdventRoots[species] = System.Convert.ToBoolean(row["AdvRoots"]);
+                parameters.NFixer[species] = System.Convert.ToBoolean(row["NitrogenFixer"]);
+                parameters.Epicormic[species] = System.Convert.ToBoolean(row["Epicormic"]);
+                
+                parameters.SetKLAI(species, System.Convert.ToDouble(row["KLAI"]));
+                parameters.SetMaxLAI(species, System.Convert.ToDouble(row["MaximumLAI"]));
+                parameters.SetCompLimit(species, System.Convert.ToDouble(row["CompLimit"]));
+                parameters.SetLeafBiomassToLAI(species, System.Convert.ToDouble(row["LeafBiomassToLAI"]));
+                parameters.SetLeafLongevity(species, System.Convert.ToDouble(row["LeafLongevity"]));
+                parameters.SetFoliageDropMonth(species, System.Convert.ToInt32(row["FoliageDropMonth"]));
+                parameters.SetMaxANPP(species, System.Convert.ToInt32(row["MaximumANPP"]));
+                parameters.SetMaxBiomass(species, System.Convert.ToInt32(row["MaximumBiomass"]));
 
-            while (! AtEndOfInput && CurrentName != Names.FunctionalGroupParameters) {
-                StringReader currentLine = new StringReader(CurrentLine);
-                ISpecies species = ReadSpecies(currentLine);
+                parameters.SetTemperatureCurve1(species, System.Convert.ToDouble(row["TemperatureCurve1"]));
+                parameters.SetTemperatureCurve2(species, System.Convert.ToDouble(row["TemperatureCurve2"]));
+                parameters.SetTemperatureCurve3(species, System.Convert.ToDouble(row["TemperatureCurve3"]));
+                parameters.SetTemperatureCurve4(species, System.Convert.ToDouble(row["TemperatureCurve4"]));
+                parameters.MoistureCurve1[species] = System.Convert.ToDouble(row["MoistureCurve1"]);
+                parameters.MoistureCurve2[species] = System.Convert.ToDouble(row["MoistureCurve2"]);
+                parameters.MoistureCurve3[species] = System.Convert.ToDouble(row["MoistureCurve3"]);
+                parameters.MoistureCurve4[species] = System.Convert.ToDouble(row["MoistureCurve4"]);
 
-                ReadValue(ft, currentLine);
-                parameters.SetFunctionalType(species, ft.Value);
+                parameters.SetFractionANPPtoLeaf(species, System.Convert.ToDouble(row["FractionANPPtoLeaf"]));
+                parameters.SetCoarseRootFraction(species, System.Convert.ToDouble(row["CoarseRootFraction"]));
+                parameters.SetFineRootFraction(species, System.Convert.ToDouble(row["FineRootFraction"]));
+                parameters.SetRootingDepth(species, System.Convert.ToInt32(row["RootDepth"]));
+                parameters.SetMortalityShapeCurve(species, System.Convert.ToDouble(row["LongevityMortalityShape"]));
 
-                ReadValue(nt, currentLine);
-                parameters.NFixer[species] = nt.Value;
+                parameters.SetLeafLignin(species, System.Convert.ToDouble(row["LeafLignin"]));
+                parameters.SetFineRootLignin(species, System.Convert.ToDouble(row["FineRootLignin"]));
+                parameters.SetWoodLignin(species, System.Convert.ToDouble(row["WoodLignin"]));
+                parameters.SetCoarseRootLignin(species, System.Convert.ToDouble(row["CoarseRootLignin"]));
+                parameters.SetLeafCN(species, System.Convert.ToDouble(row["LeafCN"]));
+                parameters.SetFineRootCN(species, System.Convert.ToDouble(row["FineRootCN"]));
+                parameters.SetWoodCN(species, System.Convert.ToDouble(row["WoodCN"]));
+                parameters.SetCoarseRootCN(species, System.Convert.ToDouble(row["CoarseRootCN"]));
+                parameters.SetFoliageLitterCN(species, System.Convert.ToDouble(row["FoliageLitterCN"]));
 
-                ReadValue(adventRoots, currentLine);
-                parameters.AdventRoots[species] = adventRoots.Value;
-
-                ReadValue(gddmn, currentLine);
-                parameters.SetGDDmin(species, gddmn.Value);
-
-                ReadValue(gddmx, currentLine);
-                parameters.SetGDDmax(species, gddmx.Value);
-
-                ReadValue(mjt, currentLine);
-                parameters.SetMinJanTemp(species, mjt.Value);
-
-                ReadValue(maxd, currentLine);
-                parameters.SetMaxDrought(species, maxd.Value);
-
-                ReadValue(leafLongevity, currentLine);
-                parameters.SetLeafLongevity(species, leafLongevity.Value);
-
-                ReadValue(epicorm, currentLine);
-                parameters.Epicormic[species] = epicorm.Value;
-
-                ReadValue(leafLignin, currentLine);
-                parameters.SetLeafLignin(species, leafLignin.Value);
-
-                ReadValue(frLignin, currentLine);
-                parameters.SetFineRootLignin(species, frLignin.Value);
-
-                ReadValue(wLignin, currentLine);
-                parameters.SetWoodLignin(species, wLignin.Value);
-
-                ReadValue(crLignin, currentLine);
-                parameters.SetCoarseRootLignin(species, crLignin.Value);
-
-                ReadValue(leafCN, currentLine);
-                parameters.SetLeafCN(species, leafCN.Value);
-
-                ReadValue(fRootCN, currentLine);
-                parameters.SetFineRootCN(species, fRootCN.Value);
-
-                ReadValue(woodCN, currentLine);
-                parameters.SetWoodCN(species, woodCN.Value);
-
-                ReadValue(cRootCN, currentLine);
-                parameters.SetCoarseRootCN(species, cRootCN.Value);
-
-                ReadValue(foliarCN, currentLine);
-                parameters.SetFoliageLitterCN(species, foliarCN.Value);
-
-                ReadValue(rootingDepth, currentLine);
-                parameters.SetRootingDepth(species, rootingDepth.Value);
-
-                ReadValue(maxANPP, currentLine);
-                parameters.SetMaxANPP(species, maxANPP.Value);
-
-                ReadValue(maxBiomass, currentLine);
-                parameters.SetMaxBiomass(species, maxBiomass.Value);
-
-                CheckNoDataAfter(lastColumn, currentLine);
-                GetNextLine();
+                parameters.SetWoodDecayRate(species, System.Convert.ToDouble(row["WoodDecayRate"]));
+                parameters.SetMonthlyWoodMortality(species, System.Convert.ToDouble(row["MonthlyWoodMortality"]));
             }
 
-            //--------- Read In Functional Group Table -------------------------------
-            PlugIn.ModelCore.UI.WriteLine("   Begin parsing FUNCTIONAL GROUP table.");
-
-            ReadName("FunctionalGroupParameters");
-            //string InitialEcoregionParameters = "InitialEcoregionParameters";
-
-            InputVar<string> ftname = new InputVar<string>("Name");
-            InputVar<int> ftindex = new InputVar<int>("Index (< 25)");
-            InputVar<double> tempcurve1 = new InputVar<double>("TempCurve(1)");
-            InputVar<double> tempcurve2 = new InputVar<double>("TempCurve(2)");
-            InputVar<double> tempcurve3 = new InputVar<double>("TempCurve(3)");
-            InputVar<double> tempcurve4 = new InputVar<double>("TempCurve(4)");
-            InputVar<double> fanppleaf = new InputVar<double>("FCFRAC: Leaf");
-            InputVar<double> btolai = new InputVar<double>("BTOLAI");
-            InputVar<double> klai = new InputVar<double>("KLAI");
-            InputVar<double> k = new InputVar<double>("K");
-            InputVar<double> maxlai = new InputVar<double>("MAXLAI");
-            InputVar<double> mwm = new InputVar<double>("Monthly Wood Mortality");
-            InputVar<double> wdr = new InputVar<double>("Wood Decay Rate");
-            InputVar<double> mortCurveShapeParm = new InputVar<double>("Mortality Curve Shape Parameter");
-            InputVar<int> foliageDropMonth = new InputVar<int>("Leaf or Needle Drop Month");
-
-            InputVar<double> moisturecurve1 = new InputVar<double>("MoistureCurve1");
-            InputVar<double> moisturecurve2 = new InputVar<double>("MoistureCurve2");
-            InputVar<double> moisturecurve3 = new InputVar<double>("MoistureCurve3");
-            InputVar<double> moisturecurve4 = new InputVar<double>("MoistureCurve4");
-            InputVar<double> coarseRootFraction = new InputVar<double>("CRootFrac");
-            InputVar<double> fineRootFraction = new InputVar<double>("FRootFrac");
-
-            while (! AtEndOfInput && CurrentName != Names.FireReductionParameters) {
-                StringReader currentLine = new StringReader(CurrentLine);
-
-                ReadValue(ftname , currentLine);
-
-                ReadValue(ftindex , currentLine);
-                int ln = (int) ftindex.Value.Actual;
-
-                if(ln >= numFunctionalTypes)
-                    throw new InputValueException(ftindex.Value.String,
-                                              "The index:  {0} exceeds the allowable number of functional groups, {1}",
-                                              ftindex.Value.String, numFunctionalTypes-1);
 
 
-                FunctionalType funcTParms = new FunctionalType();
-                parameters.FunctionalTypes[ln] = funcTParms;
+            //ReadName("SpeciesParameters");
 
-                ReadValue(tempcurve1, currentLine);
-                funcTParms.TempCurve1 = tempcurve1.Value;
+            //speciesLineNums.Clear();  //  If parser re-used (i.e., for testing purposes)
 
-                ReadValue(tempcurve2, currentLine);
-                funcTParms.TempCurve2 = tempcurve2.Value;
+            //InputVar<int> ft = new InputVar<int>("Functional Type");
+            //InputVar<bool> nt = new InputVar<bool>("Nitrogen Fixer");
+            //InputVar<bool> adventRoots = new InputVar<bool>("Adventitous Roots");
+            //InputVar<int> gddmn = new InputVar<int>("Growing Degree Day Minimum");
+            //InputVar<int> gddmx = new InputVar<int>("Growing Degree Day Maximum");
+            //InputVar<int> mjt = new InputVar<int>("Minimum January Temperature");
+            //InputVar<double> maxd = new InputVar<double>("Maximum Allowable Drought");
+            //InputVar<double> leafLongevity = new InputVar<double>("Leaf Longevity");
+            //InputVar<bool> epicorm = new InputVar<bool>("Epicormic:  Y/N");
+            //InputVar<double> leafLignin = new InputVar<double>("Leaf Percent Lignin");
+            //InputVar<double> wLignin = new InputVar<double>("Wood Percent Lignin");
+            //InputVar<double> crLignin = new InputVar<double>("Coarse Root Percent Lignin");
+            //InputVar<double> frLignin = new InputVar<double>("Fine Root Percent Lignin");
+            //InputVar<double> leafCN = new InputVar<double>("Leaf CN Ratio");
+            //InputVar<double> woodCN = new InputVar<double>("Wood CN Ratio");
+            //InputVar<double> cRootCN = new InputVar<double>("Coarse Root CN Ratio");
+            //InputVar<double> foliarCN = new InputVar<double>("Foliage CN Ratio");
+            //InputVar<double> fRootCN = new InputVar<double>("Fine Root CN Ratio");
+            //InputVar<int> rootingDepth = new InputVar<int>("Rooting depth");
+            //InputVar<int> maxANPP = new InputVar<int>("Maximum ANPP");
+            //InputVar<int> maxBiomass = new InputVar<int>("Maximum Aboveground Biomass");
+            //InputVar<int> fireTolerance = new InputVar<int>("Fire Tolerance");
+            //InputVar<int> shadeTolerance = new InputVar<int>("Shade Tolerance");
+            //InputVar<double> lightLaiShape = new InputVar<double>("LightLAIShape");
+            //InputVar<double> lightLaiScale = new InputVar<double>("LightLAIScale");
+            //InputVar<double> lightLaiLocation = new InputVar<double>("LightLAILocation");
+            //InputVar<double> lightLaiAdjust = new InputVar<double>("LightLAIAdjust");
+            //string lastColumn = "the " + lightLaiAdjust.Name + " column";
 
-                ReadValue(tempcurve3, currentLine);
-                funcTParms.TempCurve3 = tempcurve3.Value;
+            //while (! AtEndOfInput && CurrentName != Names.FunctionalGroupParameters) {
+            //    StringReader currentLine = new StringReader(CurrentLine);
+            //    ISpecies species = ReadSpecies(currentLine);
 
-                ReadValue(tempcurve4, currentLine);
-                funcTParms.TempCurve4 = tempcurve4.Value;
+                //ReadValue(ft, currentLine);
+                //parameters.SetFunctionalType(species, ft.Value);
 
-                ReadValue(fanppleaf, currentLine);
-                funcTParms.FractionANPPtoLeaf = fanppleaf.Value;
+                //ReadValue(nt, currentLine);
+                //parameters.NFixer[species] = nt.Value;
 
-                ReadValue(btolai, currentLine);
-                funcTParms.BiomassToLAI = btolai.Value;
+                //ReadValue(adventRoots, currentLine);
+                //parameters.AdventRoots[species] = adventRoots.Value;
 
-                ReadValue(klai, currentLine);
-                funcTParms.KLAI = klai.Value;
+                //ReadValue(gddmn, currentLine);
+                //parameters.SetGDDmin(species, gddmn.Value);
 
-                ReadValue(k, currentLine);
-                funcTParms.K = k.Value;
+                //ReadValue(gddmx, currentLine);
+                //parameters.SetGDDmax(species, gddmx.Value);
 
-                ReadValue(maxlai, currentLine);
-                funcTParms.MaxLAI = maxlai.Value;
+                //ReadValue(mjt, currentLine);
+                //parameters.SetMinJanTemp(species, mjt.Value);
 
-                ReadValue(moisturecurve1, currentLine);
-                funcTParms.MoistureCurve1 = moisturecurve1.Value;
+                //ReadValue(maxd, currentLine);
+                //parameters.SetMaxDrought(species, maxd.Value);
 
-                ReadValue(moisturecurve2, currentLine);
-                funcTParms.MoistureCurve2 = moisturecurve2.Value;
+                //ReadValue(leafLongevity, currentLine);
+                //parameters.SetLeafLongevity(species, leafLongevity.Value);
 
-                ReadValue(moisturecurve3, currentLine);
-                funcTParms.MoistureCurve3 = moisturecurve3.Value;
+                //ReadValue(epicorm, currentLine);
+                //parameters.Epicormic[species] = epicorm.Value;
 
-                ReadValue(moisturecurve4, currentLine);
-                funcTParms.MoistureCurve4 = moisturecurve4.Value;
+                //ReadValue(leafLignin, currentLine);
+                //parameters.SetLeafLignin(species, leafLignin.Value);
 
-                ReadValue(wdr, currentLine);
-                funcTParms.WoodDecayRate = wdr.Value;
+                //ReadValue(frLignin, currentLine);
+                //parameters.SetFineRootLignin(species, frLignin.Value);
 
-                ReadValue(mwm, currentLine);
-                funcTParms.MonthlyWoodMortality = mwm.Value;
+                //ReadValue(wLignin, currentLine);
+                //parameters.SetWoodLignin(species, wLignin.Value);
 
-                ReadValue(mortCurveShapeParm, currentLine);
-                funcTParms.LongevityMortalityShape = mortCurveShapeParm.Value;
+                //ReadValue(crLignin, currentLine);
+                //parameters.SetCoarseRootLignin(species, crLignin.Value);
 
-                ReadValue(foliageDropMonth, currentLine);
-                funcTParms.FoliageDropMonth = foliageDropMonth.Value;
+                //ReadValue(leafCN, currentLine);
+                //parameters.SetLeafCN(species, leafCN.Value);
 
-                ReadValue(coarseRootFraction, currentLine);
-                funcTParms.CoarseRootFraction = coarseRootFraction.Value;
+                //ReadValue(fRootCN, currentLine);
+                //parameters.SetFineRootCN(species, fRootCN.Value);
 
-                ReadValue(fineRootFraction, currentLine);
-                funcTParms.FineRootFraction = fineRootFraction.Value;
+                //ReadValue(woodCN, currentLine);
+                //parameters.SetWoodCN(species, woodCN.Value);
 
-                //PlugIn.ModelCore.UI.WriteLine("PPRPTS2={0}.", parameters.FunctionalTypeTable[ln].PPRPTS2);
+                //ReadValue(cRootCN, currentLine);
+                //parameters.SetCoarseRootCN(species, cRootCN.Value);
 
-                CheckNoDataAfter("the " + fineRootFraction.Name + " column", currentLine);
-                GetNextLine();
-            }
+                //ReadValue(foliarCN, currentLine);
+                //parameters.SetFoliageLitterCN(species, foliarCN.Value);
+
+                //ReadValue(rootingDepth, currentLine);
+                //parameters.SetRootingDepth(species, rootingDepth.Value);
+
+                //ReadValue(maxANPP, currentLine);
+                //parameters.SetMaxANPP(species, maxANPP.Value);
+
+                //ReadValue(maxBiomass, currentLine);
+                //parameters.SetMaxBiomass(species, maxBiomass.Value);
+
+                //ReadValue(fireTolerance, currentLine);
+                //parameters.SetFireTolerance(species, fireTolerance.Value);
+
+                //ReadValue(shadeTolerance, currentLine);
+                //parameters.SetShadeTolerance(species, shadeTolerance.Value);
+
+                //ReadValue(lightLaiShape, currentLine);
+                //parameters.SetLightLAIShape(species, lightLaiShape.Value);
+
+                //ReadValue(lightLaiScale, currentLine);
+                //parameters.SetLightLAIScale(species, lightLaiScale.Value);
+
+                //ReadValue(lightLaiLocation, currentLine);
+                //parameters.SetLightLAILocation(species, lightLaiLocation.Value);
+
+                //ReadValue(lightLaiAdjust, currentLine);
+                //parameters.SetLightLAIAdjust(species, lightLaiAdjust.Value);
+
+            //    CheckNoDataAfter(lastColumn, currentLine);
+            //    GetNextLine();
+            //}
+
+            ////--------- Read In Functional Group Table -------------------------------
+            //PlugIn.ModelCore.UI.WriteLine("   Begin parsing FUNCTIONAL GROUP table.");
+
+            //ReadName("FunctionalGroupParameters");
+            ////string InitialEcoregionParameters = "InitialEcoregionParameters";
+
+            //InputVar<string> ftname = new InputVar<string>("Name");
+            //InputVar<int> ftindex = new InputVar<int>("Index (< 25)");
+            //InputVar<double> tempcurve1 = new InputVar<double>("TempCurve(1)");
+            //InputVar<double> tempcurve2 = new InputVar<double>("TempCurve(2)");
+            //InputVar<double> tempcurve3 = new InputVar<double>("TempCurve(3)");
+            //InputVar<double> tempcurve4 = new InputVar<double>("TempCurve(4)");
+            //InputVar<double> fanppleaf = new InputVar<double>("FCFRAC: Leaf");
+            //InputVar<double> btolai = new InputVar<double>("BTOLAI");
+            //InputVar<double> klai = new InputVar<double>("KLAI");
+            //InputVar<double> k = new InputVar<double>("K");
+            //InputVar<double> maxlai = new InputVar<double>("MAXLAI");
+            //InputVar<double> mwm = new InputVar<double>("Monthly Wood Mortality");
+            //InputVar<double> wdr = new InputVar<double>("Wood Decay Rate");
+            //InputVar<double> mortCurveShapeParm = new InputVar<double>("Mortality Curve Shape Parameter");
+            //InputVar<int> foliageDropMonth = new InputVar<int>("Leaf or Needle Drop Month");
+
+            //InputVar<double> moisturecurve1 = new InputVar<double>("MoistureCurve1");
+            //InputVar<double> moisturecurve2 = new InputVar<double>("MoistureCurve2");
+            //InputVar<double> moisturecurve3 = new InputVar<double>("MoistureCurve3");
+            //InputVar<double> moisturecurve4 = new InputVar<double>("MoistureCurve4");
+            //InputVar<double> coarseRootFraction = new InputVar<double>("CRootFrac");
+            //InputVar<double> fineRootFraction = new InputVar<double>("FRootFrac");
+
+            //while (! AtEndOfInput && CurrentName != Names.FireReductionParameters) {
+            //    StringReader currentLine = new StringReader(CurrentLine);
+
+            //    ReadValue(ftname , currentLine);
+
+            //    ReadValue(ftindex , currentLine);
+            //    int ln = (int) ftindex.Value.Actual;
+
+            //    if(ln >= numFunctionalTypes)
+            //        throw new InputValueException(ftindex.Value.String,
+            //                                  "The index:  {0} exceeds the allowable number of functional groups, {1}",
+            //                                  ftindex.Value.String, numFunctionalTypes-1);
+
+
+            //    FunctionalType funcTParms = new FunctionalType();
+            //    parameters.FunctionalTypes[ln] = funcTParms;
+
+            //    ReadValue(tempcurve1, currentLine);
+            //    funcTParms.TempCurve1 = tempcurve1.Value;
+
+            //    ReadValue(tempcurve2, currentLine);
+            //    funcTParms.TempCurve2 = tempcurve2.Value;
+
+            //    ReadValue(tempcurve3, currentLine);
+            //    funcTParms.TempCurve3 = tempcurve3.Value;
+
+            //    ReadValue(tempcurve4, currentLine);
+            //    funcTParms.TempCurve4 = tempcurve4.Value;
+
+            //    ReadValue(fanppleaf, currentLine);
+            //    funcTParms.FractionANPPtoLeaf = fanppleaf.Value;
+
+            //    ReadValue(btolai, currentLine);
+            //    funcTParms.BiomassToLAI = btolai.Value;
+
+            //    ReadValue(klai, currentLine);
+            //    funcTParms.KLAI = klai.Value;
+
+            //    ReadValue(k, currentLine);
+            //    funcTParms.K = k.Value;
+
+            //    ReadValue(maxlai, currentLine);
+            //    funcTParms.MaxLAI = maxlai.Value;
+
+            //    ReadValue(moisturecurve1, currentLine);
+            //    funcTParms.MoistureCurve1 = moisturecurve1.Value;
+
+            //    ReadValue(moisturecurve2, currentLine);
+            //    funcTParms.MoistureCurve2 = moisturecurve2.Value;
+
+            //    ReadValue(moisturecurve3, currentLine);
+            //    funcTParms.MoistureCurve3 = moisturecurve3.Value;
+
+            //    ReadValue(moisturecurve4, currentLine);
+            //    funcTParms.MoistureCurve4 = moisturecurve4.Value;
+
+            //    ReadValue(wdr, currentLine);
+            //    funcTParms.WoodDecayRate = wdr.Value;
+
+            //    ReadValue(mwm, currentLine);
+            //    funcTParms.MonthlyWoodMortality = mwm.Value;
+
+            //    ReadValue(mortCurveShapeParm, currentLine);
+            //    funcTParms.LongevityMortalityShape = mortCurveShapeParm.Value;
+
+            //    ReadValue(foliageDropMonth, currentLine);
+            //    funcTParms.FoliageDropMonth = foliageDropMonth.Value;
+
+            //    ReadValue(coarseRootFraction, currentLine);
+            //    funcTParms.CoarseRootFraction = coarseRootFraction.Value;
+
+            //    ReadValue(fineRootFraction, currentLine);
+            //    funcTParms.FineRootFraction = fineRootFraction.Value;
+
+            //    //PlugIn.ModelCore.UI.WriteLine("PPRPTS2={0}.", parameters.FunctionalTypeTable[ln].PPRPTS2);
+
+            //    CheckNoDataAfter("the " + fineRootFraction.Name + " column", currentLine);
+            //    GetNextLine();
+            //}
             
             //--------- Read In Fire Reductions Table ---------------------------
             PlugIn.ModelCore.UI.WriteLine("   Begin reading FIRE REDUCTION parameters.");
@@ -762,7 +849,32 @@ namespace Landis.Extension.Succession.DGS
                 speciesLineNums[species.Name] = LineNumber;
             return species;
         }
-        //---------------------------------------------------------------------
+
+        private ISpecies ReadSpecies(string speciesName)
+        {
+            var species = speciesDataset[speciesName];
+            if (species == null)
+                throw new InputValueException(speciesName, $"{speciesName} is not a species name.");
+            
+            if (speciesLineNums.TryGetValue(species.Name, out int lineNumber))
+                throw new InputValueException(speciesName, $"The species {speciesName} was previously used on line {lineNumber}");
+            else
+                speciesLineNums[species.Name] = LineNumber;
+            return species;
+        }
+
+        private double ReadLightLAIAdjust(DataRow row)
+        {
+            try
+            {
+                double adjustLAI = System.Convert.ToDouble(row["LightLAIAdjust"]);
+                return adjustLAI;
+            }
+            catch
+            {
+                return 1.0;  // value of 1.0 uses unadjusted Weibull distribution (area under the curve = 1)
+            }
+        }
 
         /// <summary>
         /// Reads ecoregion names as column headings

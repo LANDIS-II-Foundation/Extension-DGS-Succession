@@ -32,12 +32,6 @@ namespace Landis.Extension.Succession.DGS
         string InitialSON_PrimaryMapName { get; set; }        
         string InitialDeadSurfaceMapName { get; set; }
         string InitialDeadSoilMapName { get; set; }       
-        //string InitialSOM1CSurfaceMapName { get; set; }
-        //string InitialSOM1NSurfaceMapName { get; set; }
-        //string InitialSOM2CMapName { get; set; }
-        //string InitialSOM2NMapName { get; set; }
-        //string InitialSOM3CMapName { get; set; }
-        //string InitialSOM3NMapName { get; set; }
 
         bool CalibrateMode { get; set; }
         WaterType WType {get;set;}
@@ -45,66 +39,99 @@ namespace Landis.Extension.Succession.DGS
         double[] MaximumShadeLAI { get; }
         bool SmokeModelOutputs { get; set; }
 
-        //---------------------------------------------------------------------
-        /// <summary>
-        /// A suite of parameters for species functional groups
-        /// </summary>
-        FunctionalTypeTable FunctionalTypes
-        {
-            get;set;
-        }
-        //---------------------------------------------------------------------
+        ///// <summary>
+        ///// A suite of parameters for species functional groups
+        ///// </summary>
+        //FunctionalTypeTable FunctionalTypes { get; set; }
+
         /// <summary>
         /// Parameters for fire effects on wood and leaf litter
         /// </summary>
-        FireReductions[] FireReductionsTable
-        {
-            get;set;
-        }
+        FireReductions[] FireReductionsTable { get; set; }
 
-        //---------------------------------------------------------------------
         /// <summary>
         /// Parameters for harvest or fuel treatment effects on wood and leaf litter
         /// </summary>
-        List<HarvestReductions> HarvestReductionsTable
-        {
-            get;
-            set;
-        }
-
-        //---------------------------------------------------------------------
+        List<HarvestReductions> HarvestReductionsTable { get; set; }
 
         /// <summary>
         /// Definitions of sufficient light probabilities.
         /// </summary>
-        List<ISufficientLight> LightClassProbabilities
-        {
-            get;
-        }
+        List<ISufficientLight> LightClassProbabilities { get; }
 
-        //---------------------------------------------------------------------
+        Landis.Library.Parameters.Species.AuxParm<int> GDDmin { get; set; }
+        Landis.Library.Parameters.Species.AuxParm<int> GDDmax { get; set; }
+        Landis.Library.Parameters.Species.AuxParm<int> MinJanTemp { get; set; }
+        Landis.Library.Parameters.Species.AuxParm<double> MaxDrought { get; set; }
+        Landis.Library.Parameters.Species.AuxParm<double> LightLAIShape { get; set; }
+        Landis.Library.Parameters.Species.AuxParm<double> LightLAIScale { get; set; }
+        Landis.Library.Parameters.Species.AuxParm<double> LightLAILocation { get; set; }
+        Landis.Library.Parameters.Species.AuxParm<double> LightLAIAdjust { get; set; }
+        Landis.Library.Parameters.Species.AuxParm<bool> AdventRoots { get; set; }
+        Landis.Library.Parameters.Species.AuxParm<bool> NFixer { get; set; }
+        Landis.Library.Parameters.Species.AuxParm<bool> Epicormic { get; set; }
+        Landis.Library.Parameters.Species.AuxParm<double> KLAI { get; set; }
+        Landis.Library.Parameters.Species.AuxParm<double> MaxLAI { get; set; }
+        Landis.Library.Parameters.Species.AuxParm<double> CompLimit { get; set; }
+        Landis.Library.Parameters.Species.AuxParm<double> LeafBiomassToLAI { get; set; }
+        Landis.Library.Parameters.Species.AuxParm<double> LeafLongevity { get; set; }
+        Landis.Library.Parameters.Species.AuxParm<int> FoliageDropMonth { get; set; }
+        Landis.Library.Parameters.Species.AuxParm<int> MaxANPP { get; set; }
+        Landis.Library.Parameters.Species.AuxParm<int> MaxBiomass { get; set; }
+        Landis.Library.Parameters.Species.AuxParm<double> TemperatureCurve1 { get; set; }
+        Landis.Library.Parameters.Species.AuxParm<double> TemperatureCurve2 { get; set; }
+        Landis.Library.Parameters.Species.AuxParm<double> TemperatureCurve3 { get; set; }
+        Landis.Library.Parameters.Species.AuxParm<double> TemperatureCurve4 { get; set; }
+        Landis.Library.Parameters.Species.AuxParm<double> MoistureCurve1 { get; set; }
+        Landis.Library.Parameters.Species.AuxParm<double> MoistureCurve2 { get; set; }
+        Landis.Library.Parameters.Species.AuxParm<double> MoistureCurve3 { get; set; }
+        Landis.Library.Parameters.Species.AuxParm<double> MoistureCurve4 { get; set; }
+        Landis.Library.Parameters.Species.AuxParm<double> FractionANPPtoLeaf { get; set; }
+        Landis.Library.Parameters.Species.AuxParm<double> CoarseRootFraction { get; set; }
+        Landis.Library.Parameters.Species.AuxParm<double> FineRootFraction { get; set; }
+        Landis.Library.Parameters.Species.AuxParm<int> RootingDepth { get; set; }
+        Landis.Library.Parameters.Species.AuxParm<double> LongevityMortalityShape { get; set; }
+        Landis.Library.Parameters.Species.AuxParm<int> FireTolerance { get; set; }
+        Landis.Library.Parameters.Species.AuxParm<double> LeafLignin { get; set; }
+        Landis.Library.Parameters.Species.AuxParm<double> FineRootLignin { get; set; }
+        Landis.Library.Parameters.Species.AuxParm<double> WoodLignin { get; set; }
+        Landis.Library.Parameters.Species.AuxParm<double> CoarseRootLignin { get; set; }
+        Landis.Library.Parameters.Species.AuxParm<double> LeafCN { get; set; }
+        Landis.Library.Parameters.Species.AuxParm<double> FineRootCN { get; set; }
+        Landis.Library.Parameters.Species.AuxParm<double> WoodCN { get; set; }
+        Landis.Library.Parameters.Species.AuxParm<double> CoarseRootCN { get; set; }
+        Landis.Library.Parameters.Species.AuxParm<double> FoliageLitterCN { get; set; }
+        Landis.Library.Parameters.Species.AuxParm<double> WoodDecayRate { get; set; }
+        Landis.Library.Parameters.Species.AuxParm<double> MonthlyWoodMortality { get; set; }
+        
+        //Landis.Library.Parameters.Species.AuxParm<int> SppFunctionalType{get;}
+        //Landis.Library.Parameters.Species.AuxParm<bool> NFixer{get;}
+        //Landis.Library.Parameters.Species.AuxParm<bool> AdventRoots { get; }
+        //Landis.Library.Parameters.Species.AuxParm<int> GDDmin{get;}
+        //Landis.Library.Parameters.Species.AuxParm<int> GDDmax{get;}
+        //Landis.Library.Parameters.Species.AuxParm<int> MinJanTemp{get;}
+        //Landis.Library.Parameters.Species.AuxParm<double> MaxDrought{get;}
+        //Landis.Library.Parameters.Species.AuxParm<double> LeafLongevity {get;}
+        //Landis.Library.Parameters.Species.AuxParm<bool> Epicormic {get;}
+        //Landis.Library.Parameters.Species.AuxParm<double> LeafLignin {get;}
+        //Landis.Library.Parameters.Species.AuxParm<double> WoodLignin {get;}
+        //Landis.Library.Parameters.Species.AuxParm<double> CoarseRootLignin {get;}
+        //Landis.Library.Parameters.Species.AuxParm<double> FineRootLignin {get;}
+        //Landis.Library.Parameters.Species.AuxParm<double> LeafCN {get;}
+        //Landis.Library.Parameters.Species.AuxParm<double> WoodCN {get;}
+        //Landis.Library.Parameters.Species.AuxParm<double> CoarseRootCN {get;}
+        //Landis.Library.Parameters.Species.AuxParm<double> FoliageLitterCN {get;}
+        //Landis.Library.Parameters.Species.AuxParm<double> FineRootCN {get;}
+        //Landis.Library.Parameters.Species.AuxParm<int> RootingDepth { get; }
+        //Landis.Library.Parameters.Species.AuxParm<int> MaxANPP { get; }
+        //Landis.Library.Parameters.Species.AuxParm<int> MaxBiomass { get; }
+        //Landis.Library.Parameters.Species.AuxParm<int> FireTolerance { get; }
+        //Landis.Library.Parameters.Species.AuxParm<int> ShadeTolerance { get; }
+        //Landis.Library.Parameters.Species.AuxParm<double> LightLAIShape { get; }
+        //Landis.Library.Parameters.Species.AuxParm<double> LightLAIScale { get; }
+        //Landis.Library.Parameters.Species.AuxParm<double> LightLAILocation { get; }
+        //Landis.Library.Parameters.Species.AuxParm<double> LightLAIAdjust { get; }
 
-        Landis.Library.Parameters.Species.AuxParm<int> SppFunctionalType{get;}
-        Landis.Library.Parameters.Species.AuxParm<bool> NFixer{get;}
-        Landis.Library.Parameters.Species.AuxParm<bool> AdventRoots { get; }
-        Landis.Library.Parameters.Species.AuxParm<int> GDDmin{get;}
-        Landis.Library.Parameters.Species.AuxParm<int> GDDmax{get;}
-        Landis.Library.Parameters.Species.AuxParm<int> MinJanTemp{get;}
-        Landis.Library.Parameters.Species.AuxParm<double> MaxDrought{get;}
-        Landis.Library.Parameters.Species.AuxParm<double> LeafLongevity {get;}
-        Landis.Library.Parameters.Species.AuxParm<bool> Epicormic {get;}
-        Landis.Library.Parameters.Species.AuxParm<double> LeafLignin {get;}
-        Landis.Library.Parameters.Species.AuxParm<double> WoodLignin {get;}
-        Landis.Library.Parameters.Species.AuxParm<double> CoarseRootLignin {get;}
-        Landis.Library.Parameters.Species.AuxParm<double> FineRootLignin {get;}
-        Landis.Library.Parameters.Species.AuxParm<double> LeafCN {get;}
-        Landis.Library.Parameters.Species.AuxParm<double> WoodCN {get;}
-        Landis.Library.Parameters.Species.AuxParm<double> CoarseRootCN {get;}
-        Landis.Library.Parameters.Species.AuxParm<double> FoliageLitterCN {get;}
-        Landis.Library.Parameters.Species.AuxParm<double> FineRootCN {get;}
-        Landis.Library.Parameters.Species.AuxParm<int> RootingDepth { get; }
-        Landis.Library.Parameters.Species.AuxParm<int> MaxANPP { get; }
-        Landis.Library.Parameters.Species.AuxParm<int> MaxBiomass { get; }
 
         double AtmosNslope {get;}
         double AtmosNintercept {get;}
@@ -136,12 +163,8 @@ namespace Landis.Extension.Succession.DGS
         double InitialDOCFraction { get; }
         double InitialDONFraction { get; }
         double FractionLitterDecayToDOC { get; }
-        double SoilMoistureA { get; }
-        double SoilMoistureB { get; }
+        //double SoilMoistureA { get; }
+        //double SoilMoistureB { get; }
         double DenitrificationRate { get; }
-        //double DecayRateSurf { get; }
-        //double DecayRateSOM1 { get; }
-        //double DecayRateSOM2 { get; }
-        //double DecayRateSOM3 { get; }
     }
 }
