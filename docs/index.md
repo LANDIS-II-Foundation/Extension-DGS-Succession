@@ -44,7 +44,4 @@ You can also ask for help in the [LANDIS-II users group](http://www.landis-ii.or
 If you come across any issue or suspected bug, please post about it in the [issue section of the Github repository](https://github.com/LANDIS-II-Foundation/Extension-DGS-Succession/issues) (GitHub ID required).
 
 # Author
-
-[The LANDIS-II Foundation](http://www.landis-ii.org)
-
-Mail : mlucash@uoregon.edu
+[Melissa Lucash](https://melissalucash.com)
