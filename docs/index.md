@@ -27,13 +27,13 @@ You need:
 
 # Download
 
-- The latest version of DGS can be [downloaded from GitHub](https://github.com/LANDIS-II-Foundation/Extension-DGS-Succession/blob/master/deploy/installer/LANDIS-II-V7%20DGS%20Succession%201.102-setup.exe). To install it on your computer, launch the installer.
+- The latest version of DGS can be [downloaded from GitHub](https://github.com/LANDIS-II-Foundation/Extension-DGS-Succession/blob/master/deploy/installer/LANDIS-II-V8%20DGS%20Succession%202.0-setup.exe). To install it on your computer, launch the installer.
 
 # Example Files
 
 LANDIS-II requires a global parameter file for your scenario, and separate parameter files for each extension.
 
-Example files can be [downloaded from GitHub](https://downgit.github.io/#/home?url=https://github.com/LANDIS-II-Foundation/Extension-DGS-Succession/tree/master/testing/Core7-DGS_version1.102).
+Example files can be [downloaded from GitHub](https://downgit.github.io/#/home?url=https://github.com/LANDIS-II-Foundation/Extension-DGS-Succession/tree/master/testing/Core8-DGS_version2.0).
 
 
 # Support
