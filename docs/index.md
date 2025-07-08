@@ -14,7 +14,7 @@ Melissa S. Lucash, Adrienne M. Marshall, Shelby A. Weiss, John W. McNabb, Dmitry
 - Latest release: Version 2.0 July 8, 2025
 - Full release details found in the User Guide and on GitHub.
 - [View User Guide](https://github.com/LANDIS-II-Foundation/Extension-DGS-Succession/blob/master/docs/LANDIS-II%20DGS%20Succession%20v1.0%20User%20Guide.pdf).
-- DGS depends on the Climate Library, see: [User Guide for Climate Library](https://github.com/LANDIS-II-Foundation/Library-Climate/blob/master/docs/LANDIS-II%20Climate%20Library%20v4.2%20User%20Guide.pdf)
+- DGS depends on the Climate Library, see: [User Guide for Climate Library](https://github.com/LANDIS-II-Foundation/Library-Climate/blob/master/docs/LANDIS-II%20Climate%20Library%20v5.0%20User%20Guide.pdf)
 
 - Copyright: The LANDIS-II Foundation
 
