@@ -33,6 +33,8 @@
   </ItemGroup>
 
   <ItemGroup>
+    <None Remove="lib\Landis.Extension.GiplDamm.pdb" />
+    <None Remove="lib\Landis.Extension.ShawDamm.pdb" />
     <None Remove="lib\Landis.Library.Climate-v4.1.dll" />
     <None Remove="lib\Landis.Library.Climate-v4.1.pdb" />
     <None Remove="lib\Landis.Library.Climate-v4.2.pdb" />
@@ -42,8 +44,9 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Landis.Core" Version="2.0.0" />
+    <PackageReference Include="Landis.Core" Version="3.0.1" />
     <PackageReference Include="Landis.Core.Implementation" Version="2.0.0" />
+    <PackageReference Include="Microsoft.CSharp" Version="4.7.0" />
   </ItemGroup>
   
   <ItemGroup>
@@ -53,26 +56,11 @@
     <Reference Include="Landis.Extension.ShawDamm">
       <HintPath>bin\Debug\netstandard2.0\Landis.Extension.ShawDamm.dll</HintPath>
     </Reference>
-    <Reference Include="Landis.Library.AgeOnlyCohorts-v3">
-      <HintPath>lib\Landis.Library.AgeOnlyCohorts-v3.dll</HintPath>
+    <Reference Include="Landis.Library.Climate-v5">
+      <HintPath>lib\Landis.Library.Climate-v5.dll</HintPath>
     </Reference>
-    <Reference Include="Landis.Library.Biomass-v2">
-      <HintPath>lib\Landis.Library.Biomass-v2.dll</HintPath>
-    </Reference>
-    <Reference Include="Landis.Library.BiomassCohorts-v3">
-      <HintPath>lib\Landis.Library.BiomassCohorts-v3.dll</HintPath>
-    </Reference>
-    <Reference Include="Landis.Library.Climate-v4.3">
-      <HintPath>..\..\Library-Climate\src\bin\Debug\netstandard2.0\Landis.Library.Climate-v4.3.dll</HintPath>
-    </Reference>
-    <Reference Include="Landis.Library.Cohorts-v2">
-      <HintPath>lib\Landis.Library.Cohorts-v2.dll</HintPath>
-    </Reference>
-    <Reference Include="Landis.Library.InitialCommunity-vInputBiomass">
-      <HintPath>lib\Landis.Library.InitialCommunity-vInputBiomass.dll</HintPath>
-    </Reference>
-    <Reference Include="Landis.Library.LeafBiomassCohorts-v2">
-      <HintPath>lib\Landis.Library.LeafBiomassCohorts-v2.dll</HintPath>
+    <Reference Include="Landis.Library.InitialCommunity.Universal">
+      <HintPath>lib\Landis.Library.InitialCommunity.Universal.dll</HintPath>
     </Reference>
     <Reference Include="Landis.Library.Metadata-v2">
       <HintPath>lib\Landis.Library.Metadata-v2.dll</HintPath>
@@ -80,8 +68,11 @@
     <Reference Include="Landis.Library.Parameters-v2">
       <HintPath>lib\Landis.Library.Parameters-v2.dll</HintPath>
     </Reference>
-    <Reference Include="Landis.Library.Succession-v8">
-      <HintPath>lib\Landis.Library.Succession-v8.dll</HintPath>
+    <Reference Include="Landis.Library.Succession-v9">
+      <HintPath>lib\Landis.Library.Succession-v9.dll</HintPath>
+    </Reference>
+    <Reference Include="Landis.Library.UniversalCohorts-v1">
+      <HintPath>lib\Landis.Library.UniversalCohorts-v1.dll</HintPath>
     </Reference>
   </ItemGroup>
 </Project>

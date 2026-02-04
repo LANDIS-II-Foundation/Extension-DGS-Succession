@@ -3,7 +3,7 @@
 using Landis.Core;
 using Landis.SpatialModeling;
 using Landis.Utilities;
-using Landis.Library.LeafBiomassCohorts;  
+using Landis.Library.UniversalCohorts;  
 
 using System;
 using System.Collections.Generic;
@@ -208,11 +208,11 @@ namespace Landis.Extension.Succession.DGS
         // Crown scorching is when a cohort loses its foliage but is not killed.
         public static double CrownScorching(ICohort cohort, byte siteSeverity)
         {
-        
-            int difference = (int) siteSeverity - cohort.Species.FireTolerance;
-            double ageFraction = 1.0 - ((double) cohort.Age / (double) cohort.Species.Longevity);
+
+            int difference = (int)siteSeverity - PlugIn.Parameters.FireTolerance[cohort.Species];
+            double ageFraction = 1.0 - ((double) cohort.Data.Age / (double) cohort.Species.Longevity);
             
-            if(SpeciesData.Epicormic[cohort.Species])
+            if (PlugIn.Parameters.Epicormic[cohort.Species])
             {
                 if(difference < 0)
                     return 0.5 * ageFraction;

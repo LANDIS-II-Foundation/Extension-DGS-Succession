@@ -14,7 +14,7 @@ namespace Landis.Extension.Succession.DGS
     public class Establishment
     {
 
-        private static StreamWriter log;
+        //private static StreamWriter log;
         private static double[,] avgSoilMoisturelimit = new double[PlugIn.ModelCore.Species.Count, PlugIn.ModelCore.Ecoregions.Count]; 
         private static double[,] avgMATlimit = new double[PlugIn.ModelCore.Species.Count, PlugIn.ModelCore.Ecoregions.Count]; 
         private static double[,] avgJanuaryTlimit = new double[PlugIn.ModelCore.Species.Count, PlugIn.ModelCore.Ecoregions.Count]; 
@@ -22,24 +22,7 @@ namespace Landis.Extension.Succession.DGS
         private static int[,] numberCalculations = new int[PlugIn.ModelCore.Species.Count, PlugIn.ModelCore.Ecoregions.Count];
         private static double[,] avgDryDays = new double[PlugIn.ModelCore.Species.Count, PlugIn.ModelCore.Ecoregions.Count];
         private static double[,] avgBeginGDD = new double[PlugIn.ModelCore.Species.Count, PlugIn.ModelCore.Ecoregions.Count];
-        private static double[,] avgEndGDD = new double[PlugIn.ModelCore.Species.Count, PlugIn.ModelCore.Ecoregions.Count];
-
-
-        //public static void InitializeLogFile()
-        //{
-        //    string logFileName   = "DGS-prob-establish-log.csv"; 
-        //    PlugIn.ModelCore.UI.WriteLine("   Opening a NECN log file \"{0}\" ...", logFileName);
-        //    try {
-        //        log = Landis.Data.CreateTextFile(logFileName);
-        //    }
-        //    catch (Exception err) {
-        //        string mesg = string.Format("{0}", err.Message);
-        //        throw new System.ApplicationException(mesg);
-        //    }
-            
-        //    log.AutoFlush = true;
-        //    log.WriteLine("Time, Species, ClimateRegion, NumberSitesChecked, AvgTempMult, AvgMinJanTempMult, AvgSoilMoistureMult, AvgProbEst");
-        //}
+        private static double[,] avgEndGDD = new double[PlugIn.ModelCore.Species.Count, PlugIn.ModelCore.Ecoregions.Count];        
 
         public static double Calculate(ISpecies species, ActiveSite site)
         {
@@ -50,18 +33,16 @@ namespace Landis.Extension.Succession.DGS
             double minJanTempMultiplier = 0.0;
             double establishProbability = 0.0;
 
-            AnnualClimate_Monthly ecoClimate = ClimateRegionData.AnnualWeather[climateRegion];
+            var ecoClimate = ClimateRegionData.AnnualClimate[climateRegion];
 
             if (ecoClimate == null)
                 throw new System.ApplicationException("Error in Establishment: CLIMATE NULL.");
 
             double ecoDryDays = SiteVars.DryDays[site]; 
-            soilMultiplier = SoilMoistureMultiplier(ecoClimate, species, ecoDryDays);
-            //soilMultiplier = 1.0;
+            soilMultiplier = SoilMoistureMultiplier(ecoClimate, species, ecoDryDays);            
 
             tempMultiplier = BotkinDegreeDayMultiplier(ecoClimate, species);
-            //tempMultiplier = 1.0;
-
+           
             minJanTempMultiplier = MinJanuaryTempModifier(ecoClimate, species);
 
             // Liebig's Law of the Minimum is applied to the four multipliers for each year:
@@ -77,41 +58,15 @@ namespace Landis.Extension.Succession.DGS
             avgPest[species.Index, climateRegion.Index] += establishProbability;
 
             avgDryDays[species.Index, climateRegion.Index] += ecoDryDays;
-            avgBeginGDD[species.Index, climateRegion.Index] += ecoClimate.BeginGrowing;
-            avgEndGDD[species.Index, climateRegion.Index] += ecoClimate.EndGrowing;
+            avgBeginGDD[species.Index, climateRegion.Index] += ecoClimate.BeginGrowingDay;
+            avgEndGDD[species.Index, climateRegion.Index] += ecoClimate.EndGrowingDay;
 
             numberCalculations[species.Index, climateRegion.Index]++;
 
             return establishProbability;
         }
 
-        //public static void LogEstablishment()
-        //{
-        //    foreach (ISpecies species in PlugIn.ModelCore.Species)
-        //    {
-        //        foreach (IEcoregion ecoregion in PlugIn.ModelCore.Ecoregions)
-        //        {
-        //            if (!ecoregion.Active)
-        //                continue;
-
-        //                log.Write("{0},{1},{2},{3},", PlugIn.ModelCore.CurrentTime, species.Name, ecoregion.Name, numberCalculations[species.Index, ecoregion.Index] );
-        //                log.Write("{0:0.000},", (avgMATlimit[species.Index, ecoregion.Index] / (double) numberCalculations[species.Index, ecoregion.Index]));
-        //                log.Write("{0:0.000},", (avgJanuaryTlimit[species.Index, ecoregion.Index] / (double)numberCalculations[species.Index, ecoregion.Index]));
-        //                log.Write("{0:0.000},", (avgSoilMoisturelimit[species.Index, ecoregion.Index] / (double)numberCalculations[species.Index, ecoregion.Index]));
-        //                log.WriteLine("{0:0.000}", (avgPest[species.Index, ecoregion.Index] / (double)numberCalculations[species.Index, ecoregion.Index]));
-        //        }
-        //    }
-
-        //avgSoilMoisturelimit = new double[PlugIn.ModelCore.Species.Count, PlugIn.ModelCore.Ecoregions.Count];
-        //avgMATlimit = new double[PlugIn.ModelCore.Species.Count, PlugIn.ModelCore.Ecoregions.Count];
-        //avgJanuaryTlimit = new double[PlugIn.ModelCore.Species.Count, PlugIn.ModelCore.Ecoregions.Count];
-        //avgPest = new double[PlugIn.ModelCore.Species.Count, PlugIn.ModelCore.Ecoregions.Count];
-        //numberCalculations = new int[PlugIn.ModelCore.Species.Count, PlugIn.ModelCore.Ecoregions.Count];
-
-
-        //}
-
-
+        
         public static void LogEstablishment()
         {
             foreach (ISpecies species in PlugIn.ModelCore.Species)
@@ -120,9 +75,7 @@ namespace Landis.Extension.Succession.DGS
                 {
                     if (!ecoregion.Active)
                         continue;
-
-                    //foreach (ISpecies spp in PlugIn.ModelCore.Species)
-                    //{
+                                        
                         Outputs.establishmentLog.Clear();
                         EstablishmentLog elog = new EstablishmentLog();
 
@@ -140,12 +93,6 @@ namespace Landis.Extension.Succession.DGS
 
                         Outputs.establishmentLog.AddObject(elog);
                         Outputs.establishmentLog.WriteToFile();
-                    //}
-                    //log.Write("{0},{1},{2},{3},", PlugIn.ModelCore.CurrentTime, species.Name, ecoregion.Name, numberCalculations[species.Index, ecoregion.Index] );
-                    //    log.Write("{0:0.000},", (avgMATlimit[species.Index, ecoregion.Index] / (double) numberCalculations[species.Index, ecoregion.Index]));
-                    //    log.Write("{0:0.000},", (avgJanuaryTlimit[species.Index, ecoregion.Index] / (double)numberCalculations[species.Index, ecoregion.Index]));
-                    //    log.Write("{0:0.000},", (avgSoilMoisturelimit[species.Index, ecoregion.Index] / (double)numberCalculations[species.Index, ecoregion.Index]));
-                    //    log.WriteLine("{0:0.000}", (avgPest[species.Index, ecoregion.Index] / (double)numberCalculations[species.Index, ecoregion.Index]));
                 }
             }
 
@@ -165,15 +112,15 @@ namespace Landis.Extension.Succession.DGS
         private static double SoilMoistureMultiplier(AnnualClimate weather, ISpecies species, double dryDays)
 
         {
-            double sppAllowableDrought = SpeciesData.MaxDrought[species];
+            double sppAllowableDrought = PlugIn.Parameters.MaxDrought[species];
             double growDays = 0.0;
             double maxDrought;
             double Soil_Moist_GF = 0.0;
 
-            growDays = weather.EndGrowing - weather.BeginGrowing + 1.0;
+            growDays = weather.EndGrowingDay - weather.BeginGrowingDay + 1.0;
             if (growDays < 2.0)
             {
-                PlugIn.ModelCore.UI.WriteLine("Begin Grow = {0}, End Grow = {1}", weather.BeginGrowing, weather.EndGrowing);
+                PlugIn.ModelCore.UI.WriteLine("Begin Grow = {0}, End Grow = {1}", weather.BeginGrowingDay, weather.EndGrowingDay);
                 throw new System.ApplicationException("Error: Too few growing days.");
             }
             //Calc species soil moisture multipliers
@@ -198,8 +145,8 @@ namespace Landis.Extension.Succession.DGS
             //Calc species degree day multipliers  
             //Botkin et al. 1972. J. Ecol. 60:849 - 87
             
-            double max_Grow_Deg_Days = SpeciesData.GDDmax[species]; 
-            double min_Grow_Deg_Days = SpeciesData.GDDmin[species];
+            double max_Grow_Deg_Days = PlugIn.Parameters.GDDmax[species]; 
+            double min_Grow_Deg_Days = PlugIn.Parameters.GDDmin[species];
             
             double Deg_Day_GF = 0.0;
             double Deg_Days = (double) weather.GrowingDegreeDays; 
@@ -215,11 +162,11 @@ namespace Landis.Extension.Succession.DGS
         }
         
         //---------------------------------------------------------------------------
-        private static double MinJanuaryTempModifier(AnnualClimate_Monthly weather, ISpecies species)
+        private static double MinJanuaryTempModifier(AnnualClimate weather, ISpecies species)
         // Is the January mean temperature greater than the species specified minimum?
         {
         
-            int speciesMinimum = SpeciesData.MinJanTemp[species];
+            int speciesMinimum = PlugIn.Parameters.MinJanTemp[species];
             
             if (weather.MonthlyTemp[0] < speciesMinimum)
                 return 0.0;

@@ -2,8 +2,9 @@
 
 using Landis.Core;
 using Landis.SpatialModeling;
-using Landis.Library.LeafBiomassCohorts;
+using Landis.Library.UniversalCohorts;
 using System.Collections.Generic;
+using System;
 using Landis.Library.Climate;
 using System.Linq;
 using System.Diagnostics;
@@ -19,20 +20,11 @@ namespace Landis.Extension.Succession.DGS
         public static int Month;
         public static int MonthCnt;
 
-        //public static int[] SiteMonth;
-        //public static int[] SiteMonthCnt;
-
-        //public static int siteCounter;
-        //public static Stopwatch timer1;
-        //public static Stopwatch soilLayerTimer;
-
-        //private static object _locker = new object();
-
         /// <summary>
         /// Grows all cohorts at a site for a specified number of years.
         /// Litter is decomposed following the Century model.
         /// </summary>
-        public static ISiteCohorts Run(ActiveSite site,
+        public static SiteCohorts Run(ActiveSite site,
                                        int         years,
                                        bool        isSuccessionTimeStep)
         {
@@ -50,15 +42,14 @@ namespace Landis.Extension.Succession.DGS
 
             //timer1.Start();
 
-            ISiteCohorts siteCohorts = SiteVars.Cohorts[site];
+            SiteCohorts siteCohorts = SiteVars.Cohorts[site];
             IEcoregion ecoregion = PlugIn.ModelCore.Ecoregion[site];
 
             for (int y = 0; y < years; ++y) {
 
                 Year = y + 1;
 
-                if (Climate.Future_MonthlyData.ContainsKey(PlugIn.FutureClimateBaseYear + y + PlugIn.ModelCore.CurrentTime - years))
-                    ClimateRegionData.AnnualWeather[ecoregion] = Climate.Future_MonthlyData[PlugIn.FutureClimateBaseYear + y - years + PlugIn.ModelCore.CurrentTime][ecoregion.Index];
+                ClimateRegionData.AnnualClimate[ecoregion] = Climate.FutureEcoregionYearClimate[ecoregion.Index][Year - years + PlugIn.ModelCore.CurrentTime];
 
                 //PlugIn.ModelCore.UI.WriteLine("PlugIn_FutureClimateBaseYear={0}, y={1}, ModelCore_CurrentTime={2}, CenturyTimeStep = {3}, SimulatedYear = {4}.", PlugIn.FutureClimateBaseYear, y, PlugIn.ModelCore.CurrentTime, years, (PlugIn.FutureClimateBaseYear + y - years + PlugIn.ModelCore.CurrentTime));
 
@@ -83,7 +74,7 @@ namespace Landis.Extension.Succession.DGS
                     // Calculate mineral N fractions based on coarse root biomass.  Only need to do once per year.
                     if (MonthCnt == 0)
                     {
-                        AvailableN.CalculateMineralNfraction(site);
+                        AvailableN.CalculateAnnualMineralNfraction(site);
                     }
                     //PlugIn.ModelCore.UI.WriteLine("SiteVars.MineralN = {0:0.00}, month = {1}.", SiteVars.MineralN[site], i);
 
@@ -94,20 +85,23 @@ namespace Landis.Extension.Succession.DGS
                     SiteVars.MonthlySoilTemp[site][Month] = 0.0;
                     SiteVars.MonthlyNEE[site][Month] = 0.0;
                     SiteVars.MonthlyResp[site][Month] = 0.0;
+                    SiteVars.MonthlyDeadWoodResp[site][Month] = 0.0;
+                    SiteVars.MonthlyDeadRootResp[site][Month] = 0.0;
+                    SiteVars.MonthlyDeadLeafResp[site][Month] = 0.0;
                     SiteVars.MonthlyStreamN[site][Month] = 0.0;
                     SiteVars.MonthlyLAI[site][Month] = 0.0;
                     SiteVars.SourceSink[site].Carbon = 0.0;
-                    SiteVars.TotalWoodBiomass[site] = Main.ComputeWoodBiomass((ActiveSite) site);
+                    SiteVars.TotalWoodBiomass[site] = ComputeWoodBiomass((ActiveSite) site);
                     //SiteVars.LAI[site] = Century.ComputeLAI((ActiveSite)site);
                                    
-                    double ppt = ClimateRegionData.AnnualWeather[ecoregion].MonthlyPrecip[Month];
+                    var ppt = ClimateRegionData.AnnualClimate[ecoregion].MonthlyPrecip[Month];
 
                     double monthlyNdeposition;
                     if  (PlugIn.Parameters.AtmosNintercept !=-1 && PlugIn.Parameters.AtmosNslope !=-1)
                         monthlyNdeposition = PlugIn.Parameters.AtmosNintercept + (PlugIn.Parameters.AtmosNslope * ppt);
                     else 
                     {
-                        monthlyNdeposition = ClimateRegionData.AnnualWeather[ecoregion].MonthlyNDeposition[Month];
+                        monthlyNdeposition = ClimateRegionData.AnnualClimate[ecoregion].MonthlyNDeposition[Month];
                     }
 
                     if (monthlyNdeposition < 0)
@@ -134,13 +128,13 @@ namespace Landis.Extension.Succession.DGS
                         AET = thu.MonthlyShawDammResults[Month].MonthEvapotranspirationInCm;
 
                         // calculate decay factor and anaerobic effect
-                        var pet = ClimateRegionData.AnnualWeather[ecoregion].MonthlyPET[Month];
-                        var precipitation = ClimateRegionData.AnnualWeather[ecoregion].MonthlyPrecip[Month]; //rain + irract in cm;
+                        var pet = ClimateRegionData.AnnualClimate[ecoregion].MonthlyPET[Month];
+                        var precipitation = ClimateRegionData.AnnualClimate[ecoregion].MonthlyPrecip[Month]; //rain + irract in cm;
                         var ratioPrecipPET = pet > 0.0 ? precipitation / pet : 0.0;
-                        var tave = ClimateRegionData.AnnualWeather[ecoregion].MonthlyTemp[Month];   // this is air temperature when passed to CalculateAnaerobicEffect() by SoilWater, but this might need to be soil temperature instead
+                        var tave = ClimateRegionData.AnnualClimate[ecoregion].MonthlyTemp[Month];   // this is air temperature when passed to CalculateAnaerobicEffect() by SoilWater, but this might need to be soil temperature instead
                         var drain = SiteVars.SoilDrain[site];
-                        var beginGrowing = ClimateRegionData.AnnualWeather[ecoregion].BeginGrowing;
-                        var endGrowing = ClimateRegionData.AnnualWeather[ecoregion].EndGrowing;
+                        var beginGrowing = ClimateRegionData.AnnualClimate[ecoregion].BeginGrowingDay;
+                        var endGrowing = ClimateRegionData.AnnualClimate[ecoregion].EndGrowingDay;
                         var wiltingPoint = SiteVars.SoilWiltingPoint[site];                        
                         var previousMonth = MonthCnt == 0 ? months.Last() : months[MonthCnt - 1];
 
@@ -165,7 +159,7 @@ namespace Landis.Extension.Succession.DGS
                     // **
 
                     // Calculate N allocation for each cohort
-                    AvailableN.SetMineralNallocation(site);
+                    AvailableN.CalculateMonthlyMineralNallocation(site);
 
                     if (MonthCnt == 11)
                         siteCohorts.Grow(site, (y == years && isSuccessionTimeStep), true);
@@ -209,27 +203,37 @@ namespace Landis.Extension.Succession.DGS
 
         //---------------------------------------------------------------------
 
-        public static int ComputeLivingBiomass(ISiteCohorts cohorts)
+        public static int ComputeLivingBiomass(SiteCohorts cohorts)
         {
             int total = 0;
             if (cohorts != null)
                 foreach (ISpeciesCohorts speciesCohorts in cohorts)
+                {
                     foreach (ICohort cohort in speciesCohorts)
+                    {
                         //total += (int)(cohort.WoodBiomass + cohort.LeafBiomass);
-                        total += (int)(cohort.Biomass);
-            //total += ComputeBiomass(speciesCohorts);
+                        //total += (int)(cohort.Data.Biomass);
+                        total += (int)(cohort.Data.AdditionalParameters.WoodBiomass + cohort.Data.AdditionalParameters.LeafBiomass);
+                        //total += ComputeBiomass(speciesCohorts);
+                    }
+                }
             return total;
         }
 
         //---------------------------------------------------------------------
 
-        public static int ComputeNeedleBiomass(ISiteCohorts cohorts)
+        public static int ComputeNeedleBiomass(SiteCohorts cohorts)
         {
             int total = 0;
             if (cohorts != null)
                 foreach (ISpeciesCohorts speciesCohorts in cohorts)
+                {
                     foreach (ICohort cohort in speciesCohorts)
-                        total += (int)(cohort.LeafBiomass);
+                    {
+                        //total += (int)(Convert.ToInt32(cohort.Data.AdditionalParameters.LeafBiomass));
+                        total += (int)(cohort.Data.AdditionalParameters.LeafBiomass);
+                    }
+                }
             //total += ComputeBiomass(speciesCohorts);
             return total;
         }
@@ -240,13 +244,19 @@ namespace Landis.Extension.Succession.DGS
             double woodBiomass = 0;
             if (SiteVars.Cohorts[site] != null)
                 foreach (ISpeciesCohorts speciesCohorts in SiteVars.Cohorts[site])
+                {
                     foreach (ICohort cohort in speciesCohorts)
-                        woodBiomass += cohort.WoodBiomass;
+                    {
+                         //double woodBiomass = Convert.ToDouble(cohort.Data.AdditionalParameters.WoodBiomass);
+                         woodBiomass = cohort.Data.AdditionalParameters.WoodBiomass;
+                        //woodBiomass += woodB;
+                    }
+                }
             return woodBiomass;
         }
 
         //---------------------------------------------------------------------
-        public static void ComputeTotalCohortCN(ActiveSite site, ISiteCohorts cohorts)
+        public static void ComputeTotalCohortCN(ActiveSite site, SiteCohorts cohorts)
         {
             SiteVars.CohortLeafC[site] = 0;
             SiteVars.CohortFRootC[site] = 0;
@@ -271,18 +281,18 @@ namespace Landis.Extension.Succession.DGS
         {
             ISpecies species = cohort.Species;
 
-            double leafC = cohort.LeafBiomass * 0.47;
-            double woodC = cohort.WoodBiomass * 0.47;
+            double leafC = cohort.Data.AdditionalParameters.LeafBiomass * 0.47;
+            double woodC = cohort.Data.AdditionalParameters.WoodBiomass * 0.47;
 
             double fRootC = Roots.CalculateFineRoot(cohort, leafC);
             double cRootC = Roots.CalculateCoarseRoot(cohort, woodC);
 
             double totalC = leafC + woodC + fRootC + cRootC;
 
-            double leafN  = leafC /  (double) SpeciesData.LeafCN[species];
-            double woodN = woodC / (double) SpeciesData.WoodCN[species];
-            double cRootN = cRootC / (double) SpeciesData.CoarseRootCN[species];
-            double fRootN = fRootC / (double) SpeciesData.FineRootCN[species];
+            double leafN  = leafC /  (double) PlugIn.Parameters.LeafCN[species];
+            double woodN = woodC / (double) PlugIn.Parameters.WoodCN[species];
+            double cRootN = cRootC / (double) PlugIn.Parameters.CoarseRootCN[species];
+            double fRootN = fRootC / (double) PlugIn.Parameters.FineRootCN[species];
 
             //double totalN = woodN + cRootN + leafN + fRootN;
 
