@@ -19,7 +19,7 @@ namespace Landis.Extension.Succession.DGS
     /// </summary>
     public class InitialBiomass
     {
-        private SiteCohorts cohorts;
+        private ISiteCohorts cohorts;
 
 
         //---------------------------------------------------------------------
@@ -27,7 +27,7 @@ namespace Landis.Extension.Succession.DGS
         /// <summary>
         /// The site's initial cohorts.
         /// </summary>
-        public SiteCohorts Cohorts
+        public ISiteCohorts Cohorts
         {
             get
             {
@@ -38,7 +38,7 @@ namespace Landis.Extension.Succession.DGS
 
         //---------------------------------------------------------------------
 
-        private InitialBiomass(SiteCohorts cohorts)
+        private InitialBiomass(ISiteCohorts cohorts)
         {
             this.cohorts = cohorts;
 
@@ -96,7 +96,8 @@ namespace Landis.Extension.Succession.DGS
             //List<Landis.Library.UniversalCohorts.ICohort> sortedAgeCohorts = SortCohorts(initialCommunity.Cohorts);
             List<ICohort> sortedAgeCohorts = SortCohorts(initialCommunity.Cohorts);
 
-            var cohorts = MakeBiomassCohorts(sortedAgeCohorts, site);
+            //var cohorts = MakeBiomassCohorts(sortedAgeCohorts, site);
+            ISiteCohorts cohorts = MakeBiomassCohorts(sortedAgeCohorts, site);
             initialBiomass = new InitialBiomass(cohorts);
 
             return initialBiomass;
