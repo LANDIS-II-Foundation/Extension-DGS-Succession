@@ -105,7 +105,8 @@ namespace Landis.Extension.Succession.DGS
 
         //---------------------------------------------------------------------
         //public static SiteCohorts MakeBiomassCohorts(List<Landis.Library.UniversalCohorts.ICohort> sortedCohorts, ActiveSite site)
-        public static SiteCohorts MakeBiomassCohorts(List<ICohort> sortedCohorts, ActiveSite site)
+        //public static SiteCohorts MakeBiomassCohorts(List<ICohort> sortedCohorts, ActiveSite site)
+        public static ISiteCohorts MakeBiomassCohorts(List<ICohort> sortedCohorts, ActiveSite site)
         {
 
             IEcoregion ecoregion = PlugIn.ModelCore.Ecoregion[site];

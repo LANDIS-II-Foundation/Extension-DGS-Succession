@@ -18,85 +18,11 @@ namespace Landis.Extension.Succession.DGS
         // Time of last succession simulation:
         private static ISiteVar<int> timeOfLast;
 
-        // Live biomass:        
-        //private static ISiteVar<Landis.Library.UniversalCohorts.SiteCohorts> universalCohortsSiteVar;       
-
-        // Dead biomass:
-        //private static ISiteVar<Layer> SurfaceDeadWood;
-        //private static ISiteVar<Layer> SoilDeadWood;
-        
-        //private static ISiteVar<Layer> SurfaceStructural;
-        //private static ISiteVar<Layer> SurfaceMetabolic;
-        //private static ISiteVar<Layer> SoilStructural;
-        //private static ISiteVar<Layer> SoilMetabolic;
-                       
-        // Soil layers
-        //private static ISiteVar<Layer> som1surface;
-        //private static ISiteVar<SoilLayer> SoilPrimary;
-        //private static ISiteVar<SoilLayer> SoilAvailable;
-        //private static ISiteVar<Layer> dissolved_organic;
-        //private static ISiteVar<Layer> som2;
-        //private static ISiteVar<Layer> som3;
-        //private static ISiteVar<int> SoilDepth;
-        //private static ISiteVar<double> SoilDrain;
-        //private static ISiteVar<double> SoilBaseFlowFraction;
-        //private static ISiteVar<double> SoilStormFlowFraction;
-        //private static ISiteVar<double> SoilFieldCapacity;
-        //private static ISiteVar<double> SoilWiltingPoint;
-        //private static ISiteVar<double> SoilPercentSand;
-        //private static ISiteVar<double> SoilPercentClay;
-        //private static ISiteVar<double> SoilBulkDensity;
-        //private static ISiteVar<double> SoilParticleDensity;
-
-
         // Similar to soil layers with respect to their pools:
         private static ISiteVar<Layer> stream;
         private static ISiteVar<Layer> sourceSink;
 
-        // Other variables:
-        //private static ISiteVar<double> mineralN;
-        //private static ISiteVar<double> resorbedN;
-        //private static ISiteVar<double> waterMovement;  
-        //private static ISiteVar<double> availableWater;
-        //private static ISiteVar<double> activeLayerDepth;
-        //private static ISiteVar<double> soilWaterContent;
-        //private static ISiteVar<double> liquidSnowPack;  
-        //private static ISiteVar<double> decayFactor;
-        //private static ISiteVar<double> soilTemperature;
-        //private static ISiteVar<double> anaerobicEffect;
-
-        //// Annual accumulators for reporting purposes.
-        //private static ISiteVar<double> grossMineralization;
-        //private static ISiteVar<double> ag_nppC;
-        //private static ISiteVar<double> bg_nppC;
-        //private static ISiteVar<double> litterfallC;
-        //private static ISiteVar<double> cohortLeafN;
-        //private static ISiteVar<double> cohortFRootN;
-        //private static ISiteVar<double> cohortLeafC;
-        //private static ISiteVar<double> cohortFRootC;
-        //private static ISiteVar<double> cohortWoodN;
-        //private static ISiteVar<double> cohortCRootN;
-        //private static ISiteVar<double> cohortWoodC;
-        //private static ISiteVar<double> cohortCRootC;
-        //private static ISiteVar<double[]> monthlyAGNPPC;
-        //private static ISiteVar<double[]> monthlyBGNPPC;
-        //private static ISiteVar<double[]> monthlysoilTemp;
-        //private static ISiteVar<double[]> monthlyNEE;
-        //private static ISiteVar<double[]> monthlyStreamN;
-        //private static ISiteVar<double[]> monthlyLAI;
-        //public static ISiteVar<double> AnnualNEE;
-        //public static ISiteVar<double> FireCEfflux;
-        //public static ISiteVar<double> FireNEfflux;
-        //public static ISiteVar<double> Nvol;
-        //private static ISiteVar<double[]> monthlyResp;
-        //private static ISiteVar<double> totalNuptake;
-        //private static ISiteVar<double[]> monthlymineralN;
-        //private static ISiteVar<double> frassC;
-        //private static ISiteVar<double> lai;
-        //private static ISiteVar<double> annualPPT_AET; //Annual water budget calculation. I'm coppying LAI implementation
-        //private static ISiteVar<int> dryDays;
-        //private static ISiteVar<double> fineFuels;
-        //private static ISiteVar<double[]> monthlymineralN;
+        
         public static ISiteVar<double> AnnualNEE;
         public static ISiteVar<double> FireCEfflux;
         public static ISiteVar<double> FireNEfflux;
@@ -139,13 +65,13 @@ namespace Landis.Extension.Succession.DGS
         /// </summary>
         public static void Initialize()
         {
-            //cohorts = PlugIn.ModelCore.Landscape.NewSiteVar<Landis.Library.UniversalCohorts.SiteCohorts>();
             cohorts = PlugIn.ModelCore.Landscape.NewSiteVar<SiteCohorts>();
-            //universalCohortsSiteVar = Landis.Library.Succession.CohortSiteVar<Landis.Library.UniversalCohorts.SiteCohorts>.Wrap(cohorts);
-            FineFuels = PlugIn.ModelCore.Landscape.NewSiteVar<double>();
 
+            FineFuels = PlugIn.ModelCore.Landscape.NewSiteVar<double>();
             TimeOfLast = PlugIn.ModelCore.Landscape.NewSiteVar<int>();
-            
+            HarvestDisturbedYear = PlugIn.ModelCore.Landscape.NewSiteVar<int>();
+            FireDisturbedYear = PlugIn.ModelCore.Landscape.NewSiteVar<int>();
+
             // Dead biomass:
             SurfaceDeadWood     = PlugIn.ModelCore.Landscape.NewSiteVar<Layer>();
             SoilDeadWood        = PlugIn.ModelCore.Landscape.NewSiteVar<Layer>();
@@ -237,6 +163,8 @@ namespace Landis.Extension.Succession.DGS
             HarvestTime = PlugIn.ModelCore.Landscape.NewSiteVar<int>();
 
             //CohortResorbedNallocation = PlugIn.ModelCore.Landscape.NewSiteVar<Dictionary<int, Dictionary<int, double>>>();
+           //slope = PlugIn.ModelCore.Landscape.NewSiteVar<double>();
+           //aspect = PlugIn.ModelCore.Landscape.NewSiteVar<double>();
 
             //PlugIn.ModelCore.RegisterSiteVar(universalCohortsSiteVar, "Succession.UniversalCohorts");
             PlugIn.ModelCore.RegisterSiteVar(cohorts, "Succession.UniversalCohorts");
@@ -329,9 +257,10 @@ namespace Landis.Extension.Succession.DGS
         public static double ActualSiteBiomass(ActiveSite site)
         {
             IEcoregion ecoregion = PlugIn.ModelCore.Ecoregion[site];
-            SiteCohorts siteCohorts = Cohorts[site];
+            //SiteCohorts siteCohorts = Cohorts[site];
+            ISiteCohorts siteCohorts = Cohorts[site];
 
-            if(siteCohorts == null)
+            if (siteCohorts == null)
                 return 0.0;
             
             int youngBiomass;
@@ -1052,18 +981,23 @@ namespace Landis.Extension.Succession.DGS
         /// A summary of LAI (m2/m2)
         /// </summary>
         public static ISiteVar<double> LAI { get; set; }
-//{
-//            get
-//            {
-//                return lai;
-//            }
-//            set
-//            {
-//                lai = value;
-//            }
+        //{
+        //            get
+        //            {
+        //                return lai;
+        //            }
+        //            set
+        //            {
+        //                lai = value;
+        //            }
 
 
-//        }
+        //        }
+        //---------------------------------------------------------------------
+        /// A summary of Slope 
+        /// </summary>
+        //public static ISiteVar<double> Slope { get; set; }
+
         //---------------------------------------------------------------------
         /// <summary>
         /// A summary of Annual Water Budget (ppt - AET)

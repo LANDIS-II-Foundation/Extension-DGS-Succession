@@ -24,7 +24,8 @@ namespace Landis.Extension.Succession.DGS
         /// Grows all cohorts at a site for a specified number of years.
         /// Litter is decomposed following the Century model.
         /// </summary>
-        public static SiteCohorts Run(ActiveSite site,
+        //public static SiteCohorts Run(ActiveSite site,
+        public static ISiteCohorts Run(ActiveSite site,
                                        int         years,
                                        bool        isSuccessionTimeStep)
         {
@@ -203,7 +204,8 @@ namespace Landis.Extension.Succession.DGS
 
         //---------------------------------------------------------------------
 
-        public static int ComputeLivingBiomass(SiteCohorts cohorts)
+        //public static int ComputeLivingBiomass(SiteCohorts cohorts)
+        public static int ComputeLivingBiomass(ISiteCohorts cohorts)
         {
             int total = 0;
             if (cohorts != null)
@@ -222,7 +224,8 @@ namespace Landis.Extension.Succession.DGS
 
         //---------------------------------------------------------------------
 
-        public static int ComputeNeedleBiomass(SiteCohorts cohorts)
+        //public static int ComputeNeedleBiomass(SiteCohorts cohorts)
+        public static int ComputeNeedleBiomass(ISiteCohorts cohorts)
         {
             int total = 0;
             if (cohorts != null)
@@ -239,6 +242,7 @@ namespace Landis.Extension.Succession.DGS
         }
         //---------------------------------------------------------------------
 
+        //public static double ComputeWoodBiomass(ActiveSite site, SiteCohorts cohorts)
         public static double ComputeWoodBiomass(ActiveSite site)
         {
             double woodBiomass = 0;
@@ -256,7 +260,8 @@ namespace Landis.Extension.Succession.DGS
         }
 
         //---------------------------------------------------------------------
-        public static void ComputeTotalCohortCN(ActiveSite site, SiteCohorts cohorts)
+        //public static void ComputeTotalCohortCN(ActiveSite site, SiteCohorts cohorts)
+        public static void ComputeTotalCohortCN(ActiveSite site,ISiteCohorts cohorts)
         {
             SiteVars.CohortLeafC[site] = 0;
             SiteVars.CohortFRootC[site] = 0;

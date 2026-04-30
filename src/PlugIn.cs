@@ -637,24 +637,25 @@ namespace Landis.Extension.Succession.DGS
 
             if (disturbanceType != null)
             {
-                //if (disturbanceType.IsMemberOf("disturbance:harvest"))
                 if (eventArgs.DisturbanceType != null && disturbanceType.IsMemberOf("disturbance:harvest"))
                     {
                     SiteVars.HarvestPrescriptionName = ModelCore.GetSiteVar<string>("Harvest.PrescriptionName");
-                    if (!Disturbed[site]) // this is the first cohort killed/damaged
+                    if (ModelCore.CurrentTime > SiteVars.HarvestDisturbedYear[site]) // this is the first cohort killed/damaged
+                    //if (!Disturbed[site]) // this is the first cohort killed/damaged
                     {
                         HarvestEffects.ReduceLayers(SiteVars.HarvestPrescriptionName[site], site);
+                        SiteVars.HarvestDisturbedYear[site] = ModelCore.CurrentTime;
                     }
 
                     double woodLoss = woodInput * (float)HarvestEffects.GetCohortWoodRemoval(site);
                     double foliarLoss = foliarInput * (float)HarvestEffects.GetCohortLeafRemoval(site);
 
                     //if (eventArgs.Reduction >= 1)
-                    if (eventArgs.FractionBiomassReduction >= 1)
-                    {
-                        SiteVars.SourceSink[site].Carbon += woodLoss * 0.47;
-                        SiteVars.SourceSink[site].Carbon += foliarLoss * 0.47;
-                    }
+                    //    if (eventArgs.FractionBiomassReduction >= 1)
+                    //    {
+                    //        SiteVars.SourceSink[site].Carbon += woodLoss * 0.47;
+                    //        SiteVars.SourceSink[site].Carbon += foliarLoss * 0.47;
+                    //    }
 
                     woodInput -= woodLoss;
                     foliarInput -= foliarLoss;
@@ -664,13 +665,8 @@ namespace Landis.Extension.Succession.DGS
                 {
                     SiteVars.FireSeverity = ModelCore.GetSiteVar<byte>("Fire.Severity");
 
-                    //if (eventArgs.Reduction >= 1)
-                    //if (eventArgs.FractionBiomassReduction >= 1)
-                    //{
                     Landis.Library.Succession.Reproduction.CheckForPostFireRegen(eventArgs.Cohort, site);
-                    ///}
-
-                    //if (!Disturbed[site]) // this is the first cohort killed/damaged
+                    
                     if (ModelCore.CurrentTime > SiteVars.FireDisturbedYear[site]) // this is the first cohort killed/damaged
 
                     {
@@ -679,31 +675,11 @@ namespace Landis.Extension.Succession.DGS
                         if (SiteVars.FireSeverity != null && SiteVars.FireSeverity[site] > 0)
                             FireEffects.ReduceLayers(SiteVars.FireSeverity[site], site);
 
+                        SiteVars.FireDisturbedYear[site] = ModelCore.CurrentTime;
+
                     }
 
-                    //if (eventArgs.Reduction >= 1)
-                    //{
-                    //    double woodFireConsumption = woodInput * (float)FireEffects.ReductionsTable[(int)SiteVars.FireSeverity[site]].CoarseLitterReduction;
-                    //    double foliarFireConsumption = foliarInput * (float)FireEffects.ReductionsTable[(int)SiteVars.FireSeverity[site]].FineLitterReduction;
-                    //    SiteVars.SourceSink[site].Carbon += woodFireConsumption * 0.47;
-                    //    SiteVars.SourceSink[site].Carbon += foliarFireConsumption * 0.47;
-
-                    //    SiteVars.SmolderConsumption[site] += woodFireConsumption;
-                    //    SiteVars.FlamingConsumption[site] += foliarFireConsumption;
-                    //    woodInput -= (float)woodFireConsumption;
-                    //    foliarInput -= (float)foliarFireConsumption;
-                    //}
-                    //else
-                    //{
-                    //    double live_woodFireConsumption = woodInput * (float)FireEffects.ReductionsTable[(int)SiteVars.FireSeverity[site]].CohortWoodReduction;
-                    //    double live_foliarFireConsumption = foliarInput * (float)FireEffects.ReductionsTable[(int)SiteVars.FireSeverity[site]].CohortLeafReduction;
-
-                    //    SiteVars.SmolderConsumption[site] += live_woodFireConsumption;
-                    //    SiteVars.FlamingConsumption[site] += live_foliarFireConsumption;
-                    //    woodInput -= (float)live_woodFireConsumption;
-                    //    foliarInput -= (float)live_foliarFireConsumption;
-                    //}
-                    //}
+                    
                     double live_woodFireConsumption = woodInput * FireEffects.ReductionsTable[(int)SiteVars.FireSeverity[site]].CohortWoodReduction;
                     double live_foliarFireConsumption = foliarInput * FireEffects.ReductionsTable[(int)SiteVars.FireSeverity[site]].CohortLeafReduction;
 
