@@ -27,7 +27,7 @@ You need:
 
 # Download
 
-- The latest version of DGS (DGS v2.1) can be [downloaded from GitHub]((https://github.com/LANDIS-II-Foundation/Extension-DGS-Succession/blob/master/deploy/installer/LANDIS-II-V8%20DGS%20Succession%202.1-setup.exe) ). To install it on your computer, launch the installer. You will also need a DGS-specific version of Social-Climate-Fire (https://github.com/mslucash/Extension-SCRPPLE/blob/master/deploy/installer/LANDIS-II-V8%20Social%20Climate%20Fire%204.1.1-setup.exe )
+- The latest version of DGS (DGS v2.1) can be [downloaded from GitHub]((https://github.com/LANDIS-II-Foundation/Extension-DGS-Succession/blob/master/deploy/installer/LANDIS-II-V8%20DGS%20Succession%202.1-setup.exe) ). To install it on your computer, launch the installer. You will also need a DGS-specific version of [Social-Climate-Fire](https://github.com/mslucash/Extension-SCRPPLE/blob/master/deploy/installer/LANDIS-II-V8%20Social%20Climate%20Fire%204.1.1-setup.exe)
 
 # Example Files
 
