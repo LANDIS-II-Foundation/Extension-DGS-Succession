@@ -1,7 +1,7 @@
 LandisData   Extension
 
 Name         "DGS Succession"
-Version      2.1
+Version      2.1.1
 Type         succession
 Assembly     Landis.Extension.Succession.DGS-v2
 Class        Landis.Extension.Succession.DGS.PlugIn
